@@ -57,7 +57,10 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
+# Development
 STATIC_URL = '/' + PREFIX_URL + 'static/'
+# Production
+#STATIC_URL = 'http://doqh27zvd7u5w.cloudfront.net/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
