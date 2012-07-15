@@ -29,7 +29,7 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 
 3. Inital commit.
     * Modify manage.py to import new_settings instead of settings.
-    * git commit -m 'Local settings'
+    * `git commit -m 'Local settings'`
 
 4. Configure the settings page to work with your system.
     * Get your own API keys from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret). Put these keys into the appropriate place in the settings file.
@@ -40,10 +40,10 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
 
 5. cd into the project root directory (it has manage.py in it). Run the command:
-'python manage.py runserver'
+     `'python manage.py runserver'`
 
 6. If you have any difficulties getting setup, let me know about and I may be able to help.
 
 7. Last commit before pull request.
     * Modify manage.py to import settings instead of new_settings (Let me know if changes are needed to settings to run your code)
-    * git commit -m 'Global settings'
+    * `git commit -m 'Global settings'`
