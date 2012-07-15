@@ -25,7 +25,7 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 1. Download the project code from master or fork if you plan on possibly contributing later.
 
 2. Create your own settings file to preserve the global file.
-    * Copy settings.py where it lies and name the copy "new_settings.py".
+    * Copy settings.py where it lies and name the copy "new_settings.py" (**Make sure you use this exact filename**).
 
 3. Inital commit.
     * Modify manage.py to import new_settings instead of settings.
