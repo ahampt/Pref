@@ -1,2 +1,8 @@
+# File Types
+
 *.pyc
 *.log
+
+# Files
+
+new_settings.py
