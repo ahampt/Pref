@@ -24,7 +24,14 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 
 1. Download the project code from master or fork if you plan on possibly contributing later.
 
-2. Configure the settings page to work with your system.
+2. Create your own settings file to preserve the global file.
+    * Copy settings.py where it lies and name the copy "new_settings.py".
+
+3. Inital commit.
+    * Modify manage.py to import new_settings instead of settings.
+    * git commit -m 'Local settings'
+
+4. Configure the settings page to work with your system.
     * Get your own API keys from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret). Put these keys into the appropriate place in the settings file.
     * Create DB using [phpmyadmin](http://127.0.0.1/phpmyadmin) with whatever name you want, just be sure to put the name of it here. (Set the collation to utf8_bin)
     * Set your own username and password for said database. Leave password blank ('') if no password.
@@ -32,7 +39,11 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
     * Change the PREFIX_URL as you see fit (This means to get to the site you will have to go to http://localhost/PREFIX_URL)
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
 
-3. cd into the project root directory (it has manage.py in it). Run the command:
+5. cd into the project root directory (it has manage.py in it). Run the command:
 'python manage.py runserver'
 
-4. If you have any difficulties getting setup, let me know about and I may be able to help.
+6. If you have any difficulties getting setup, let me know about and I may be able to help.
+
+7. Last commit before pull request.
+    * Modify manage.py to import settings instead of new_settings (Let me know if changes are needed to settings to run your code)
+    * git commit -m 'Global settings'
