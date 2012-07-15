@@ -127,6 +127,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+LOGGING_DIR = '/var/log/pref/'
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
@@ -145,31 +147,31 @@ LOGGING = {
 			'level': 'DEBUG',
 			'class': 'logging.FileHandler',
 			'formatter': 'verbose',
-			'filename': '/var/log/pref/site.log',
+			'filename': LOGGING_DIR + 'site.log',
 		},
         'profile': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
 			'formatter': 'verbose',
-			'filename': '/var/log/pref/profile.log'
+			'filename': LOGGING_DIR + 'profile.log'
         },
 		'movie': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
 			'formatter': 'verbose',
-			'filename': '/var/log/pref/movie.log'
+			'filename': LOGGING_DIR + 'movie.log'
         },
 		'property': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
 			'formatter': 'verbose',
-			'filename': '/var/log/pref/property.log'
+			'filename': LOGGING_DIR + 'property.log'
         },
 		'associate': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
 			'formatter': 'verbose',
-			'filename': '/var/log/pref/associate.log'
+			'filename': LOGGING_DIR + 'associate.log'
         }
     },
     'loggers': {
