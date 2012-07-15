@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' with static='dnd' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	
+	{% if movies or unranked_movies %}
+		<div class="row">
+			<div id="dhtmlgoodies_dragDropContainer">
+				<div id="dhtmlgoodies_listOfItems">	
+					<ul id="allItems">
+						{% for movie in movies %}
+							<li id="{{movie.id}}">{{forloop.counter}}. {{movie.Title}} ({{movie.Year}})</li>
+						{% endfor %}
+						{% for movie in unranked_movies %}
+							<li id="u{{movie.id}}">Unranked: {{movie.Title}} ({{movie.Year}})</li>
+						{% endfor %}
+					</ul>
+				</div>	
+			</div>
+			<ul id="dragContent"></ul>
+			<div id="dragDropIndicator"><img src="{{STATIC_URL}}img/insert.gif"></div>
+		</div>
+		<div class="row">
+			<div class="span1 offset1">
+				<a class="btn btn-large btn-success" href="#" onclick="saveArrangableNodes();return false">Save</a>
+				{% url webapp.views.profile.view username=profile.Username as profile_url %}
+				<form id="rankForm" action="{{profile_url}}?rank=1" method="post"> {% csrf_token %}
+					<input type="hidden" id="hiddenMovieIds" name="hiddenMovieIds">
+				</form>
+			</div>
+			<div class="span2">
+				<a class="btn btn-large btn-success" href="{{profile_url}}?movies=1">Full Listings</a>
+			</div>
+		</div>
+	{% else %}
+		{% url webapp.views.site.discovery as discovery_url %}
+		<big>No movies ranked. You should <a href="{{discovery_url}}">Find Movies</a> to populate this page.</big>
+	{% endif %}
+
+	{% include 'includes/footer.html' %}
+</body>
+</html>

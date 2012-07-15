@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	<table class="table table-striped">
+		<tr><th class="span8">#{{people.start_index}}{% if not people.start_index == people.end_index %}-{{people.end_index}}{%endif%} (of {{people.paginator.count}}) people</th></tr>
+		{% for person in people %}
+			<tr>
+				{% url webapp.views.property.person urlname=person.UrlName as person_url %}
+				<td><a href="{{ person_url }}">{{person.Name}}</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+	{% url webapp.views.property.people as people_url %}
+	<div class="pagination">
+		<ul>
+			<li {% if not people.has_previous %} class="disabled" {% endif %}}><a href="{{people_url}}?page={{people.previous_page_number}}&length={{people.paginator.per_page}}">&lt;&lt;</a></li>
+			<li class="active"><a href="{{people_url}}?page={{people.number}}&length={{people.paginator.per_page}}">{{people.number}}</a></li>
+			<li{% if not people.has_next %} class="disabled" {% endif %}}><a href="{{people_url}}?page={{people.next_page_number}}&length={{people.paginator.per_page}}">&gt;&gt;</a></li>
+		</ul>
+	</div>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

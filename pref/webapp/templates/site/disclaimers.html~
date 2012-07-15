@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	<p>
+		All the information on this website is published in good faith and for general information purpose only. Pref does not make any warranties about the completeness, reliability, and accuracy of this information. Any action you take upon the information on this website is strictly at your own risk and Pref will not be liable for any losses and damages in connection with the use of Pref.<br /><br />
+
+		From Pref, you can vist other websites by following hyperlinks to these sites. While Pref strives to provide only links to useful and ethical websites, Pref has no control over the content and nature of these sites and the links to other websites do not imply a recommendation for all the content found on these sites.<br /><br />
+
+		Please also be aware that when you leave Pref, other sites may have different privacy policies and terms which are beyond Pref's control.<br /><br />
+
+		{% url webapp.views.site.about as about_url %}
+		Use of the term Pref on this page refers to the owners and operatoes of Pref found <a href="{{about_url}}">here</a>.
+	</p>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

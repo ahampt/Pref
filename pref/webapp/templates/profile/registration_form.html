@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body onload="setFocus('username')">
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% if error_msg %}
+		{% for item in error_msg.items %}
+			<div class="alert alert-error">
+				{{item.0}}: {{item.1}}
+			</div>
+		{% endfor %}
+	{% endif %}
+	{% url webapp.views.site.register as register_url %}
+	<form class="well" action="{{register_url}}" method="post"> {% csrf_token %}
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="username">Username: </label>
+				<div class="input-prepend">
+					{% if profile and profile.Username %}
+						<span class="add-on"><i class="icon-user"></i></span><input class="span3" type="text" name="username" id="username" value="{{profile.Username}}" />
+					{% else %}
+						<span class="add-on"><i class="icon-user"></i></span><input class="span3" type="text" name="username" id="username" />
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="email">Email: </label>
+				<div class="input-prepend">
+					{% if profile and profile.Email %}
+						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="text" name="email" id="email" value="{{profile.Email}}" />
+					{% else %}
+						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="text" name="email" id="email" />
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="password">Password: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="password" id="password" />
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="confirm_password">Confirm Password: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="confirm_password" id="confirm_password" />
+				</div>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span1 offset2">
+				<input class="btn btn-large btn-success" type="submit" value="Register" />
+			</div>
+			<div class="span1 offset1">
+				{% url webapp.views.site.home as home_url %}
+				<a class="btn btn-large btn-danger" href="{{home_url}}">Cancel</a>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span4 offset2">
+				{% url webapp.views.profile.login as login_url %}
+				<p>Already have a profile? <a href="{{login_url}}">Sign In</a></p>
+			</div>
+		</div>
+	</form>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

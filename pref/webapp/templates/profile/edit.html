@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load webapp_extras %}
+{% include 'includes/head.html' with static='starbox' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% if error_msg %}
+		{% for item in error_msg.items %}
+			<div class="alert alert-error">
+				{{item.0}}: {{item.1}}
+			</div>
+		{% endfor %}
+	{% endif %}
+	{% url webapp.views.profile.view username=profile.Username as profile_url %}
+	<form class="well" action="{{profile_url}}?edit=1" method="post"> {% csrf_token %}
+		<div class="row">
+			<div class="span2">
+				<h2>Info</h2>
+			</div>
+			<div class="span4">
+				<label for="username">Username: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-user"></i></span><input class="span3" type="text" name="username" id="username" value="{{profile.Username}}" />
+				</div>
+			</div>
+			<div class="span1">
+				<a class="btn btn-medium btn-danger" href="{{profile_url}}?delete=1" onclick="return confirmAction('Delete Profile?')">Delete</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="email">Email: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="text" name="email" id="email" value="{{profile.Email}}" />
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="password">Password: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="password" id="password" />
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<label for="confirm_password">Confirm Password: </label>
+				<div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="confirm_password" id="confirm_password" />
+				</div>
+			</div>
+		</div>
+		{% if request.session.admin %}
+			<div class="row">
+				<div class="span1 offset3">
+					<br />
+					<label class="checkbox">
+						{% if profile.IsAdmin %}
+							<input type="checkbox" name="admin" id="admin" value="IsAdmin" checked/> IsAdmin
+						{% else %}
+							<input type="checkbox" name="admin" id="admin" value="IsAdmin"/> IsAdmin
+						{% endif %}
+					</label>
+					<br />
+				</div>
+		</div>
+		{% endif %}
+		<div class="row">
+			<div class="span2">
+				<h2>Ratings</h2>
+			</div>
+			<div class="span1">
+				<label for="star_numbers">Stars: </label>
+				<div>
+					<select class="input-mini" name="star_numbers" id="star_numbers">
+						<option value="1" {% if profile.NumberOfStars == 1 %} selected="selected" {% endif %}>1</option>
+						<option value="2" {% if profile.NumberOfStars == 2 %} selected="selected" {% endif %}>2</option>
+						<option value="3" {% if profile.NumberOfStars == 3 %} selected="selected" {% endif %}>3</option>
+						<option value="4" {% if profile.NumberOfStars == 4 %} selected="selected" {% endif %}>4</option>
+						<option value="5" {% if profile.NumberOfStars == 5 %} selected="selected" {% endif %}>5</option>
+						<option value="6" {% if profile.NumberOfStars == 6 %} selected="selected" {% endif %}>6</option>
+						<option value="7" {% if profile.NumberOfStars == 7 %} selected="selected" {% endif %}>7</option>
+						<option value="8" {% if profile.NumberOfStars == 8 %} selected="selected" {% endif %}>8</option>
+						<option value="9" {% if profile.NumberOfStars == 9 %} selected="selected" {% endif %}>9</option>
+						<option value="10" {% if profile.NumberOfStars == 10 %} selected="selected" {% endif %}>10</option>
+					</select>
+				</div>
+			</div>
+			<div class="span1 offset1">
+				<br />
+				Substars: 
+			</div>
+			<div class="span2">
+				<input type="radio" name="substars" value="1" {% if profile.SubStars == 1 %} checked {% endif %} /> 1<br />
+				<input type="radio" name="substars" value="2" {% if profile.SubStars == 2 %} checked {% endif %} /> 2<br />
+				<input type="radio" name="substars" value="4" {% if profile.SubStars == 4 %} checked {% endif %} /> 4<br />
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				<input type="radio" name="stars" value="0" {% if profile.StarImage == 0 %} checked {% endif %} /> <img src="{{STATIC_URL}}img/starbox/big.png" />
+			</div>
+		</div>
+		{% for star_number in profile.NumberOfStars|get_range %}
+			{% for sub_number in profile.SubStars|divide_rounding_up:2|get_range %}
+				<div class="row">
+					<div class="span2">
+						<div id='test_{{star_number}}_{{sub_number}}'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
+						<script language="javascript" type='text/javascript'>
+							new Starbox('test_{{star_number}}_{{sub_number}}', {{profile.SubStars|multiply:star_number|add:sub_number|get_item:rate_range}}, {buttons: {{star_number|add:1|multiply:profile.SubStars}}, duration: 0.25, effect: {mouseover: true, mouseout: true}, ghosting: true, max: {{star_number|add:1}}, rated: {{profile.SubStars|multiply:star_number|add:sub_number|get_item:rate_range}}, rerate: true, overlay: 'default.png', stars: {{star_number|add:1}}});
+						</script>
+					</div>
+					<div class="span2">
+						<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number|multiply:2}}" id="indicator_{{star_number}}_{{sub_number|multiply:2}}" value="{{profile.SubStars|multiply:star_number|add:sub_number|get_item:indicators}}" />
+					</div>
+					{% if profile.SubStars != 1 %}
+						<div class="span2">
+							<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number|multiply:2|add:1}}" id="indicator_{{star_number}}_{{sub_number|multiply:2|add:1}}" value="{{profile.SubStars|multiply:star_number|add:sub_number|add:1|get_item:indicators}}" />
+						</div>
+					{% endif %}
+				</div>
+			{% endfor %}
+		{% endfor %}
+		<br />
+		<div class="row">
+			<div class="span1 offset2">
+				<input class="btn btn-large btn-success" type="submit" value="Save" />
+			</div>
+			<div class="span1 offset1">
+				<a class="btn btn-large btn-danger" href="{{profile_url}}">Cancel</a>
+			</div>
+		</div>
+	</form>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

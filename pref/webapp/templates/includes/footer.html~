@@ -1,0 +1,52 @@
+	</div> 
+	<div class="span2"></div>
+	</div> 
+	<hr>
+	<footer>
+		<p class="pull-left">
+			&copy; 2012 <a href="http://www.andyhampton.com" target="_blank">Andy Hampton</a>
+		</p>
+		<p class="pull-right">
+			{% url webapp.views.site.about as about_url %}
+			{% url webapp.views.site.disclaimers as disclaimers_url %}
+			{% url webapp.views.site.legal as legal_url %}
+			{% url webapp.views.site.privacy as privacy_url %}
+			<a href="{{about_url}}">About</a> | <a href="{{disclaimers_url}}">Disclaimers</a> | <a href="{{privacy_url}}">Privacy Policy</a>
+		</p>
+	</footer>
+	</div> <!-- /container -->
+	<!-- javascript -->
+	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	{% if static == 'starbox' %}<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1/prototype.js"></script>
+	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
+	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>{% endif %}
+	{% if static == 'dnd' %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/dragndrop.js"></script>{% endif %}
+	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
+	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/std.js"></script>
+	<script language="javascript" type="text/javascript">
+		function starboxChangedText(event) {
+			var indicator = this.down('.indicator'),
+			pick = (event.memo.rating || 0) * {{profile.SubStars}} - 1,
+			indicator = this.down('.indicator');
+			// for restoring, store the indicator text on the star if it was not set before.
+			this.starboxResetText = this.starboxResetText || indicator.innerHTML;
+			this.down('.indicator').update(
+			["{{indicators|join:'","'}}"]
+			[pick]);  
+		}
+		// when the link is clicked update the restore value
+		function starboxRatedText() {
+			var indicator = this.down('.indicator');
+			this.starboxResetText = indicator.innerHTML;
+		}
+		// here we restore the indicator on mouseout, if needed
+		function starboxLeftText() {
+			this.down('.indicator').update(this.starboxResetText || '');
+		}
+		// attach the custom events after the DOM is loaded
+		document.observe('dom:loaded', function() {
+			$('rating').observe('starbox:changed', starboxChangedText) // observe the mouseover
+			.observe('starbox:rated', starboxRatedText) // observe the click
+			.observe('starbox:left', starboxLeftText); // observe the mouseout
+		});
+	</script>

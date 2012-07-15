@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% if person %}
+		{% include 'includes/header.html' %}
+		{% url webapp.views.property.person urlname=person.UrlName as person_url %}
+		<ul class="nav nav-tabs">
+			<li><a href="{{person_url}}">View</a></li>
+			<li class="active">
+				<a href="{{person_url}}?edit=1">Edit</a>
+			</li>
+		</ul>
+		{% if error_msg %}
+			{% for item in error_msg.items %}
+				<div class="alert alert-error">
+					{{item.0}}: {{item.1}}
+				</div>
+			{% endfor %}
+		{% endif %}
+		<form class="well" action="{{person_url}}?edit=1" method="post"> {% csrf_token %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="name">Title: </label>
+					<input type="text" name="name" id="name" value="{{person.Name}}" />
+				</div>
+				<div class="span1">
+					<a class="btn btn-medium btn-danger" href="{{person_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span1 offset2">
+					<input class="btn btn-large btn-success" type="submit" value="Save" />
+				</div>
+				<div class="span1 offset1">
+					<a class="btn btn-large btn-danger" href="{{person_url}}">Cancel</a>
+				</div>
+			</div>
+		</form>
+		<h2>{{directed_movies|length}} Directed Movies</h2>
+		<ul id="directed_list">
+		{% if directed_movies|length > 0 %}
+			{% for movie in directed_movies %}
+				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+		{% endif %}
+		<form action="{{person_url}}?add=1&t=0" method="POST"> {% csrf_token %}
+			<li class="field">
+				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
+				<input type="submit" value="Add" />
+			</li>
+		</form>
+		</ul>
+		<h2>{{written_movies|length}} Written Movies</h2>
+		<ul id="written_list">
+		{% if written_movies|length > 0 %}
+			{% for movie in written_movies %}
+				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+		{% endif %}
+		<form action="{{person_url}}?add=1&t=1" method="POST"> {% csrf_token %}
+			<li class="field">
+				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
+				<input type="submit" value="Add" />
+			</li>
+		</form>
+		</ul>
+		<h2>{{acted_movies|length}} Acted Movies</h2>
+		<ul id="acted_list">
+		{% if acted_movies|length > 0 %}
+			{% for movie in acted_movies %}
+				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+		{% endif %}
+		<form action="{{person_url}}?add=1&t=2" method="POST"> {% csrf_token %}
+			<li class="field">
+				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
+				<input type="submit" value="Add" />
+			</li>
+		</form>
+		</ul>
+	{% else %}
+		<div class="page-header">
+			<h1>invalid person</h1>
+		</div>
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>

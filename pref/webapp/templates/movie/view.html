@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load webapp_extras %}
+{% include 'includes/head.html' with static='starbox' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% if movie %}
+		{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+		{% if request.session.admin %}
+			<ul class="nav nav-tabs">
+				<li class="active">
+					<a href="{{movie_url}}">View</a>
+				</li>
+				<li><a href="{{movie_url}}?edit=1">Edit</a></li>
+			</ul>
+		{% endif %}
+		<div class="row">
+			<div class="span2">
+				<h2>Information</h2>
+			</div>
+			{% if not association %}
+				<div class="span1">
+					<a class="btn btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
+				</div>
+				<div class="span1">
+					<a class="btn btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
+				</div>
+			{% endif %}
+		</div>
+		<br />
+		<div class="row">
+			<div class="span1">
+			{% if movie.Runtime %}
+				{{movie.Runtime}} min
+			{% endif %}
+			</div>
+			<div class="span3">
+			{% if genres %}
+				{% for genre in genres %}
+					{% url webapp.views.property.genre description=genre.Description as genre_url %}
+					<a href="{{genre_url}}">{{genre.Description}}</a>
+					{% if not forloop.last %}
+						 | 
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+			</div>
+			<div class="span1">
+			{% if movie.ImdbId %}
+				<a href="{{imdb_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
+			{% endif %}
+			</div>
+			<div class="span1">
+			{% if movie.RottenTomatoesId %}
+				<a href="{{rt_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/rotten_tomatoes.jpg" /></a>
+			{% endif %}
+			</div>
+			<div class="span1">
+			{% if movie.NetflixId %}
+				<a href="{{netflix_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
+			{% endif %}
+			</div>
+			<div class="span1">
+			{% if movie.WikipediaId %}
+				<a href="{{wikipedia_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
+			{% endif %}
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span4">
+			{% if directors %}
+				Directed By: 
+				{% for director in directors %}
+					{% url webapp.views.property.person urlname=director.UrlName as director_url %}
+					<a href="{{director_url}}">{{director.Name}}</a>
+					{% if not forloop.last %}
+						,
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+			</div>
+			<div class="span4">
+			{% if writers %}
+				Writen By: 
+				{% for writer in writers %}
+					{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
+					<a href="{{writer_url}}">{{writer.Name}}</a>
+					{% if not forloop.last %}
+						,
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+			</div>
+		</div>
+		<br />
+		{% if actors %}
+			Cast: 
+			{% for actor in actors %}
+				{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
+				<a href="{{actor_url}}">{{actor.Name}}</a>
+				{% if not forloop.last %}
+					,
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		<br /><br />
+		{% if association and profile %}
+			<div class="well">
+				<div class="row">
+					<div class="span2">
+						<h2>Thoughts</h2>
+					</div>
+					<div class="span1">
+						<a class="btn btn-danger" href="{{movie_url}}?assoc=1&remove=1">Remove</a>
+					</div>
+					<div class="span3">
+						<a class="btn btn-success" href="{{movie_url}}?assoc=1&recent=1">Watched Today</a>
+					</div>
+					<div class="span1">
+						{% if association.Watched and association.Rank %}
+							<a class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')" rel="popover">{{association.Rank}}</a>
+							<script type="text/javascript">
+								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rerank {{movie.Title}}'});
+							</script>
+						{% elif association.Watched %}
+							<a class="btn btn-large btn-primary" href="{{movie_url}}?rank=1" rel="popover">-</a>
+							<script type="text/javascript">
+								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rank {{movie.Title}} for the first time'});
+							</script>
+						{% endif %}
+					</div>
+				</div>
+				<br />
+				{% if association.Watched %}
+					<div class="row">
+						<div class="span3">
+							First Viewed On: {{association.CreatedAt.date}}
+						</div>
+						<div class="span3">
+							Last Viewed On: {{association.UpdatedAt.date}}
+						</div>
+					</div>
+					<br />
+				{% endif %}
+				<form action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
+					<div class="row">
+						<div class="span2">
+							{% if association.Watched %}
+								<input type="checkbox" name="watched" id="watched" value="Watched" checked /> Watched
+							{% else %}
+								<input type="checkbox" name="watched" id="watched" value="Watched" /> Watched
+							{% endif %}
+						</div>
+						<div class="span2">
+							{% if association.Accessible %}
+								<input type="checkbox" name="accessible" id="accessible" value="Accessible" checked /> Accessible
+							{% else %}
+								<input type="checkbox" name="accessible" id="accessible" value="Accessible" /> Accessible
+							{% endif %}
+						</div>
+						{% if association.Accessible %}
+							{% if association.Source %}
+								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["Amazon", "Blu-ray", "DVD", "Digital", "Hulu", "Netflix"]' name="source" id="source" value="{{association.Source}}" />
+							{% else %}
+								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["Amazon", "Blu-ray", "DVD", "Digital", "Hulu", "Netflix"]' name="source" id="source" placeholder="Search" />
+							{% endif %}
+						{% endif %}
+					</div>
+					<br />
+					{% if association.Watched %}
+						<div class="row">
+							<div class="span2">
+								{% if not association.Rating %}
+									<div>
+										Unrated (zero invalid):
+									</div>
+								{% endif %}
+								<div id='rating'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
+								<script language="javascript" type='text/javascript'>
+									new Starbox('rating', {{association.Rating|default:"0"}}, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, color: '#FFD700', duration: 0.3, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, rated: {{association.Rating|default:"false"}}, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}, total: 1});
+								</script>
+							</div>
+							<div class="span5">
+								{% if association.Review %}
+									<textarea class="field span5" name="review" rows="4">{{association.Review}}</textarea>
+								{% else %}
+									<textarea class="field span5" name="review" rows="4" placeholder="Review"></textarea>
+								{% endif %}
+							</div>
+						</div>
+						<br />
+					{% endif %}
+					<div class="row">
+						<div class="span1 offset6">
+							<input type="submit" class="btn btn-large btn-success" name="save" id="save" value="Save" />
+						</div>
+					</div>
+				</form>
+			</div>
+		{% endif %}
+		<div class="row">
+			<div class="span4">
+				<a href="{{movie_url}}?suggestion=1">Suggestion/Comment/Correction</a>
+			</div>
+		</div>
+	{% else %}
+		<div class="page-header">
+			<h1>invalid movie</h1>
+		</div>
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>

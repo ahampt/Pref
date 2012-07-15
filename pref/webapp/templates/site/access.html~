@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body onload="setFocus('username')">
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% url webapp.views.login as login_url %}
+	<form class="well span4 offset4" action="{{login_url}}" method="post"> {% csrf_token %}
+		<div class="input-prepend row">
+			<div class="span4"><span class="add-on"><i class="icon-user"></i></span><input class="span3" type="text" name="username" id="username" placeholder="Username" /></div>
+		</div>
+		<br />
+		<div class="input-prepend row">
+			<div class="span4"><span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="password" id="password" placeholder="Password" /></div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span1 offset2"><input class="btn btn-large btn-success" type="submit" value="Login" /></div>
+		</div>
+	</form>
+	<br /><br />
+	{% url webapp.views.access as access_url %}
+	<form class="well span4 offset4" action="{{access_url}}" method="post"> {% csrf_token %}
+		<div class="input-prepend row">
+			<div class="span4"><span class="add-on"><i class="icon-lock"></i></span><input class="span3" type="password" name="access_password" id="access_password" placeholder="Password" /></div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span1 offset2"><input class="btn btn-large btn-success" type="submit" value="Access" /></div>
+		</div>
+	</form>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

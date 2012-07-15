@@ -1,0 +1,51 @@
+<head>
+	{% load webapp_extras %}
+	<meta charset="utf-8" />
+	<title>Pref</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="Organize and keep track of all the movies in your life with useful rating and reviewing tools on Pref." />
+	<meta name="author" content="Andy Hampton" />
+	<meta name="robots" content="index, follow" />
+	<meta name="copyright" content="Andy Hampton" />
+	<meta name="language" content="English" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<!-- styles -->
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
+	{% if static == 'dnd' %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dragndrop.css" />{% endif %}
+	{% if static == 'starbox' %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />{% endif %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/std.css" />
+	{% if static == 'dnd' %}
+		<style>
+			#dhtmlgoodies_listOfItems ul{	/* Left column <ul> */	
+				height: {{size|multiply:25}}px;
+			}
+		</style>
+	{% endif %}
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- fav and touch icons -->
+	<link rel="shortcut icon" href="{{STATIC_URL}}ico/favicon.ico" />
+	<link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{STATIC_URL}}ico/apple-touch-icon-144-precomposed.png" />
+	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{STATIC_URL}}ico/apple-touch-icon-114-precomposed.png" />
+	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{STATIC_URL}}ico/apple-touch-icon-72-precomposed.png" />
+	<link rel="apple-touch-icon-precomposed" href="{{STATIC_URL}}ico/apple-touch-icon-57-precomposed.png" />
+
+	<!-- javascript -->
+	
+	<script language="javascript" type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32590866-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+</head>

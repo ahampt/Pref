@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% if genre %}
+		{% include 'includes/header.html' %}
+		{% url webapp.views.property.genre description=genre.Description as genre_url %}
+		<ul class="nav nav-tabs">
+			<li><a href="{{genre_url}}">View</a></li>
+			<li class="active">
+				<a href="{{genre_url}}?edit=1">Edit</a>
+			</li>
+		</ul>
+		{% if error_msg %}
+			{% for item in error_msg.items %}
+				<div class="alert alert-error">
+					{{item.0}}: {{item.1}}
+				</div>
+			{% endfor %}
+		{% endif %}
+		<form class="well" action="{{genre_url}}?edit=1" method="post"> {% csrf_token %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="description">Description: </label>
+					<input type="text" name="description" id="description" value="{{genre.Description}}" />
+				</div>
+				<div class="span1">
+					<a class="btn btn-medium btn-danger" href="{{genre_url}}?delete=1" onclick="return confirmAction('Delete Genre?')">Delete</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span1 offset2">
+					<input class="btn btn-large btn-success" type="submit" value="Save" />
+				</div>
+				<div class="span1 offset1">
+					<a class="btn btn-large btn-danger" href="{{genre_url}}">Cancel</a>
+				</div>
+			</div>
+		</form>
+		<h2>{{movies|length}} {{genre.Description}} Movies</h2>
+		<ul id="list">
+			{% for movie in movies %}
+				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{genre_url}}?remove=1&i={{movie.UrlTitle}}" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Movie?')">Delete</a></li>
+			{% endfor %}
+			<form action="{{genre_url}}?add=1" method="POST"> {% csrf_token %}
+				<li class="field">
+					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
+					<input type="submit" value="Add" />
+				</li>
+			</form>
+		</ul>
+	{% else %}
+		<div id="content-list">
+			<p>invalid genre</p>
+		</div>
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>

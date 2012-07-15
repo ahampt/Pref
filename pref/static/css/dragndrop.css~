@@ -1,0 +1,63 @@
+	#dhtmlgoodies_dragDropContainer ul{	/* General rules for all <ul> */
+		float: left;
+	}
+	
+	#right_col ul{
+		float: right;
+	}
+	
+	#right_col li{	/* Movable items, i.e. <LI> */
+		list-style-type:none;
+		height:15px;
+		border:1px solid #000;
+		padding:2px;
+		margin-bottom:2px;
+		font-size:13px;
+		line-height:15px;
+	}
+	
+	#dhtmlgoodies_dragDropContainer li,#dragContent li,li#indicateDestination{	/* Movable items, i.e. <LI> */
+		list-style-type:none;
+		height:15px;
+		background-color:#F5F5F5;
+		border:1px solid #000;
+		padding:2px;
+		margin-bottom:2px;
+		cursor:pointer;
+		font-size:13px;
+		line-height:15px;
+	}
+	
+	
+	/* LEFT COLUMN CSS */
+	#dhtmlgoodies_listOfItems ul{	/* Left(Sources) column <ul> */	
+		width: 480px;
+	}
+		
+	div#dhtmlgoodies_listOfItems div{
+		border:1px solid #999;		
+	}
+	div#dhtmlgoodies_listOfItems div ul{	/* Left column <ul> */
+		margin-left:10px;	/* Space at the left of list - the arrow will be positioned there */
+	}
+	/* END LEFT COLUMN CSS */
+	
+	#dragContent{	/* Drag container */
+		position:absolute;
+		width:450px;
+		height:15px;
+		display:none;
+		margin:0px;
+		padding:0px;
+		z-index:2000;
+	}
+
+	#dragDropIndicator{	/* DIV for the small arrow */
+		position:absolute;
+		width:7px;
+		height:10px;
+		display:none;
+		z-index:1000;
+		margin:0px;
+		padding:0px;
+	}

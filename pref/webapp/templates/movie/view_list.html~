@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	<table class="table table-striped">
+		<tr><th class="span5">#{{page.start_index}}{% if not page.start_index == page.end_index %}-{{page.end_index}}{%endif%} (of {{page.paginator.count}}) titles</th><th class="span1"></th><th class="span2"></th></tr>
+		{% for movie, bool in movies %}
+			<tr>
+				{% url webapp.views.movie.movie urltitle=movie.UrlTitle as movie_url %}
+				<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
+				<td style="text-align: center">{{movie.Year}}</td>
+				<td style="text-align: center">
+					{% if bool %}
+						<a class="btn btn-small btn-success" href="{{movie_url}}">Options</a>
+					{% else %}
+						<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
+						&nbsp&nbsp&nbsp
+						<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+	{% url movies.movie.movies as movies_url %}
+	<div class="pagination">
+		<ul>
+			<li {% if not page.has_previous %} class="disabled" {% endif %}}><a href="{{movies_url}}?page={{page.previous_page_number}}&length={{page.paginator.per_page}}">&lt;&lt;</a></li>
+			<li class="active"><a href="{{movies_url}}?page={{page.number}}&length={{page.paginator.per_page}}">{{page.number}}</a></li>
+			<li{% if not page.has_next %} class="disabled" {% endif %}}><a href="{{movies_url}}?page={{page.next_page_number}}&length={{page.paginator.per_page}}">&gt;&gt;</a></li>
+		</ul>
+	</div>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

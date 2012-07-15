@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	
+	<h2>Associate movies to your profile by:</h2>
+	<br />
+	<ol>
+		<li>Searching for movies using the search bar at the top of this page.</li><br />
+		{% url webapp.views.movie.view_list as movies_url %}
+		<li>Looking through all of the movies currently in the system <a href="{{movies_url}}">here</a>.</li><br />
+		{% url webapp.views.property.people as people_url %}
+		<li>Looking through movies with your favorite actors, directors, and writers <a href="{{people_url}}">here</a>.</li><br />
+		{% url webapp.views.property.genres as genres_url %}
+		<li>Looking through movies in your favorite genres <a href="{{genres_url}}">here</a>.</li>
+	</ol>
+	
+	{% include 'includes/footer.html' %}
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load webapp_extras %}
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% if profile %}
+		{% include 'includes/header.html' %}
+		{% if admin_rights %}
+			<div class="row">
+				<div class="span4 offset2">
+					Email: {{profile.Email}}<br /><br />
+				</div>
+			</div>
+		{% endif %}
+		<div class="row">
+			<div class="span4 offset2">
+				Member Since: {{profile.CreatedAt.date}}<br /><br />
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4 offset2">
+				Last Login: {{profile.UpdatedAt.date}}<br /><br />
+			</div>
+		</div>
+		{% if admin_rights %}
+			<div class="row">
+				<div class="span1 offset2">
+					Ratings: 
+				</div>
+				<div class="span3">
+					<div id='rating'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
+					<script language="javascript" type='text/javascript'>
+						new Starbox('rating', 0.0, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, color: '#FFD700', duration: 0.25, effect: {mouseover: true, mouseout: true}, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}});
+					</script>
+					<br /><br />
+				</div>
+			</div>
+		{% endif %}
+		<div class="row">
+			{% url webapp.views.property.profile username=profile.Username as profile_url %}
+			{% if admin_rights %}
+				<div class="span2 offset2">
+					<a class="btn btn-large" href="{{profile_url}}?edit=1"><i class="icon-cog"></i> Settings</a>
+				</div>
+				<div class="span2">
+			{% else %}
+				<div class="span2 offset2">
+			{% endif %}
+				<a class="btn btn-large" href="{{profile_url}}?movies=1"><i class="icon-film"></i> Movies</a>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span2 offset2">
+				<a href="{{profile_url}}?suggestion=1">Suggestion/Comment/Correction</a>
+			</div>
+		</div>
+	{% else %}
+		<div class="page-header">
+			<h1>invalid user</h1>
+		</div class="page-header">
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% if movie %}
+		{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+		{% if movie1 %}
+			<div class="well span3">
+				<div class="row">
+					<form id="leftForm" action="{{movie_url}}?rank=1" method="post"> {% csrf_token %}
+						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min1}}">
+						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max1}}">
+						{% if movie.id == movie1.id %}
+							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association2.Rank}}">
+						{% else %}
+							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association1.Rank}}">
+						{% endif %}						
+						<div class="span1 offset1">
+							<input class="btn btn-large btn-primary" type="submit" value="Pick" />
+						</div>
+					</form>
+				</div>
+				<br />
+				<div class="row" style="height: 100px;">
+					<div class="span3">
+						{{movie1.Title}} ({{movie1.Year}})
+					</div>
+				</div>
+			</div>
+		{% endif %}
+		{% if movie2 %}
+			<div class="well span3">
+				<div class="row">
+					<form id="rightForm" action="{{movie_url}}?rank=1" method="post"> {% csrf_token %}
+						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min2}}">
+						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max2}}">
+						{% if movie.id == movie2.id %}
+							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association1.Rank}}">
+						{% else %}
+							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association2.Rank}}">
+						{% endif %}		
+						<div class="span1 offset1">
+							<input class="btn btn-large btn-primary" type="submit" value="Pick" />
+						</div>
+					</form>
+				</div>
+				<br />
+				<div class="row" style="height: 100px;">
+					<div class="span3">
+						{{movie2.Title}} ({{movie2.Year}})
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>

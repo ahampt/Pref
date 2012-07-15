@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+	{% include 'navbar.html' %}
+	{% include 'header.html' %}
+	<p>This website was created by me as a way to supplement countless spreadsheets and individual programs to keep track of the things I love across many mediums. You can find more information about the site and contribute by going <a href="http://code.google.com/p/my-movie-website/">here</a>.</p>
+	<p>Please make comments and suggestions as you use the site by clicking the appropriate buttons on pages when you see them as I am building this site purely to suffice my own needs until someone speaks up. Thanks</p>
+	<p>Be aware that after 90 days of inactivity, user data is no longer safe and may be deleted or altered unintentionally.
+	<p>For information about current issues and fixes, go <a href="http://code.google.com/p/my-movie-website/source/list">here</a>.</p>
+	<p>Open tickets <a href="http://code.google.com/p/my-movie-website/issues/list">here</a>.</p>
+	{% include 'footer.html' %}
+</body>
+</html>

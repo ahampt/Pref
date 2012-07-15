@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% include 'includes/header.html' %}
+	{% if movie %}
+		{% url webapp.views.movie.movie urltitle=movie.UrlTitle as form_url %}
+	{% elif person %}
+		{% url webapp.views.property.person name=person.UrlName as form_url %}
+	{% elif genre %}
+		{% url webapp.views.property.genre description=genre.Description as form_url %}
+	{% elif profile %}
+		{% url webapp.views.profile.profile username=profile.Username as form_url %}
+	{% else %}
+		{% url webapp.views.site.about as form_url %}
+	{% endif %}
+	<form class="well" action="{{form_url}}?suggestion=1" method="post"> {% csrf_token %}
+		<div class="row">
+			<div class="offset1">
+				<textarea class="field span5" name="message" rows="5" placeholder="Comment/Correction/Suggestion - We'll take it all, just be sure to be considerate in what you write. No need for contact information or where the change is, that is already recorded."></textarea>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span1 offset2">
+				<input class="btn btn-large btn-success" type="submit" value="Submit" />
+			</div>
+			<div class="span1 offset1">
+				<a class="btn btn-large btn-danger" href="{{form_url}}">Cancel</a>
+			</div>
+		</div>
+		<br />
+	</form>
+	{% include 'includes/footer.html' %}
+</body>
+</html>

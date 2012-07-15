@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body>
+	{% include 'includes/navbar.html' %}
+	{% if movie %}
+		{% include 'includes/header.html' %}
+		{% url webapp.views.movie.movie urltitle=movie.UrlTitle as movie_url %}
+		<ul class="nav nav-tabs">
+			<li><a href="{{movie_url}}">View</a></li>
+			<li class="active"><a href="{{movie_url}}?edit=1">Edit</a></li>
+		</ul>
+		{% if error_msg %}
+			{% for item in error_msg.items %}
+				<div class="alert alert-error">
+					{{item.0}}: {{item.1}}
+				</div>
+			{% endfor %}
+		{% endif %}
+		<form class="well" action="{{movie_url}}?edit=1" method="post"> {% csrf_token %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="title">Title: </label>
+					<input type="text" name="title" id="title" value="{{movie.Title}}" />
+				</div>
+				<div class="span1">
+					<a class="btn btn-medium btn-danger" href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Movie?')">Delete</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="year">Year: </label>
+					<input type="text" name="year" id="year" value="{{movie.Year}}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="runtime">Runtime: </label>
+					<input type="text" name="runtime" id="runtime" value="{{movie.Runtime}}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="imdb"><a href="{{imdb_link}}" target="_blank">IMDb: </a></label>
+					<input type="text" name="imdb" id="imdb" value="{{movie.ImdbId}}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="rottentomatoes"><a href="{{rt_link}}" target="_blank">Rotten Tomatoes: </a></label>
+					<input type="text" name="rottentomatoes" id="rottentomatoes" value="{{movie.RottenTomatoesId}}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="netflix"><a href="{{netflix_link}}" target="_blank">Netflix: </a></label>
+					<input type="text" name="netflix" id="netflix" value="{{movie.NetflixId}}" />
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<div class="span1 offset2">
+					<input class="btn btn-large btn-success" type="submit" value="Save" />
+				</div>
+				<div class="span1 offset1">
+					<a class="btn btn-large btn-danger" href="{{movie_url}}">Cancel</a>
+				</div>
+			</div>
+		</form>
+		{% if directors %}
+		<h2>Directors</h2>
+		<ul id="directors-list">
+			{% for director in directors %}
+				{% url webapp.views.property.person urlname=director.UrlName as director_url %}
+				<li><a href="{{director_url}}">{{director.Name}}</a> - <a href="{{director_url}}?remove=1&i={{movie.UrlTitle}}&t=0&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{director_url}}?edit=1">Edit</a> <a href="{{director_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+			<form action="{{movie_url}}?add=1&t=0" method="POST"> {% csrf_token %}
+				<li class="field">
+					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
+					<input type="submit" value="Add" />
+				</li>
+			</form>
+		</ul>
+		{% endif %}
+		{% if writers %}
+		<h2>Writers</h2>
+		<ul id="writers-list">
+			{% for writer in writers %}
+				{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
+				<li><a href="{{writer_url}}">{{writer.Name}}</a> - <a href="{{writer_url}}?remove=1&i={{movie.UrlTitle}}&t=1&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{writer_url}}?edit=1">Edit</a> <a href="{{writer_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+			<form action="{{movie_url}}?add=1&t=1" method="POST"> {% csrf_token %}
+				<li class="field">
+					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
+					<input type="submit" value="Add" />
+				</li>
+			</form>
+		</ul>
+		{% endif %}
+		{% if actors %}
+		<h2>Actors</h2>
+		<ul id="actors-list">
+			{% for actor in actors %}
+				{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
+				<li><a href="{{actor_url}}">{{actor.Name}}</a> - <a href="{{actor_url}}?remove=1&i={{movie.UrlTitle}}&t=2&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{actor_url}}?edit=1">Edit</a> <a href="{{actor_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+			{% endfor %}
+			<form action="{{movie_url}}?add=1&t=2" method="POST"> {% csrf_token %}
+				<li class="field">
+					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
+					<input type="submit" value="Add" />
+				</li>
+			</form>
+		</ul>
+		{% endif %}
+		{% if genres %}
+		<h2>Genres</h2>
+		<ul id="genres-list">
+			{% for genre in genres %}
+				{% url webapp.views.property.genre description=genre.Description as genre_url %}
+				<li><a href="{{genre_url}}">{{genre.Description}}</a> - <a href="{{genre_url}}?remove=1&i={{movie.UrlTitle}}&redirect=1" onclick="return confirmAction('Remove Genre?')">Remove</a> <a href="{{genre_url}}?edit=1">Edit</a> <a href="{{genre_url}}?delete=1" onclick="return confirmAction('Delete Genre?')">Delete</a></li>
+			{% endfor %}
+			<form action="{{movie_url}}?add=1&t=3" method="POST"> {% csrf_token %}
+				<li class="field">
+					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{genres_list|join:'","'}}"]' name="add" id="add" />
+					<input type="submit" value="Add" />
+				</li>
+			</form>
+		</ul>
+		{% endif %}
+	{% else %}
+		<div class="page-header">
+			<h1>invalid person</h1>
+		</div>
+	{% endif %}
+	{% include 'includes/footer.html' %}
+</body>
+</html>
