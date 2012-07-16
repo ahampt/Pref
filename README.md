@@ -14,9 +14,9 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 
 1. Install [Python](http://www.python.org/) 2.7.3+.
 
-2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), and [Oauth](http://code.daaku.org/python-oauth/) python modules in this order. Let me know if you need any of the packages as I think some of them have stopped being supported.
+2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), and [Oauth](http://code.daaku.org/python-oauth/) python modules in this order. Let me know if you need any of the packages as I think some of them have lost support.
 
-3. Install [Lamp](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/) if you don't have Apache and MySQL.
+3. Install Apache Stack for [Linux](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/), [Windowns](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
 
 4. Install [Django](https://www.djangoproject.com/download/) 1.4
 
@@ -32,7 +32,7 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
     * `git commit -m 'Local settings'`
 
 4. Configure the settings page to work with your system.
-    * Get your own API keys from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret). Put these keys into the appropriate place in the settings file.
+    * Get your own API keys if you wish (or leave as is) from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret). Put these keys into the appropriate place in the settings file.
     * Create DB using [phpmyadmin](http://127.0.0.1/phpmyadmin) with whatever name you want, just be sure to put the name of it here. (Set the collation to utf8_bin)
     * Set your own username and password for said database. Leave password blank ('') if no password.
     * Set the time zone correctly for you or leave alone.
@@ -40,7 +40,7 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
 
 5. cd into the project root directory (it has manage.py in it). Run the command:
-     `'python manage.py runserver'`
+     `python manage.py runserver`
 
 6. If you have any difficulties getting setup, let me know about and I may be able to help.
 
