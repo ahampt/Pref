@@ -16,7 +16,7 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 
 2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), and [Oauth](http://code.daaku.org/python-oauth/) python modules in this order. Let me know if you need any of the packages as I think some of them have lost support.
 
-3. Install Apache Stack for [Linux](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/), [Windowns](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
+3. Install Apache Stack for [Linux](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/), [Windows](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
 
 4. Install [Django](https://www.djangoproject.com/download/) 1.4
 
