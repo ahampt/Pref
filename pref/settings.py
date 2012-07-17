@@ -47,7 +47,7 @@ USE_I18N = True
 # calendars according to the current locale
 USE_L10N = True
 
-PREFIX_URL = 'projects/pref/'
+PREFIX_URL = ''
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
