@@ -25,25 +25,18 @@ Install Pref yourself to contrubute to the site and use it for your own organiza
 1. Download the project code from master or fork if you plan on possibly contributing later.
 
 2. Create your own settings file to preserve the global file.
-    * Copy settings.py where it lies and name the copy "new_settings.py" (**Make sure you use this exact filename**).
+    * Copy local_settings.template where it lies and name the copy "local_settings.py" (**Make sure you use this exact filename**).
 
-3. Inital commit.
-    * Modify manage.py to import new_settings instead of settings.
-    * `git commit -m 'Local settings'`
-
-4. Configure the settings page to work with your system.
-    * Get your own API keys if you wish (or leave as is) from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret). Put these keys into the appropriate place in the settings file.
+3. Configure the settings page to work with your system **All changes should be made in the local_settings.py file and not settings.py**.
+    * Get your own API keys from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret).
     * Create DB using [phpmyadmin](http://127.0.0.1/phpmyadmin) with whatever name you want, just be sure to put the name of it here. (Set the collation to utf8_bin)
     * Set your own username and password for said database. Leave password blank ('') if no password.
     * Set the time zone correctly for you or leave alone.
     * Change the PREFIX_URL as you see fit (This means to get to the site you will have to go to http://localhost/PREFIX_URL)
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
+    * Make any other changes that the template describes if desired.
 
-5. cd into the project root directory (it has manage.py in it). Run the command:
+4. cd into the project root directory (it has manage.py in it). Run the command:
      `python manage.py runserver`
 
-6. If you have any difficulties getting setup, let me know about and I may be able to help.
-
-7. Last commit before pull request.
-    * Modify manage.py to import settings instead of new_settings (Let me know if changes are needed to settings to run your code)
-    * `git commit -m 'Global settings'`
+5. If you have any difficulties getting setup, let me know about and I may be able to help.
