@@ -1,0 +1,123 @@
+import os
+relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x)
+
+# Required
+
+API_KEYS = {
+	'ROTTEN_TOMATOES': '',
+	'NETFLIX': '',
+	'NETFLIX_SECRET': ''
+}
+
+# Optional
+# 
+# Uncomment DEBUG and TEMPLATE_DEBUG for production environment
+# DEBUG = False
+# TEMPLATE_DEBUG = DEBUG
+# 
+# ACCESS_PASSWORD = ''
+# 
+# DATABASES = {
+# 	'default': {
+# 		'ENGINE': 'django.db.backends.sqlite3',	# Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+# 		'NAME': 'pref_db',			# Or path to database file if using sqlite3.
+# 		'USER': '',				# Not used with sqlite3.
+# 		'PASSWORD': '',				# Not used with sqlite3.
+# 		'HOST': '',				# Set to empty string for localhost. Not used with sqlite3.
+# 		'PORT': '',				# Set to empty string for default. Not used with sqlite3.
+# 	}
+# }
+# 
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+# TIME_ZONE = 'America/Chicago'
+# 
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+# LANGUAGE_CODE = 'en-us'
+# 
+# Use PREFIX_URL and STATIC_URL together
+# PREFIX_URL = ''
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+# STATIC_URL = '/' + PREFIX_URL + 'static/'
+# 
+# Make this unique, and don't share it with anybody. Can be generated online if don't want to use default
+# SECRET_KEY = ''
+# 
+# Uncomment LOGGING and below if changed LOGGING_DIR and uncommented it
+# LOGGING_DIR = '/var/log/pref/'
+# 
+# LOGGING = {
+#	'version': 1,
+#	'disable_existing_loggers': False,
+#	'formatters': {
+#		'verbose': {
+#			'format': '%(levelname)s %(asctime)s: %(message)s'
+#		}
+#	},
+#	'handlers': {
+#		'site': {
+#			'level': 'DEBUG',
+#			'class': 'logging.FileHandler',
+#			'formatter': 'verbose',
+#			'filename': LOGGING_DIR + 'site.log',
+#		},
+#		'profile': {
+#			'level': 'DEBUG',
+#			'class': 'logging.FileHandler',
+#			'formatter': 'verbose',
+#			'filename': LOGGING_DIR + 'profile.log'
+#		},
+#		'movie': {
+#			'level': 'DEBUG',
+#			'class': 'logging.FileHandler',
+#			'formatter': 'verbose',
+#			'filename': LOGGING_DIR + 'movie.log'
+#		},
+#		'property': {
+#			'level': 'DEBUG',
+#			'class': 'logging.FileHandler',
+#			'formatter': 'verbose',
+#			'filename': LOGGING_DIR + 'property.log'
+#		},
+#		'associate': {
+#			'level': 'DEBUG',
+#			'class': 'logging.FileHandler',
+#			'formatter': 'verbose',
+#			'filename': LOGGING_DIR + 'associate.log'
+#		}
+#	},
+#	'loggers': {
+#		'log.site': {
+#			'handlers': ['site'],
+#			'level': 'DEBUG',
+#			'propagate': False,
+#		},
+#		'log.profile': {
+#			'handlers': ['profile'],
+#			'level': 'DEBUG',
+#			'propagate': False,
+#		},
+#		'log.movie': {
+#			'handlers': ['movie'],
+#			'level': 'DEBUG',
+#			'propagate': False,
+#		},
+#		'log.property': {
+#			'handlers': ['property'],
+#			'level': 'DEBUG',
+#			'propagate': False,
+#		},
+#		'log.associate': {
+#			'handlers': ['associate'],
+#			'level': 'DEBUG',
+#			'propogate': False,
+#		}
+#	}
+# }

@@ -1,8 +1,10 @@
 # File Types
 
+*~
+.*.swp
 *.pyc
 *.log
 
 # Files
 
-new_settings.py
+local_settings.py
