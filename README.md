@@ -4,7 +4,7 @@ Rate, rank, and keep track of media consumed or desired to be consumed. This sit
 
 ## Access
 
-Access password is "movies" if you want to use the site. I have it locked to prevent spammers and unwanted access for now.
+Access password is "D8sJ#Wo4r@Gs0r^qzx" if you want to use the site. I have it locked to prevent spammers and unwanted access for now.
 
 ## Installation
 
