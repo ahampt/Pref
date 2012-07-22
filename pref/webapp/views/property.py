@@ -89,7 +89,7 @@ def person(request, urlname):
 				PATH: webapp.views.property.person urlname; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_id)
-				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
+				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' PersonId: ' + str(person.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
@@ -295,7 +295,7 @@ def genre(request, description):
 				PATH: webapp.views.property.genre description; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_id)
-				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
+				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' GenreId: ' + str(genre.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)

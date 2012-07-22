@@ -32,6 +32,7 @@ def register(request):
 			*****************************************************************************'''
 			# Defaults
 			profile = Profiles()
+			profile.FailedLoginAttempts = 0
 			profile.NumberOfStars = 4
 			profile.SubStars = 2
 			profile.StarImage = 0
@@ -139,8 +140,9 @@ def login(request):
 			# Don't waste time validating rediculously sized password strings
 			text_password = request.POST.get('password')
 			# Use check_password to compare hashed password correctly
-			if len(text_password) < 1000 and check_password(text_password, profile.Password):
+			if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS and len(text_password) < 1000 and check_password(text_password, profile.Password):
 				login_command(request, profile)
+				profile.FailedLoginAttempts = 0
 				profile.save()
 				profile_logger.info(profile.Username + ' Login Success')
 				set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 3)
@@ -148,15 +150,23 @@ def login(request):
 			# Redirect to login if currently logged in (as different profile) or to access otherwise
 			else:
 				profile_logger.info(profile.Username + ' Login Failure')
+				profile.FailedLoginAttempts = profile.FailedLoginAttempts + 1 if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS else profile.FailedLoginAttempts
+				profile.save()
 				logged_in_profile_id = request.session.get('auth_profile_id')
 				logged_in_profile_username = request.session.get('auth_profile_username')
 				logged_in_profile_admin = request.session.get('admin')
 				if not logged_in_profile_id:
 					access = request.session.get('auth_access')
 					if not access:
-						set_msg(request, 'Login Failed!', 'Username or Password not correct', 4)
+						if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
+							set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
+						else:
+							set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 5)
 						return redirect('webapp.views.site.access')
-				return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+				else:
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display login page if logged in or have access otherwise back to access
@@ -326,7 +336,7 @@ def view(request, username):
 				Send suggestion/comment/correction email and redirect to profile page
 				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
-				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
+				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)

@@ -7,6 +7,8 @@ TEMPLATE_DEBUG = DEBUG
 
 ACCESS_PASSWORD = 'movies'
 
+MAX_LOGIN_ATTEMPTS = 25
+
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',

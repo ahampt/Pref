@@ -29,7 +29,10 @@ EMAIL_PORT = 25
 # DEBUG = False
 # TEMPLATE_DEBUG = DEBUG
 # 
+# Make sure that this is strong enough that brute force will not work
 # ACCESS_PASSWORD = ''
+# 
+# MAX_LOGIN_ATTEMPTS = 25
 # 
 # DATABASES = {
 # 	'default': {

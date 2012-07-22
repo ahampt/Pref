@@ -8,6 +8,10 @@
 		<div class="alert alert-error">
 			Username or Password not correct
 		</div>
+	{% elif lockout_error %}
+		<div class="alert alert-error">
+			Account locked, contact administrator
+		</div>
 	{% endif %}
 	{% url webapp.views.profile.login as login_url %}
 	<form class="well" action="{{login_url}}" method="post"> {% csrf_token %}

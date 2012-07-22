@@ -7,6 +7,7 @@ class Profiles(models.Model):
 	Username = models.CharField(max_length=30,unique=True)
 	Email = models.CharField(max_length=254)
 	Password = models.CharField(max_length=81)
+	FailedLoginAttempts = models.PositiveSmallIntegerField()
 	IsAdmin = models.BooleanField()
 	NumberOfStars = models.PositiveSmallIntegerField()
 	SubStars = models.PositiveSmallIntegerField()

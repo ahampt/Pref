@@ -335,7 +335,7 @@ def view(request, urltitle):
 				PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_id)
-				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
+				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
