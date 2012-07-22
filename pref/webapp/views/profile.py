@@ -1,6 +1,8 @@
 import logging, random, sys
+from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
@@ -247,7 +249,7 @@ def view_list(request):
 
 # Profile tools including view, edit, delete, drag and drop rankings, view associated movies, and suggestions
 def view(request, username):
-	#try:
+	try:
 		logged_in_profile_id = request.session.get('auth_profile_id')
 		logged_in_profile_username = request.session.get('auth_profile_username')
 		logged_in_profile_admin = request.session.get('admin')
@@ -324,13 +326,13 @@ def view(request, username):
 				Send suggestion/comment/correction email and redirect to profile page
 				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
-				email_from = profile.Email if profile.Email else ''
+				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
 				if email_message:
 					# send email
-					pass
+					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
 				else:
 					pass
 				return redirect('webapp.views.profile.view', username=profile.Username)
@@ -469,9 +471,9 @@ def view(request, username):
 			*****************************************************************************'''
 			indicators = profile.StarIndicators.split(',')
 			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators}, RequestContext(request))
-	#except ObjectDoesNotExist:
-	#	raise Http404
-	#except Exception:
-	#	profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	except ObjectDoesNotExist:
+		raise Http404
+	except Exception:
+		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 

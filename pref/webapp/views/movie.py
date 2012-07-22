@@ -1,6 +1,8 @@
 import logging, math, random, sys, urllib
 from datetime import datetime
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
@@ -333,13 +335,13 @@ def view(request, urltitle):
 				PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_id)
-				email_from = profile.Email if profile.Email else ''
+				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
 				if email_message:
 					# send email
-					pass
+					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
 				else:
 					pass
 				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)

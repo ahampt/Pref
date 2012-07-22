@@ -1,5 +1,6 @@
 import logging, sys
 from django.conf import settings
+from django.core.mail import send_mail
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
@@ -70,13 +71,13 @@ def home(request):
 			except Exception:
 				pass
 			if profile:
-				email_from = profile.Email if profile.Email else ''
+				email_from = profile.Email if profile.Email else settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' Error'
 			email_message = request.POST.get('message') if request.POST.get('message') else None
 			set_msg(request, 'Thank you for your feedback!', 'We have recieved your input and will react to it appropriately.', 3)
 			if email_message:
 				# send email
-				pass
+				send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
 			else:
 				pass
 			return redirect('webapp.views.site.home')

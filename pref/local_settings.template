@@ -9,6 +9,20 @@ API_KEYS = {
 	'NETFLIX_SECRET': ''
 }
 
+EMAIL_HOST = '<smtp.*>'
+
+EMAIL_HOST_USER = '<username>'
+
+EMAIL_HOST_PASSWORD = '<password>'
+
+DEFAULT_FROM_EMAIL = '<from_address>'
+
+DEFAULT_TO_EMAIL = '<to_address>'
+
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+EMAIL_PORT = 25
+
 # Optional
 # 
 # Uncomment DEBUG and TEMPLATE_DEBUG for production environment
