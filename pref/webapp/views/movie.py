@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from webapp.tools.id_tools import wikipedia_id_from_movie, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
-from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, rottentomatoes_link_for_movie, netflix_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, update_rankings
+from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, rottentomatoes_link_for_movie, netflix_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, update_rankings, check_and_get_session_info
 from webapp.tools.search_tools import movies_from_term
 from webapp.models import Profiles, People, Genres, Movies, MovieProperties, ProfileMovies
 
@@ -20,12 +20,13 @@ associate_logger = logging.getLogger('log.associate')
 # Display movie list and tools for admin add movie, and add movie with ids
 def view_list(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
+		if not logged_in_profile_info['id']:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.site.login')
+			return redirect('webapp.views.profile.login')
 		if request.GET.get('add') and request.GET.get('i') and request.GET.get('r') and request.GET.get('n'):
 			'''*****************************************************************************
 			Add movie given imdb identifier (rotten tomatoes and netflix ids required as well) and redirect to movie page by way of association functions if success otherwise back to search with errors
@@ -56,8 +57,8 @@ def view_list(request):
 						raise ValidationError('')
 					movie.full_clean()
 					movie.save()
-					create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_username)
-					movie_logger.info(movie.UrlTitle + ' Create Success by '  + logged_in_profile_username)
+					create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
+					movie_logger.info(movie.UrlTitle + ' Create Success by '  + logged_in_profile_info['username'])
 					# Redirect to 'add association' function and add option 'seen' if already present
 					res = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					res['Location'] += '?assoc=1&add=1'
@@ -66,7 +67,7 @@ def view_list(request):
 					return res
 				except ValidationError as e:
 					urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
-					movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_username)
+					movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
 					error_msg = None
 					if has_error:
 						error_msg = {'Error' : error_text}
@@ -76,10 +77,10 @@ def view_list(request):
 							error_msg[key] = str(error_msg[key][0])
 					return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : error_msg}, RequestContext(request))
 			else:
-				movie_logger.info('Movie Create Failure by ' + logged_in_profile_username)
+				movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
 				res_dict['error_list'] = {'ImdbId' : res_dict['error_msg']}
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : res_dict.get('error_list')}, RequestContext(request))
-		elif logged_in_profile_admin and request.GET.get('add'):
+		elif logged_in_profile_info['admin'] and request.GET.get('add'):
 			if request.method == 'POST':
 				'''*****************************************************************************
 				Add movie given user input of imdb, netflix, and rottentomatoes urls or ids and redirect to movie page
@@ -91,18 +92,18 @@ def view_list(request):
 						movie = res_dict.get('movie')
 						movie.full_clean()
 						movie.save()
-						create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_username)
-						movie_logger.info(movie.UrlTitle + ' Create Success by ' + logged_in_profile_username)
+						create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
+						movie_logger.info(movie.UrlTitle + ' Create Success by ' + logged_in_profile_info['username'])
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					except ValidationError as e:
 						urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
-						movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_username)
+						movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
 						error_msg = e.message_dict
 						for key in error_msg:
 							error_msg[key] = str(error_msg[key][0])
 						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie)}, RequestContext(request))
 				else:
-					movie_logger.info('Movie Create Failure by ' + logged_in_profile_username)
+					movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
 					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'imdb_link' : imdb_link_for_movie(res_dict.get('movie')), 'rt_link' : rottentomatoes_link_for_movie(res_dict.get('movie')), 'netflix_link' : netflix_link_for_movie(res_dict.get('movie')), 'wikipedia_link' : wikipedia_link_for_movie(res_dict.get('movie'))}, RequestContext(request))
 			else:
 				'''*****************************************************************************
@@ -130,7 +131,7 @@ def view_list(request):
 			# Get all associations with logged in profile to correctly display links (seen later as well)
 			for movie in paginated_movies:
 				try:
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = movie)
+					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					movies.append((movie, True))
 				except Exception:
 					movies.append((movie, False))
@@ -142,10 +143,11 @@ def view_list(request):
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
+		if not logged_in_profile_info['id']:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
 			return redirect('webapp.views.profile.login')
 		movie = Movies.objects.get(UrlTitle=urltitle)
@@ -169,7 +171,7 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,add; MISC: none;
 					*****************************************************************************'''
 					watched = True if request.GET.get('seen') else False
-					profile = Profiles.objects.get(id=logged_in_profile_id)
+					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 					profile_movie = ProfileMovies(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
 					profile_movie.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
@@ -179,14 +181,14 @@ def view(request, urltitle):
 					Update association based on a user recently watching a movie and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,recent; MISC: none;
 					*****************************************************************************'''
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = movie)
+					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					# First time watching the specified movie
 					if not association.Watched:
 						association.Watched = True
 						association.CreatedAt = datetime.now()
 					association.UpdatedAt = datetime.now()
 					association.save()
-					associate_logger.info(logged_in_profile_username + ' Association with ' + movie.UrlTitle + ' Update Success')
+					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
 					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 3)
 				elif request.method == 'POST' and request.GET.get('update'):
 					'''*****************************************************************************
@@ -194,7 +196,7 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - assoc,update; MISC: none;
 					*****************************************************************************'''
 					rankings_changed = False
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = movie)
+					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					# If first time user watched the movie, update both times
 					if not association.Watched and request.POST.get('watched') == 'Watched':
 						association.CreatedAt = datetime.now()
@@ -212,7 +214,7 @@ def view(request, urltitle):
 						if request.POST.get('rating_rated') and request.POST.get('rating_rated') != 'false':
 							# Handle bad float coercion by ignoring the rating
 							try:
-								profile = Profiles.objects.get(id=logged_in_profile_id)
+								profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 								association.Rating = int(math.ceil(float(request.POST.get('rating_rated')) * int(math.ceil(100 / profile.NumberOfStars))))
 							except Exception:
 								pass
@@ -225,21 +227,21 @@ def view(request, urltitle):
 						association.Source = request.POST.get('source')
 					association.Accessible = request.POST.get('accessible') == 'Accessible'
 					association.save()
-					associate_logger.info(logged_in_profile_username + ' Association with ' + movie.UrlTitle + ' Update Success')
+					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
 					# Update rankings if ranking of movie was altered in some way
 					if rankings_changed:
-						update_rankings(logged_in_profile_id)
+						update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 3)
 				elif request.GET.get('remove'):
 					'''*****************************************************************************
 					Delete association and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,remove; MISC: none;
 					*****************************************************************************'''
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = movie)
+					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					association.delete()
-					associate_logger.info(logged_in_profile_username + ' Disassociated ' + movie.UrlTitle + ' Success')
+					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					# Fill in the gap in rankings
-					update_rankings(logged_in_profile_id)
+					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 5)
 			except ObjectDoesNotExist:
 				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 5)
@@ -249,7 +251,7 @@ def view(request, urltitle):
 			return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rank'):
 			try:
-				profile = Profiles.objects.get(id=logged_in_profile_id)
+				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				association = ProfileMovies.objects.get(ProfileId = profile, MovieId = movie, Watched=True)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 				associations = ProfileMovies.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
@@ -280,7 +282,7 @@ def view(request, urltitle):
 								assoc.Rank += 1
 								assoc.save()
 						association.save()
-						associate_logger.info(logged_in_profile_username + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
+						associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
 						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number ' + str(association.Rank) + ' out of ' + str(associations.count() + 1) + '.', 3)
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					# Else continue ranking by finding new comparison movie
@@ -299,7 +301,7 @@ def view(request, urltitle):
 					if associations.count() == 0:
 						association.Rank = 1
 						association.save()
-						associate_logger.info(logged_in_profile_username + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
+						associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
 						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number 1 out of 1.', 3)
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					min = 0
@@ -318,11 +320,11 @@ def view(request, urltitle):
 			PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - rank; MISC: none;
 			*****************************************************************************'''
 			try:
-				association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = movie)
+				association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 				association.Rank = None
 				association.save()
-				associate_logger.info(logged_in_profile_username + ' Association with ' + movie.UrlTitle + ' Reset Rank Success')
-				update_rankings(logged_in_profile_id)
+				associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Reset Rank Success')
+				update_rankings(logged_in_profile_info['id'])
 			except Exception:
 				pass
 			res = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
@@ -334,7 +336,7 @@ def view(request, urltitle):
 				Send suggestion/comment/correction email and redirect to movie page
 				PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
-				profile = Profiles.objects.get(id=logged_in_profile_id)
+				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
@@ -351,7 +353,7 @@ def view(request, urltitle):
 				PATH: webapp.views.movie.view urltitle; METHOD: not post; PARAMS: get - suggestion; MISC: none;
 				*****************************************************************************'''
 				return render_to_response('site/suggestion_form.html', {'header' : generate_header_dict(request, 'Suggestion/Comment/Correction'), 'movie' : movie}, RequestContext(request))
-		elif logged_in_profile_admin and request.GET.get('edit'):
+		elif logged_in_profile_info['admin'] and request.GET.get('edit'):
 			if request.method == 'POST':
 				'''*****************************************************************************
 				Save changes made to movie and redirect to movie page
@@ -366,16 +368,16 @@ def view(request, urltitle):
 					movie.NetflixId = request.POST.get('netflix')
 					movie.full_clean()
 					movie.save()
-					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_username)
+					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
 					set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 3)
 					return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 				except ValidationError as e:
-					movie_logger.info(movie.UrlTitle + ' Update Failure by ' + logged_in_profile_username)
+					movie_logger.info(movie.UrlTitle + ' Update Failure by ' + logged_in_profile_info['username'])
 					error_msg = e.message_dict
 					for key in error_msg:
 						error_msg[key] = str(error_msg[key][0])
 					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
-			elif logged_in_profile_admin and request.GET.get('delete'):
+			elif logged_in_profile_info['admin'] and request.GET.get('delete'):
 				'''*****************************************************************************
 				Delete movie and redirect to home
 				PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile.IsAdmin;
@@ -391,22 +393,22 @@ def view(request, urltitle):
 							continue
 						else:
 							person.delete()
-							property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_username)
+							property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
 					elif property.Type == 3:
 						genre = Genres.objects.get(id=property.PropertyId)
 						if genre_is_relevant(genre):
 							continue
 						else:
 							genre.delete()
-							property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_username)
+							property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 				# Delete all profile associations (Update rankings afterwards)
 				for association in ProfileMovies.objects.select_related().filter(MovieId=movie):
 					association.delete()
-					associate_logger.info(logged_in_profile_username + ' Disassociated ' + movie.UrlTitle + ' Success')
+					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					update_rankings(association.ProfileId)
 				# Delete movie
 				movie.delete()
-				movie_logger.info(movie.UrlTitle + ' Delete Success by ' + logged_in_profile_username)
+				movie_logger.info(movie.UrlTitle + ' Delete Success by ' + logged_in_profile_info['username'])
 				set_msg(request, 'Movie Deleted!', movie.Title + ' has successfully been deleted.', 5)
 				return redirect('webapp.views.site.home')
 			else:
@@ -415,7 +417,7 @@ def view(request, urltitle):
 				PATH: webapp.views.movie.view urltitle; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
 				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
-		elif logged_in_profile_admin and request.GET.get('add') and request.method == 'POST':
+		elif logged_in_profile_info['admin'] and request.GET.get('add') and request.method == 'POST':
 			'''*****************************************************************************
 			Create property association with movie and redirect to edit page
 			PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - add; MISC: logged_in_profile.IsAdmin;
@@ -431,7 +433,7 @@ def view(request, urltitle):
 				acts.append(value)
 			elif type == 3:
 				gens.append(value)
-			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_username)
+			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
 			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 3)
 			properties = MovieProperties.objects.filter(MovieId=movie)
 			directors, writers, actors, genres = [], [], [], []
@@ -454,7 +456,7 @@ def view(request, urltitle):
 			profile = None
 			indicators = []
 			try:
-				profile = Profiles.objects.get(id=logged_in_profile_id)
+				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				association = ProfileMovies.objects.get(ProfileId = profile, MovieId = movie)
 				# Scale rating to profile preference (i.e. from percentage rating to n stars)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
@@ -471,12 +473,13 @@ def view(request, urltitle):
 # Display search results
 def search(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
+		if not logged_in_profile_info['id']:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.movie.login')
+			return redirect('webapp.views.profile.login')
 		if request.GET.get('t'):
 			'''*****************************************************************************
 			Search for movie and display movie page or search results page appropriately
@@ -508,7 +511,7 @@ def search(request):
 							found = True
 							if (imdb_movie, False) not in old_movies and (imdb_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = imdb_movie)
+									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = imdb_movie)
 									old_movies.append((imdb_movie, True))
 								except Exception:
 									old_movies.append((imdb_movie, False))
@@ -520,7 +523,7 @@ def search(request):
 							found = True
 							if (netflix_movie, False) not in old_movies and (netflix_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = netflix_movie)
+									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = netflix_movie)
 									old_movies.append((netflix_movie, True))
 								except Exception:
 									old_movies.append((netflix_movie, False))
@@ -532,7 +535,7 @@ def search(request):
 							found = True
 							if (rt_movie, False) not in old_movies and (rt_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = rt_movie)
+									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = rt_movie)
 									old_movies.append((rt_movie, True))
 								except Exception:
 									old_movies.append((rt_movie, False))

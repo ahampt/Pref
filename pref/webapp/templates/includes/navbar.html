@@ -1,8 +1,8 @@
 	<div class="navbar navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">
-				{% url webapp.views.site.home as home_url %}
-				<a class="brand" href="{{home_url}}">Pref</a>
+				{% url webapp.views.site.access as access_url %}
+				<a class="brand" href="{{access_url}}">Pref</a>
 				{% if request.session.auth_profile_username or request.session.auth_access %}
 					<div class="btn-group pull-right">
 						{% if request.session.auth_profile_username %}

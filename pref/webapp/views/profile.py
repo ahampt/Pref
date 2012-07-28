@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg
+from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info
 from webapp.models import Profiles, Movies, ProfileMovies
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -17,14 +17,10 @@ associate_logger = logging.getLogger('log.associate')
 # User registration/Profile creation
 def register(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			access = request.session.get('auth_access')
-			if not access:
-				set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-				return redirect('webapp.views.site.access')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+		if permission_response != True:
+			return permission_response
 		if request.method == 'POST':
 			'''*****************************************************************************
 			Create profile and redirect to home on success or back to register on failure
@@ -152,45 +148,35 @@ def login(request):
 				profile_logger.info(profile.Username + ' Login Failure')
 				profile.FailedLoginAttempts = profile.FailedLoginAttempts + 1 if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS else profile.FailedLoginAttempts
 				profile.save()
-				logged_in_profile_id = request.session.get('auth_profile_id')
-				logged_in_profile_username = request.session.get('auth_profile_username')
-				logged_in_profile_admin = request.session.get('admin')
-				if not logged_in_profile_id:
-					access = request.session.get('auth_access')
-					if not access:
-						if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-							set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
-						else:
-							set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 5)
-						return redirect('webapp.views.site.access')
+				logged_in_profile_info = { }
+				permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+				if permission_response == True:
+					if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
+						return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+					else:
+						return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
 				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+					set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
 				else:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
+					set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 5)
+				return redirect('webapp.views.site.access')
 		else:
 			'''*****************************************************************************
 			Display login page if logged in or have access otherwise back to access
 			PATH: webapp.views.profile.login; METHOD: not post; PARAMS: none; MISC: none;
 			*****************************************************************************'''
-			logged_in_profile_id = request.session.get('auth_profile_id')
-			logged_in_profile_username = request.session.get('auth_profile_username')
-			logged_in_profile_admin = request.session.get('admin')
-			if not logged_in_profile_id:
-				access = request.session.get('auth_access')
-				if not access:
-					set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-					return redirect('webapp.views.site.access')
+			logged_in_profile_info = { }
+			permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+			if permission_response != True:
+				return permission_response
 			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login')}, RequestContext(request))
 	except ObjectDoesNotExist:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			access = request.session.get('auth_access')
-			if not access:
-				set_msg(request, 'Login Failed!', 'Username or Password not correct', 4)
-				return redirect('webapp.views.site.access')
-		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+		if permission_response == True:
+			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+		set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
+		return redirect('webapp.views.site.access')
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
@@ -198,12 +184,10 @@ def login(request):
 # Logout user and redirect to home
 def logout(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.profile.login')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
 		'''*****************************************************************************
 		Logout any logged in profile and redirect to home page (five minutes access given)
 		PATH: webapp.views.profile.logout; METHOD: none; PARAMS: none; MISC: none;
@@ -219,12 +203,10 @@ def logout(request):
 # Display profile list and provied alternative way to registration page
 def view_list(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.profile.login')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
 		# Note genre and person don't have this option because they have to be added through a movie to be relevant
 		if request.GET.get('add'):
 			'''*****************************************************************************
@@ -260,19 +242,17 @@ def view_list(request):
 # Profile tools including view, edit, delete, drag and drop rankings, view associated movies, and suggestions
 def view(request, username):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.profile.login')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
 		profile = Profiles.objects.get(Username=username)
-		admin_rights = logged_in_profile_id and (logged_in_profile_id == profile.id or logged_in_profile_admin)
-		if logged_in_profile_id == profile.id and request.GET.get('rank'):
+		admin_rights = logged_in_profile_info['id'] and (logged_in_profile_info['id'] == profile.id or logged_in_profile_info['admin'])
+		if logged_in_profile_info['id'] == profile.id and request.GET.get('rank'):
 			if request.method == 'POST' and request.POST.get('hiddenMovieIds'):
 				'''*****************************************************************************
 				Save drag and drop ranks and redirect back to drag and drop page
-				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get/post - rank/hiddenMovieIds; MISC: logged_in_profile_username = username;
+				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get/post - rank/hiddenMovieIds; MISC: logged_in_profile_info['username'] = username;
 				*****************************************************************************'''
 				movies, unranked_movies = [], []
 				ids_string = request.POST.get('hiddenMovieIds')
@@ -282,14 +262,14 @@ def view(request, username):
 					# If unranked, ignore
 					if ids[i][0] == "u":
 						try:
-							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = ids[i][1:])
+							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i][1:])
 							unranked_movies.append(associated_movie.MovieId)
 						except Exception:
 							continue
 					# Else, update rank according to iteration number of for loop
 					else:
 						try:
-							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_id, MovieId = ids[i])
+							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i])
 							if associated_movie.Rank != i+1:
 								associated_movie.Rank = i+1
 								associated_movie.save()
@@ -303,11 +283,11 @@ def view(request, username):
 			else:
 				'''*****************************************************************************
 				Display drag and drop page
-				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - rank; MISC: logged_in_profile_username = username;
+				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - rank; MISC: logged_in_profile_info['username'] = username;
 				*****************************************************************************'''
 				movies, unranked_movies = [], []
 				# Get all ranked and unranked (watched with no rank) titles and sort by rank followed by descending year followed by title (same for almost all lists)
-				associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_id, Watched = True).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+				associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], Watched = True).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
 				for assoc in associated_movies:
 					if assoc.Rank:
 						movies.append(assoc.MovieId)
@@ -321,7 +301,7 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
 			movies, unranked_movies, unseen_movies = [], [], []
-			associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_id).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+			associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_info['id']).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
 			for assoc in associated_movies:
 				if assoc.Rank:
 					movies.append(assoc.MovieId)
@@ -356,7 +336,7 @@ def view(request, username):
 			if request.method == 'POST':
 				'''*****************************************************************************
 				Save changes made to profile and redirect to profile page
-				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get - edit; MISC: logged_in_profile_username = username OR logged_in_profile.IsAdmin;
+				PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get - edit; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
 				*****************************************************************************'''
 				has_error = False
 				error_text = None
@@ -382,7 +362,7 @@ def view(request, username):
 								indicators += str(i + (float(j + 1) / profile.SubStars))
 							indicators += ','
 					profile.StarIndicators = indicators[0:-1]
-					if logged_in_profile_admin:
+					if logged_in_profile_info['admin']:
 						profile.IsAdmin = request.POST.get('admin') == 'IsAdmin'
 					# Validate password same as before
 					if len(request.POST.get('password')) >= 1000:
@@ -429,7 +409,7 @@ def view(request, username):
 							profile.Password = ''
 					profile.full_clean()
 					profile.save()
-					profile_logger.info(profile.Username + ' Update Success by ' + logged_in_profile_username)
+					profile_logger.info(profile.Username + ' Update Success by ' + logged_in_profile_info['username'])
 					set_msg(request, 'Profile Updated!', 'Your profile has successfully been updated.', 3)
 					return redirect('webapp.views.profile.view', username=profile.Username)
 				except ValidationError as e:
@@ -453,7 +433,7 @@ def view(request, username):
 			else:
 				'''*****************************************************************************
 				Display edit page
-				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile_username = username OR logged_in_profile.IsAdmin;
+				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
 				*****************************************************************************'''
 				rate_range = []
 				for i in range(profile.NumberOfStars):
@@ -463,15 +443,15 @@ def view(request, username):
 		elif admin_rights and request.GET.get('delete'):
 			'''*****************************************************************************
 			Delete profile and redirect to home
-			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile_username = username OR logged_in_profile.IsAdmin;
+			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
 			*****************************************************************************'''
-			if logged_in_profile_id == profile.id:
+			if logged_in_profile_info['id'] == profile.id:
 				prof = logout_command(request)
 				profile_logger.info(prof.Username + ' Logout Success')
 			# Delete all associations
 			ProfileMovies.objects.filter(ProfileId=profile).delete()
 			profile.delete()
-			profile_logger.info(profile.Username + ' Delete Success by ' + logged_in_profile_username)
+			profile_logger.info(profile.Username + ' Delete Success by ' + logged_in_profile_info['username'])
 			set_msg(request, 'Goodbye ' + profile.Username + '!', 'Your profile has successfully been deleted.', 5)
 			return redirect('webapp.views.site.home')
 		else:

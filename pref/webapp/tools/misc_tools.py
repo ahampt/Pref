@@ -1,5 +1,6 @@
 import logging
 from django.conf import settings
+from django.shortcuts import redirect
 from webapp.models import Profiles, Movies, People, Genres, MovieProperties, ProfileMovies
 
 profile_logger = logging.getLogger('log.profile')
@@ -168,15 +169,21 @@ def login_command(request, profile):
 		pass
 	return profile
 
-# Return logged in profile
-def get_logged_in_profile(request):
-	try:
-		if request.session.get('auth_profile_id'):
-			return Profiles.objects.get(id=request.session['auth_profile_id'])
-		else:
-			return None
-	except:
-		return None
+# Return logged in profile information in a dictionary otherwise redirect
+def check_and_get_session_info(request, logged_in_profile_info, check_access):
+	if request.session.get('auth_profile_id'):
+		logged_in_profile_info['id'] = request.session.get('auth_profile_id')
+		logged_in_profile_info['username'] = request.session.get('auth_profile_username')
+		logged_in_profile_info['admin'] = request.session.get('admin')
+		return True
+	elif check_access and request.session.get('auth_access'):
+		return True
+	elif check_access:
+		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+		return redirect('webapp.views.site.access')
+	else:
+		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+		return redirect('webapp.views.profile.login')
 
 # Return true if property is associated with any movies
 def person_is_relevant(person):

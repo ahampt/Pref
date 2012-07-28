@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import generate_header_dict, set_msg
+from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info
 from webapp.models import Profiles
 
 site_logger = logging.getLogger('log.site')
@@ -28,7 +28,7 @@ def access(request):
 				set_msg(request, 'Access Granted!', 'Welcome, you have successfully accessed the site.', 3)
 				return redirect('webapp.views.site.home')
 			else:
-				set_msg(request, 'Access Denied!', 'Password not correct', 4)
+				set_msg(request, 'Access Denied!', 'Password not correct', 5)
 				return redirect('webapp.views.site.access')
 		else:
 			'''*****************************************************************************
@@ -36,14 +36,11 @@ def access(request):
 			PATH: webapp.views.site.access; METHOD: not post; PARAMS: none; MISC: none;
 			*****************************************************************************'''
 			# Mandatory check in every function that checks if user is logged in (or has access for a few pages like this one)
-			logged_in_profile_id = request.session.get('auth_profile_id')
-			logged_in_profile_username = request.session.get('auth_profile_username')
-			logged_in_profile_admin = request.session.get('admin')
-			if not logged_in_profile_id:
-				access = request.session.get('auth_access')
-				if not access:
-					return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
-			return redirect('webapp.views.site.home')
+			logged_in_profile_info = { }
+			permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+			if permission_response == True:
+				return redirect('webapp.views.site.home')
+			return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
 
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
@@ -52,14 +49,10 @@ def access(request):
 # Landing page after login or profile creation
 def home(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			access = request.session.get('auth_access')
-			if not access:
-				set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-				return redirect('webapp.views.site.access')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+		if permission_response != True:
+			return permission_response
 		if request.GET.get('error') and request.method == 'POST':
 			'''*****************************************************************************
 			Error page will submit user email here (could be delegated to an error function)
@@ -67,7 +60,7 @@ def home(request):
 			*****************************************************************************'''
 			profile, email_from, email_subject = None, settings.DEFAULT_FROM_EMAIL, 'Error'
 			try:
-				profile = Profiles.objects.get(id=logged_in_profile_id)
+				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 			except Exception:
 				pass
 			if profile:
@@ -92,12 +85,10 @@ def home(request):
 # Show users how to get started using the website
 def discovery(request):
 	try:
-		logged_in_profile_id = request.session.get('auth_profile_id')
-		logged_in_profile_username = request.session.get('auth_profile_username')
-		logged_in_profile_admin = request.session.get('admin')
-		if not logged_in_profile_id:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.profile.login')
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		if permission_response != True:
+			return permission_response
 		'''*****************************************************************************
 		Display discovery page
 		PATH: webapp.views.site.discovery; METHOD: none; PARAMS: none; MISC: none;
@@ -111,18 +102,16 @@ def discovery(request):
 def about(request):
 	try:
 		if request.GET.get('suggestion'):
-			logged_in_profile_id = request.session.get('auth_profile_id')
-			logged_in_profile_username = request.session.get('auth_profile_username')
-			logged_in_profile_admin = request.session.get('admin')
-			if not logged_in_profile_id:
-				set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-				return redirect('webapp.views.profile.login')
+			logged_in_profile_info = { }
+			permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+			if permission_response != True:
+				return permission_response
 			if request.method == 'POST':
 				'''*****************************************************************************
 				Send suggestion/comment/correction email and redirect to home page
 				PATH: webapp.views.site.about; METHOD: post; PARAMS: none; MISC: none;
 				*****************************************************************************'''
-				profile = Profiles.objects.get(id=logged_in_profile_id)
+				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' 404'
 				email_message = request.POST.get('message') if request.POST.get('message') else None
