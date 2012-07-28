@@ -34,6 +34,9 @@ EMAIL_PORT = 25
 # 
 # MAX_LOGIN_ATTEMPTS = 25
 # 
+# Google analytics code to track usage of the site
+# TRACKING_CODE = ''
+# 
 # DATABASES = {
 # 	'default': {
 # 		'ENGINE': 'django.db.backends.sqlite3',	# Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.

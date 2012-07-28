@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from webapp.models import Profiles, Movies, People, Genres, MovieProperties, ProfileMovies
 
 profile_logger = logging.getLogger('log.profile')
@@ -91,7 +92,7 @@ def wikipedia_link_for_movie(movie):
 
 # Return dictionary for use in the header template (called in every response)
 def generate_header_dict(request, header_text):
-	msg_heading, msg, color = None, None, None
+	msg_heading, msg, color, tracking_code = None, None, None, None
 	try:
 		# Expand session for another hour
 		request.session.set_expiry(3600)
@@ -126,7 +127,7 @@ def generate_header_dict(request, header_text):
 	search_list = []
 	for title, year in movies_titles_years:
 		search_list.append(str(title) + ' (' + str(year) + ')')
-	return {'msg_dict' : {'msg_heading' : msg_heading, 'msg' : msg, 'color' : color}, 'header_text' : header_text, 'search_list' : search_list}
+	return {'msg_dict' : {'msg_heading' : msg_heading, 'msg' : msg, 'color' : color}, 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
 
 # Set alert message data (title, content, color)
 def set_msg(request, msg_heading, msg, msg_color_enum):

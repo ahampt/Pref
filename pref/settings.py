@@ -9,6 +9,8 @@ ACCESS_PASSWORD = 'movies'
 
 MAX_LOGIN_ATTEMPTS = 25
 
+TRACKING_CODE = ''
+
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',
