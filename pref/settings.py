@@ -67,7 +67,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	'django.core.context_processors.media',
 	'django.core.context_processors.static',
 	"django.core.context_processors.tz",
-	'django.contrib.messages.context_processors.messages'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,10 +84,7 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
 	'django.contrib.contenttypes',
-	'django.contrib.messages',
 	'django.contrib.sessions',
-	'django.contrib.sites',
-	'django.contrib.staticfiles',
 	'pref.webapp',
 )
 

@@ -25,10 +25,11 @@ def access(request):
 				request.session['auth_access'] = True
 				# Five minutes to create a profile or login
 				request.session.set_expiry(300)
-				set_msg(request, 'Access Granted!', 'Welcome, you have successfully accessed the site.', 3)
+				# Message to display to user (levels: default, primary, info, success, warning, danger, inverse
+				set_msg(request, 'Access Granted!', 'Welcome, you have successfully accessed the site.', 'success')
 				return redirect('webapp.views.site.home')
 			else:
-				set_msg(request, 'Access Denied!', 'Password not correct', 5)
+				set_msg(request, 'Access Denied!', 'Password not correct', 'danger')
 				return redirect('webapp.views.site.access')
 		else:
 			'''*****************************************************************************
@@ -66,7 +67,7 @@ def home(request):
 			if profile:
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' Error'
 			email_message = request.POST.get('message') if request.POST.get('message') else None
-			set_msg(request, 'Thank you for your feedback!', 'We have recieved your input and will react to it appropriately.', 3)
+			set_msg(request, 'Thank you for your feedback!', 'We have recieved your input and will react to it appropriately.', 'success')
 			if email_message:
 				# send email
 				send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
@@ -115,7 +116,7 @@ def about(request):
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' 404'
 				email_message = request.POST.get('message') if request.POST.get('message') else None
-				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
+				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
 					# send email
 					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)

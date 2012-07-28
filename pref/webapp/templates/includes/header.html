@@ -3,8 +3,8 @@
 		<h1>{{header.header_text}}</h1>
 	</div>
 	{% if header.msg_dict.msg %}
-		<div class="alert alert-block alert-{{header.msg_dict.color}}">
-			<h3 class="alert-heading">{{header.msg_dict.msg_heading}}</h3>
+		<div class="alert alert-block alert-{{header.msg_dict.lvl}}">
+			<h3 class="alert-heading">{{header.msg_dict.head}}</h3>
 			{{header.msg_dict.msg}}
 		</div>
 	{% endif %}

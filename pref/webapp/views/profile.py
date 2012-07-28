@@ -94,7 +94,7 @@ def register(request):
 				# Login the new profile
 				login_command(request, profile)
 				profile_logger.info(profile.Username + ' Login Success')
-				set_msg(request, 'Welcome ' + profile.Username + '!', 'Your profile has successfully been created.', 3)
+				set_msg(request, 'Welcome ' + profile.Username + '!', 'Your profile has successfully been created.', 'success')
 				return render_to_response('movie/discovery.html', {'header' : generate_header_dict(request, 'Now What?')}, RequestContext(request))
 			# Failed validation (Note for all future cases like this)
 			except ValidationError as e:
@@ -141,7 +141,7 @@ def login(request):
 				profile.FailedLoginAttempts = 0
 				profile.save()
 				profile_logger.info(profile.Username + ' Login Success')
-				set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 3)
+				set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 'success')
 				return redirect('webapp.views.site.home')
 			# Redirect to login if currently logged in (as different profile) or to access otherwise
 			else:
@@ -156,9 +156,9 @@ def login(request):
 					else:
 						return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
 				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-					set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
+					set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
 				else:
-					set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 5)
+					set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 'danger')
 				return redirect('webapp.views.site.access')
 		else:
 			'''*****************************************************************************
@@ -175,7 +175,7 @@ def login(request):
 		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
 		if permission_response == True:
 			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
-		set_msg(request, 'Login Failed!', 'Username or Password not correct', 5)
+		set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
 		return redirect('webapp.views.site.access')
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
@@ -194,7 +194,7 @@ def logout(request):
 		*****************************************************************************'''
 		profile = logout_command(request)
 		profile_logger.info(profile.Username + ' Logout Success')
-		set_msg(request, 'Tata For Now ' + profile.Username + '!', 'You have successfully logged out.', 4)
+		set_msg(request, 'Tata For Now ' + profile.Username + '!', 'You have successfully logged out.', 'warning')
 		return redirect('webapp.views.site.home')
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
@@ -278,7 +278,7 @@ def view(request, username):
 						except Exception:
 							continue
 				size = len(movies) + len(unranked_movies)
-				set_msg(request, 'Rankings Updated!', 'Your rankings have successfully been updated.', 3)
+				set_msg(request, 'Rankings Updated!', 'Your rankings have successfully been updated.', 'success')
 				return render_to_response('profile/dnd_rank.html', {'header' : generate_header_dict(request, profile.Username + '\'s Rankings'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'size' : size}, RequestContext(request))
 			else:
 				'''*****************************************************************************
@@ -319,7 +319,7 @@ def view(request, username):
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
-				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
+				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
 					# send email
 					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
@@ -410,7 +410,7 @@ def view(request, username):
 					profile.full_clean()
 					profile.save()
 					profile_logger.info(profile.Username + ' Update Success by ' + logged_in_profile_info['username'])
-					set_msg(request, 'Profile Updated!', 'Your profile has successfully been updated.', 3)
+					set_msg(request, 'Profile Updated!', 'Your profile has successfully been updated.', 'success')
 					return redirect('webapp.views.profile.view', username=profile.Username)
 				except ValidationError as e:
 					username = profile.Username if profile.Username and profile.Username.encode('ascii', 'replace').isalnum() else 'Anonymous'
@@ -452,7 +452,7 @@ def view(request, username):
 			ProfileMovies.objects.filter(ProfileId=profile).delete()
 			profile.delete()
 			profile_logger.info(profile.Username + ' Delete Success by ' + logged_in_profile_info['username'])
-			set_msg(request, 'Goodbye ' + profile.Username + '!', 'Your profile has successfully been deleted.', 5)
+			set_msg(request, 'Goodbye ' + profile.Username + '!', 'Your profile has successfully been deleted.', 'danger')
 			return redirect('webapp.views.site.home')
 		else:
 			'''*****************************************************************************

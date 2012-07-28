@@ -1,5 +1,6 @@
 import logging
 from django.conf import settings
+from django.contrib import messages
 from django.shortcuts import redirect
 from webapp.models import Profiles, Movies, People, Genres, MovieProperties, ProfileMovies
 
@@ -102,33 +103,17 @@ def generate_links_dict(movie):
 
 # Return dictionary for use in the header template (called in every response)
 def generate_header_dict(request, header_text):
-	msg_heading, msg, color, tracking_code = None, None, None, None
+	msg_head, msg, msg_lvl, tracking_code = None, None, None, None
 	try:
 		# Expand session for another hour
 		request.session.set_expiry(3600)
 		# Set alert data if present
-		msg_heading = request.session['msg_heading']
+		msg_head = request.session['msg_head']
 		msg = request.session['msg']
-		msg_color_enum = request.session['msg_color_enum']
-		if msg_color_enum == 0:
-			color = 'default'
-		elif msg_color_enum == 1:
-			color = 'primary'
-		elif msg_color_enum == 2:
-			color = 'info'
-		elif msg_color_enum == 3:
-			color = 'success'
-		elif msg_color_enum == 4:
-			color = 'warning'
-		elif msg_color_enum == 5:
-			color = 'danger'
-		elif msg_color_enum == 6:
-			color = 'inverse'
-		else:
-			color = 'default'
-		del request.session['msg_heading']
+		msg_lvl = request.session['msg_lvl']
+		del request.session['msg_head']
 		del request.session['msg']
-		del request.session['msg_color_enum']
+		del request.session['msg_lvl']
 	# Ignore otherwise
 	except KeyError:
 		pass
@@ -137,13 +122,13 @@ def generate_header_dict(request, header_text):
 	search_list = []
 	for title, year in movies_titles_years:
 		search_list.append(str(title) + ' (' + str(year) + ')')
-	return {'msg_dict' : {'msg_heading' : msg_heading, 'msg' : msg, 'color' : color}, 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
+	return {'msg_dict' : {'head' : msg_head, 'msg' : msg, 'lvl' : msg_lvl}, 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
 
 # Set alert message data (title, content, color)
-def set_msg(request, msg_heading, msg, msg_color_enum):
-	request.session['msg_heading'] = msg_heading
+def set_msg(request, msg_head, msg, msg_lvl):
+	request.session['msg_head'] = msg_head
 	request.session['msg'] = msg
-	request.session['msg_color_enum'] = msg_color_enum
+	request.session['msg_lvl'] = msg_lvl
 
 # Logout and return profile of user
 def logout_command(request):
@@ -188,10 +173,10 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access):
 	elif check_access and request.session.get('auth_access'):
 		return True
 	elif check_access:
-		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 		return redirect('webapp.views.site.access')
 	else:
-		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 		return redirect('webapp.views.profile.login')
 
 # Return true if property is associated with any movies

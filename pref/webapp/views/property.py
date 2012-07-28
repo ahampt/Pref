@@ -88,7 +88,7 @@ def person(request, urlname):
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' PersonId: ' + str(person.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
-				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
+				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
 					# send email
 					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
@@ -112,7 +112,7 @@ def person(request, urlname):
 					person.full_clean()
 					person.save()
 					property_logger.info(person.UrlName + ' Update Success by ' + logged_in_profile_info['username'])
-					set_msg(request, 'Person Updated!', person.Name + ' has successfully been updated.', 3)
+					set_msg(request, 'Person Updated!', person.Name + ' has successfully been updated.', 'success')
 					return redirect('webapp.views.property.person', urlname=person.UrlName)
 				except ValidationError as e:
 					property_logger.info(person.UrlName + ' Update Failure by ' + logged_in_profile_info['username'])
@@ -144,7 +144,7 @@ def person(request, urlname):
 			# Delete person
 			person.delete()
 			property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
-			set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted.', 5)
+			set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted.', 'danger')
 			return redirect('webapp.views.site.home')
 		elif logged_in_profile_info['admin'] and request.GET.get('add') and request.method == 'POST':
 			'''*****************************************************************************
@@ -168,7 +168,7 @@ def person(request, urlname):
 					written_movies.append(prop.MovieId)
 				for prop in acted_properties:
 					acted_movies.append(prop.MovieId)
-				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to ' + person.Name + '\'s career.', 3)
+				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to ' + person.Name + '\'s career.', 'success')
 				return render_to_response('property/edit_person.html', {'header' : generate_header_dict(request, 'Update'), 'person' : person, 'directed_movies' : directed_movies, 'written_movies' : written_movies, 'acted_movies' : acted_movies}, RequestContext(request))
 			except ObjectDoesNotExist:
 				property_logger.info(value + ' Added to ' + person.UrlName + ' Failure by ' + logged_in_profile_info['username'])
@@ -190,12 +190,12 @@ def person(request, urlname):
 			associate_logger.info(movie.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
 			if person_is_relevant(person):
 				if re:
-					set_msg(request, 'Person Removed!', person.Name + ' has successfully been removed from ' + movie.Title + '.', 4)
+					set_msg(request, 'Person Removed!', person.Name + ' has successfully been removed from ' + movie.Title + '.', 'warning')
 					response = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					response['Location'] += '?edit=1'
 					return response
 				else:
-					set_msg(request, 'Movie Removed!', movie.Title + ' has successfully been removed from ' + person.Name + ' \'s career.', 4)
+					set_msg(request, 'Movie Removed!', movie.Title + ' has successfully been removed from ' + person.Name + ' \'s career.', 'warning')
 					response = redirect('webapp.views.property.person', urlname=person.UrlName)
 					response['Location'] += '?edit=1'
 					return response
@@ -203,14 +203,14 @@ def person(request, urlname):
 				if re:
 					person.delete()
 					property_logger.info(person.Name + ' Delete Success by' + logged_in_profile_info['username'])
-					set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted due to the removal of them from ' + movie.Title + '.', 5)
+					set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted due to the removal of them from ' + movie.Title + '.', 'danger')
 					response = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					response['Location'] += '?edit=1'
 					return response
 				else:
 					person.delete()
 					property_logger.info(person.Name + ' Delete Success by' + logged_in_profile_info['username'])
-					set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted due to the removal of ' + movie.Title + ' from their career.', 5)
+					set_msg(request, 'Person Deleted!', person.Name + ' has successfully been deleted due to the removal of ' + movie.Title + ' from their career.', 'danger')
 					return redirect('webapp.views.site.home')
 		else:
 			'''*****************************************************************************
@@ -290,7 +290,7 @@ def genre(request, description):
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' GenreId: ' + str(genre.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
-				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
+				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
 					# send email
 					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
@@ -314,7 +314,7 @@ def genre(request, description):
 					genre.full_clean()
 					genre.save()
 					property_logger.info(genre.Description + ' Update Success by ' + logged_in_profile_info['username'])
-					set_msg(request, 'Genre Updated!', genre.Description + ' has successfully been updated.', 3)
+					set_msg(request, 'Genre Updated!', genre.Description + ' has successfully been updated.', 'success')
 					return redirect('webapp.views.property.genre', description=genre.Description)
 				except ValidationError as e:
 					property_logger.info(genre.Description + ' Update Failure by ' + logged_in_profile_info['username'])
@@ -338,7 +338,7 @@ def genre(request, description):
 				associate_logger.info(prop.MovieId.UrlTitle + ' Disassociated ' + genre.Description + ' Success by ' + logged_in_profile_info['username'])
 			genre.delete()
 			property_logger.info(genre.Description + ' Delete Success by' + logged_in_profile_info['username'])
-			set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted.', 5)
+			set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted.', 'danger')
 			return redirect('webapp.views.site.home')
 		elif logged_in_profile_info['admin'] and request.GET.get('add') and request.method == 'POST':
 			try:
@@ -355,7 +355,7 @@ def genre(request, description):
 				movies = []
 				for prop in properties:
 					movies.append(prop.MovieId)
-				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to' + genre.Description + ' movies.', 4)
+				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to' + genre.Description + ' movies.', 'warning')
 				return render_to_response('property/edit_genre.html', {'header' : generate_header_dict(request, 'Update'), 'genre' : genre, 'movies' : movies}, RequestContext(request))
 			except ObjectDoesNotExist:
 				property_logger.info(value + ' Added to ' + genre.Description + ' Failure by ' + logged_in_profile_info['username'])
@@ -376,12 +376,12 @@ def genre(request, description):
 			associate_logger.info(movie.UrlTitle + ' Disassociated ' + genre.Description + ' Success by ' + logged_in_profile_info['username'])
 			if genre_is_relevant(genre):
 				if re:
-					set_msg(request, 'Genre Removed!', genre.Description + ' has successfully been removed from ' + movie.Title + '.', 4)
+					set_msg(request, 'Genre Removed!', genre.Description + ' has successfully been removed from ' + movie.Title + '.', 'warning')
 					response = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					response['Location'] += '?edit=1'
 					return response
 				else:
-					set_msg(request, 'Movie Removed!', movie.Title + ' has successfully been removed from' + genre.Description + 'movies.', 4)
+					set_msg(request, 'Movie Removed!', movie.Title + ' has successfully been removed from' + genre.Description + 'movies.', 'warning')
 					response = redirect('webapp.views.property.genre', description=genre.Description)
 					response['Location'] += '?edit=1'
 					return resposne
@@ -389,14 +389,14 @@ def genre(request, description):
 				if re:
 					genre.delete()
 					property_logger.info(genre.Description + ' Delete Success by' + logged_in_profile_info['username'])
-					set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted due to the removal of it from ' + movie.Title + '.', 5)
+					set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted due to the removal of it from ' + movie.Title + '.', 'danger')
 					response = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					response['Location'] += '?edit=1'
 					return response
 				else:
 					genre.delete()
 					property_logger.info(genre.Description + ' Delete Success by' + logged_in_profile_info['username'])
-					set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted due to the removal of ' + movie.Title + ' from this genre.', 5)
+					set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted due to the removal of ' + movie.Title + ' from this genre.', 'danger')
 					return redirect('webapp.views.site.home')
 		else:
 			return render_to_response('property/view_genre.html', {'header' : generate_header_dict(request, genre.Description), 'genre' : genre, 'movies' : movies_tuples, 'page' : genre_movies}, RequestContext(request))

@@ -25,7 +25,7 @@ def view_list(request):
 		if permission_response != True:
 			return permission_response
 		if not logged_in_profile_info['id']:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 			return redirect('webapp.views.profile.login')
 		if request.GET.get('add') and request.GET.get('i') and request.GET.get('r') and request.GET.get('n'):
 			'''*****************************************************************************
@@ -148,7 +148,7 @@ def view(request, urltitle):
 		if permission_response != True:
 			return permission_response
 		if not logged_in_profile_info['id']:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
+			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'danger')
 			return redirect('webapp.views.profile.login')
 		movie = Movies.objects.get(UrlTitle=urltitle)
 		# Get all properties associated with movie (actors, directors, writers, genres)
@@ -175,7 +175,7 @@ def view(request, urltitle):
 					profile_movie = ProfileMovies(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
 					profile_movie.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
-					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies.', 3)
+					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies.', 'success')
 				elif request.GET.get('recent'):
 					'''*****************************************************************************
 					Update association based on a user recently watching a movie and redirect to movie page
@@ -189,7 +189,7 @@ def view(request, urltitle):
 					association.UpdatedAt = datetime.now()
 					association.save()
 					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
-					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 3)
+					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 'success')
 				elif request.method == 'POST' and request.GET.get('update'):
 					'''*****************************************************************************
 					Update association from input on movie page and redirect to movie page
@@ -231,7 +231,7 @@ def view(request, urltitle):
 					# Update rankings if ranking of movie was altered in some way
 					if rankings_changed:
 						update_rankings(logged_in_profile_info['id'])
-					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 3)
+					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 'success')
 				elif request.GET.get('remove'):
 					'''*****************************************************************************
 					Delete association and redirect to movie page
@@ -242,9 +242,9 @@ def view(request, urltitle):
 					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
-					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 5)
+					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
 			except ObjectDoesNotExist:
-				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 5)
+				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
 			except Exception:
 				associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 				return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
@@ -283,7 +283,7 @@ def view(request, urltitle):
 								assoc.save()
 						association.save()
 						associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
-						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number ' + str(association.Rank) + ' out of ' + str(associations.count() + 1) + '.', 3)
+						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number ' + str(association.Rank) + ' out of ' + str(associations.count() + 1) + '.', 'success')
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					# Else continue ranking by finding new comparison movie
 					else:
@@ -302,7 +302,7 @@ def view(request, urltitle):
 						association.Rank = 1
 						association.save()
 						associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
-						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number 1 out of 1.', 3)
+						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number 1 out of 1.', 'success')
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					min = 0
 					max = associations.count()-1
@@ -340,7 +340,7 @@ def view(request, urltitle):
 				email_from = settings.DEFAULT_FROM_EMAIL
 				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
-				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 3)
+				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
 					# send email
 					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
@@ -370,7 +370,7 @@ def view(request, urltitle):
 					movie.full_clean()
 					movie.save()
 					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
-					set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 3)
+					set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 'success')
 					return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 				except ValidationError as e:
 					movie_logger.info(movie.UrlTitle + ' Update Failure by ' + logged_in_profile_info['username'])
@@ -410,7 +410,7 @@ def view(request, urltitle):
 				# Delete movie
 				movie.delete()
 				movie_logger.info(movie.UrlTitle + ' Delete Success by ' + logged_in_profile_info['username'])
-				set_msg(request, 'Movie Deleted!', movie.Title + ' has successfully been deleted.', 5)
+				set_msg(request, 'Movie Deleted!', movie.Title + ' has successfully been deleted.', 'danger')
 				return redirect('webapp.views.site.home')
 			else:
 				'''*****************************************************************************
@@ -435,7 +435,7 @@ def view(request, urltitle):
 			elif type == 3:
 				gens.append(value)
 			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
-			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 3)
+			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 'success')
 			properties = MovieProperties.objects.filter(MovieId=movie)
 			directors, writers, actors, genres = [], [], [], []
 			for property in properties:
@@ -478,9 +478,6 @@ def search(request):
 		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
 		if permission_response != True:
 			return permission_response
-		if not logged_in_profile_info['id']:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 4)
-			return redirect('webapp.views.profile.login')
 		if request.GET.get('t'):
 			'''*****************************************************************************
 			Search for movie and display movie page or search results page appropriately
