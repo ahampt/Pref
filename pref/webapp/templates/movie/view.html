@@ -48,22 +48,22 @@
 			</div>
 			<div class="span1">
 			{% if movie.ImdbId %}
-				<a href="{{imdb_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
+				<a href="{{links.imdb}}" target="_blank"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
 			{% endif %}
 			</div>
 			<div class="span1">
 			{% if movie.RottenTomatoesId %}
-				<a href="{{rt_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/rotten_tomatoes.jpg" /></a>
+				<a href="{{links.rt}}" target="_blank"><img src="{{STATIC_URL}}img/ico/rotten_tomatoes.jpg" /></a>
 			{% endif %}
 			</div>
 			<div class="span1">
 			{% if movie.NetflixId %}
-				<a href="{{netflix_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
+				<a href="{{links.netflix}}" target="_blank"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
 			{% endif %}
 			</div>
 			<div class="span1">
 			{% if movie.WikipediaId %}
-				<a href="{{wikipedia_link}}" target="_blank"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
+				<a href="{{links.wikipedia}}" target="_blank"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
 			{% endif %}
 			</div>
 		</div>

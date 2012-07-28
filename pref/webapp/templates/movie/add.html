@@ -17,7 +17,7 @@
 			<div class="span4 offset2">
 				<label for="imdb_url">IMDb URL or ID*: </label>
 				{% if movie and movie.ImdbId %}
-					<input type="text" name="imdb_url" id="imdb_url" value="{{imdb_link}}" />
+					<input type="text" name="imdb_url" id="imdb_url" value="{{links.imdb}}" />
 				{% else %}
 					<input type="text" name="imdb_url" id="imdb_url" />
 				{% endif %}
@@ -27,7 +27,7 @@
 			<div class="span4 offset2">
 				<label for="netflix_url">Netflix URL or ID: </label>
 				{% if movie and movie.NetflixId %}
-					<input type="text" name="netflix_url" id="netflix_url" value="{{netflix_link}}" />
+					<input type="text" name="netflix_url" id="netflix_url" value="{{links.netflix}}" />
 				{% else %}
 					<input type="text" name="netflix_url" id="netflix_url" />
 				{% endif %}
@@ -37,7 +37,7 @@
 			<div class="span4 offset2">
 				<label for="rottentomatoes_id">Rotten Tomatoes ID: </label>
 				{% if movie and movie.RottentomatoesId %}
-					<input type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{rt_link}}" />
+					<input type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
 				{% else %}
 					<input type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
 				{% endif %}

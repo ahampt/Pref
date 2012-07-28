@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from webapp.tools.id_tools import wikipedia_id_from_movie, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
-from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, rottentomatoes_link_for_movie, netflix_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, update_rankings, check_and_get_session_info
+from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info
 from webapp.tools.search_tools import movies_from_term
 from webapp.models import Profiles, People, Genres, Movies, MovieProperties, ProfileMovies
 
@@ -101,10 +101,10 @@ def view_list(request):
 						error_msg = e.message_dict
 						for key in error_msg:
 							error_msg[key] = str(error_msg[key][0])
-						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie)}, RequestContext(request))
+						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'links' : generate_links_dict(movie)}, RequestContext(request))
 				else:
 					movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
-					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'imdb_link' : imdb_link_for_movie(res_dict.get('movie')), 'rt_link' : rottentomatoes_link_for_movie(res_dict.get('movie')), 'netflix_link' : netflix_link_for_movie(res_dict.get('movie')), 'wikipedia_link' : wikipedia_link_for_movie(res_dict.get('movie'))}, RequestContext(request))
+					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'links' : generate_links_dict(res_dict.get('movie'))}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display admin add movie page
@@ -376,7 +376,7 @@ def view(request, urltitle):
 					error_msg = e.message_dict
 					for key in error_msg:
 						error_msg[key] = str(error_msg[key][0])
-					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 			elif logged_in_profile_info['admin'] and request.GET.get('delete'):
 				'''*****************************************************************************
 				Delete movie and redirect to home
@@ -416,7 +416,7 @@ def view(request, urltitle):
 				Display edit page
 				PATH: webapp.views.movie.view urltitle; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
-				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 		elif logged_in_profile_info['admin'] and request.GET.get('add') and request.method == 'POST':
 			'''*****************************************************************************
 			Create property association with movie and redirect to edit page
@@ -446,7 +446,7 @@ def view(request, urltitle):
 					actors.append(People.objects.get(id=property.PropertyId))
 				elif property.Type == 3:
 					genres.append(Genres.objects.get(id=property.PropertyId))
-			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display movie page
@@ -463,7 +463,7 @@ def view(request, urltitle):
 				indicators = profile.StarIndicators.split(',')
 			except Exception:
 				pass
-			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'imdb_link' : imdb_link_for_movie(movie), 'rt_link' : rottentomatoes_link_for_movie(movie), 'netflix_link' : netflix_link_for_movie(movie), 'wikipedia_link' : wikipedia_link_for_movie(movie)}, RequestContext(request))
+			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
 	except ObjectDoesNotExist:
 		raise Http404
 	except Exception:

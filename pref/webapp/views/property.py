@@ -113,7 +113,7 @@ def person(request, urlname):
 					person.save()
 					property_logger.info(person.UrlName + ' Update Success by ' + logged_in_profile_info['username'])
 					set_msg(request, 'Person Updated!', person.Name + ' has successfully been updated.', 3)
-					return redirect('webapp.views.movie.person', urlname=person.UrlName)
+					return redirect('webapp.views.property.person', urlname=person.UrlName)
 				except ValidationError as e:
 					property_logger.info(person.UrlName + ' Update Failure by ' + logged_in_profile_info['username'])
 					error_msg = e.message_dict

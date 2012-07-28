@@ -91,6 +91,15 @@ def wikipedia_link_for_movie(movie):
 		return 'http://en.wikipedia.org/wiki/' + movie.WikipediaId
 	return None
 
+# Return dictionary of links for movie
+def generate_links_dict(movie):
+	links = { }
+	links['imdb'] = imdb_link_for_movie(movie)
+	links['rt'] = rottentomatoes_link_for_movie(movie)
+	links['netflix'] = netflix_link_for_movie(movie)
+	links['wikipedia'] = wikipedia_link_for_movie(movie)
+	return links
+
 # Return dictionary for use in the header template (called in every response)
 def generate_header_dict(request, header_text):
 	msg_heading, msg, color, tracking_code = None, None, None, None
