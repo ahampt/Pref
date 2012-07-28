@@ -44,6 +44,16 @@
 			</div>
 		</div>
 		<div class="row">
+			<div class="span4 offset2">
+				<label for="wikipedia_id">Wikipedia ID: </label>
+				{% if movie and movie.WikipediaId %}
+					<input type="text" name="wikipedia_id" id="wikipedia_id" value="{{links.wikipedia}}" />
+				{% else %}
+					<input type="text" name="wikipedia_id" id="wikipedia_id" />
+				{% endif %}
+			</div>
+		</div>
+		<div class="row">
 			<div class="span1 offset2">
 				<input class="btn btn-large btn-success" type="submit" value="Submit" />
 			</div>

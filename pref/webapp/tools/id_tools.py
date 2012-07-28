@@ -338,7 +338,7 @@ def rottentomatoes_movie_from_title(cur_movie, only_id = False):
 		return {'error_msg' : 'No title to search from.'}
 
 # Return movie given user inputs (imdb, netflix, rotten tomatoes) (url, id)
-def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input):
+def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input, wikipedia_input):
 	imdb_movie, rottentomatoes_movie, netflix_movie = None, None, None
 	directors, writers, actors, genres = [], [], [], []
 	movie = Movies()
@@ -391,4 +391,6 @@ def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input):
 		if rottentomatoes_res.get('movie'):
 			rottentomatoes_movie = rottentomatoes_res.get('movie')
 			movie.RottenTomatoesId = rottentomatoes_movie.RottenTomatoesId
+	# Use given wikipedia input with no validation, maybe include in future
+	movie.WikipediaId = wikipedia_input[29:] if wikipedia_input.find('http://en.wikipedia.org/wiki/') == 0 else wikipedia_input
 	return {'success': success, 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'error_list' : error_list}

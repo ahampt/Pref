@@ -86,7 +86,7 @@ def view_list(request):
 				Add movie given user input of imdb, netflix, and rottentomatoes urls or ids and redirect to movie page
 				PATH: webapp.views.movie.view_list; METHOD: post; PARAMS: get - add; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
-				res_dict = movie_from_inputs(request.POST.get('imdb_url'), request.POST.get('netflix_url'), request.POST.get('rottentomatoes_id'))
+				res_dict = movie_from_inputs(request.POST.get('imdb_url'), request.POST.get('netflix_url'), request.POST.get('rottentomatoes_id'), request.POST.get('wikipedia_id'))
 				if res_dict.get('success'):
 					try:
 						movie = res_dict.get('movie')
@@ -366,6 +366,7 @@ def view(request, urltitle):
 					movie.ImdbId = request.POST.get('imdb')
 					movie.RottenTomatoesId = request.POST.get('rottentomatoes')
 					movie.NetflixId = request.POST.get('netflix')
+					movie.WikipediaId = request.POST.get('wikipedia')
 					movie.full_clean()
 					movie.save()
 					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
