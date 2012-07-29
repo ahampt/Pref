@@ -30,9 +30,9 @@
 				<label for="email">Email: </label>
 				<div class="input-prepend">
 					{% if profile and profile.Email %}
-						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="text" name="email" id="email" value="{{profile.Email}}" />
+						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="email" name="email" id="email" value="{{profile.Email}}" />
 					{% else %}
-						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="text" name="email" id="email" />
+						<span class="add-on"><i class="icon-envelope"></i></span><input class="span3" type="email" name="email" id="email" />
 					{% endif %}
 				</div>
 			</div>
