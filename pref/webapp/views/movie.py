@@ -142,7 +142,7 @@ def view_list(request):
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
 		if permission_response != True:
@@ -378,46 +378,47 @@ def view(request, urltitle):
 					for key in error_msg:
 						error_msg[key] = str(error_msg[key][0])
 					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
-			elif logged_in_profile_info['admin'] and request.GET.get('delete'):
-				'''*****************************************************************************
-				Delete movie and redirect to home
-				PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile.IsAdmin;
-				*****************************************************************************'''
-				for property in properties:
-					person, genre = None, None
-					# Delete all property associations
-					property.delete()
-					# Delete actual property if no longer relevant (i.e. has another movie associated with it)
-					if property.Type == 0 or property.Type == 1 or property.Type == 2:
-						person = People.objects.get(id=property.PropertyId)
-						if person_is_relevant(person):
-							continue
-						else:
-							person.delete()
-							property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
-					elif property.Type == 3:
-						genre = Genres.objects.get(id=property.PropertyId)
-						if genre_is_relevant(genre):
-							continue
-						else:
-							genre.delete()
-							property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
-				# Delete all profile associations (Update rankings afterwards)
-				for association in ProfileMovies.objects.select_related().filter(MovieId=movie):
-					association.delete()
-					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
-					update_rankings(association.ProfileId)
-				# Delete movie
-				movie.delete()
-				movie_logger.info(movie.UrlTitle + ' Delete Success by ' + logged_in_profile_info['username'])
-				set_msg(request, 'Movie Deleted!', movie.Title + ' has successfully been deleted.', 'danger')
-				return redirect('webapp.views.site.home')
 			else:
 				'''*****************************************************************************
 				Display edit page
 				PATH: webapp.views.movie.view urltitle; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
 				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+		elif logged_in_profile_info['admin'] and request.GET.get('delete'):
+			'''*****************************************************************************
+			Delete movie and redirect to home
+			PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile.IsAdmin;
+			*****************************************************************************'''
+			print 'here'
+			for property in properties:
+				person, genre = None, None
+				# Delete all property associations
+				property.delete()
+				# Delete actual property if no longer relevant (i.e. has another movie associated with it)
+				if property.Type == 0 or property.Type == 1 or property.Type == 2:
+					person = People.objects.get(id=property.PropertyId)
+					if person_is_relevant(person):
+						continue
+					else:
+						person.delete()
+						property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
+				elif property.Type == 3:
+					genre = Genres.objects.get(id=property.PropertyId)
+					if genre_is_relevant(genre):
+						continue
+					else:
+						genre.delete()
+						property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
+			# Delete all profile associations (Update rankings afterwards)
+			for association in ProfileMovies.objects.select_related().filter(MovieId=movie):
+				association.delete()
+				associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
+				update_rankings(association.ProfileId)
+			# Delete movie
+			movie.delete()
+			movie_logger.info(movie.UrlTitle + ' Delete Success by ' + logged_in_profile_info['username'])
+			set_msg(request, 'Movie Deleted!', movie.Title + ' has successfully been deleted.', 'danger')
+			return redirect('webapp.views.site.home')
 		elif logged_in_profile_info['admin'] and request.GET.get('add') and request.method == 'POST':
 			'''*****************************************************************************
 			Create property association with movie and redirect to edit page
@@ -465,11 +466,11 @@ def view(request, urltitle):
 			except Exception:
 				pass
 			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	except ObjectDoesNotExist:
-		raise Http404
-	except Exception:
-		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	#except ObjectDoesNotExist:
+	#	raise Http404
+	#except Exception:
+	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):
