@@ -38,10 +38,10 @@ def access(request):
 			*****************************************************************************'''
 			# Mandatory check in every function that checks if user is logged in (or has access for a few pages like this one)
 			logged_in_profile_info = { }
-			permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
-			if permission_response == True:
-				return redirect('webapp.views.site.home')
-			return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
+			permission_response = check_and_get_session_info(request, logged_in_profile_info, True, False)
+			if permission_response != True:
+				return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
+			return redirect('webapp.views.site.home')
 
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
@@ -87,7 +87,7 @@ def home(request):
 def discovery(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		'''*****************************************************************************
@@ -104,7 +104,7 @@ def about(request):
 	try:
 		if request.GET.get('suggestion'):
 			logged_in_profile_info = { }
-			permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+			permission_response = check_and_get_session_info(request, logged_in_profile_info)
 			if permission_response != True:
 				return permission_response
 			if request.method == 'POST':

@@ -16,7 +16,7 @@ associate_logger = logging.getLogger('log.associate')
 def people(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		'''*****************************************************************************
@@ -44,7 +44,7 @@ def people(request):
 def person(request, urlname):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		# Get all movie associations with person and get all profile associations with said movies
@@ -228,7 +228,7 @@ def person(request, urlname):
 def genres(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		'''*****************************************************************************
@@ -256,7 +256,7 @@ def genres(request):
 def genre(request, description):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		genre = Genres.objects.get(Description=description)

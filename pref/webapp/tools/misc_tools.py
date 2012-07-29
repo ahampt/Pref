@@ -101,34 +101,48 @@ def generate_links_dict(movie):
 	links['wikipedia'] = wikipedia_link_for_movie(movie)
 	return links
 
+# Set alert message data (title, content, level)
+def set_msg(request, msg_head, msg, msg_lvl):
+	request.session['msg_head'] = msg_head
+	request.session['msg'] = msg
+	request.session['msg_lvl'] = msg_lvl
+
+# Clear message data
+def clear_msg(request):
+	try:
+		del request.session['msg_head']
+	except KeyError:
+		pass
+	try:
+		del request.session['msg']
+	except KeyError:
+		pass
+	try:
+		del request.session['msg_lvl']
+	except KeyError:
+		pass
+
+# Get and clear message data
+def get_msg_dict(request):
+	msg_dict = {'head' : request.session.get('msg_head'), 'msg' : request.session.get('msg'), 'lvl' : request.session.get('msg_lvl')}
+	clear_msg(request)
+	return msg_dict
+
 # Return dictionary for use in the header template (called in every response)
 def generate_header_dict(request, header_text):
-	msg_head, msg, msg_lvl, tracking_code = None, None, None, None
+	tracking_code = None
 	try:
 		# Expand session for another hour
 		request.session.set_expiry(3600)
-		# Set alert data if present
-		msg_head = request.session['msg_head']
-		msg = request.session['msg']
-		msg_lvl = request.session['msg_lvl']
-		del request.session['msg_head']
-		del request.session['msg']
-		del request.session['msg_lvl']
 	# Ignore otherwise
-	except KeyError:
+	except Exception:
 		pass
 	# Form list of strings for all movies [title (year),] for typeahead search
 	movies_titles_years = Movies.objects.values_list('Title', 'Year').order_by('Title')
 	search_list = []
 	for title, year in movies_titles_years:
 		search_list.append(str(title) + ' (' + str(year) + ')')
-	return {'msg_dict' : {'head' : msg_head, 'msg' : msg, 'lvl' : msg_lvl}, 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
-
-# Set alert message data (title, content, color)
-def set_msg(request, msg_head, msg, msg_lvl):
-	request.session['msg_head'] = msg_head
-	request.session['msg'] = msg
-	request.session['msg_lvl'] = msg_lvl
+	return {'msg_dict' : get_msg_dict(request), 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
 
 # Logout and return profile of user
 def logout_command(request):
@@ -164,7 +178,7 @@ def login_command(request, profile):
 	return profile
 
 # Return logged in profile information in a dictionary otherwise redirect
-def check_and_get_session_info(request, logged_in_profile_info, check_access):
+def check_and_get_session_info(request, logged_in_profile_info, check_access = False, show_msg = True):
 	if request.session.get('auth_profile_id'):
 		logged_in_profile_info['id'] = request.session.get('auth_profile_id')
 		logged_in_profile_info['username'] = request.session.get('auth_profile_username')
@@ -173,10 +187,12 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access):
 	elif check_access and request.session.get('auth_access'):
 		return True
 	elif check_access:
-		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
+		if show_msg:
+			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 		return redirect('webapp.views.site.access')
 	else:
-		set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
+		if show_msg:
+			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 		return redirect('webapp.views.profile.login')
 
 # Return true if property is associated with any movies

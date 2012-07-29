@@ -149,17 +149,17 @@ def login(request):
 				profile.FailedLoginAttempts = profile.FailedLoginAttempts + 1 if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS else profile.FailedLoginAttempts
 				profile.save()
 				logged_in_profile_info = { }
-				permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
-				if permission_response == True:
+				permission_response = check_and_get_session_info(request, logged_in_profile_info, True, False)
+				if permission_response != True:
 					if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-						return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+						set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
 					else:
-						return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
+						set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 'danger')
+					return permission_response
 				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-					set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
 				else:
-					set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 'danger')
-				return redirect('webapp.views.site.access')
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display login page if logged in or have access otherwise back to access
@@ -172,11 +172,11 @@ def login(request):
 			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login')}, RequestContext(request))
 	except ObjectDoesNotExist:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
-		if permission_response == True:
-			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
-		set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
-		return redirect('webapp.views.site.access')
+		permission_response = check_and_get_session_info(request, logged_in_profile_info, True, False)
+		if permission_response != True:
+			set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
+			return permission_response
+		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
@@ -185,7 +185,7 @@ def login(request):
 def logout(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		'''*****************************************************************************
@@ -204,7 +204,7 @@ def logout(request):
 def view_list(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		# Note genre and person don't have this option because they have to be added through a movie to be relevant
@@ -243,7 +243,7 @@ def view_list(request):
 def view(request, username):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		profile = Profiles.objects.get(Username=username)

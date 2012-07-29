@@ -21,7 +21,7 @@ associate_logger = logging.getLogger('log.associate')
 def view_list(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		if not logged_in_profile_info['id']:
@@ -142,9 +142,9 @@ def view_list(request):
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	#try:
+	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		if not logged_in_profile_info['id']:
@@ -466,17 +466,17 @@ def view(request, urltitle):
 			except Exception:
 				pass
 			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	#except ObjectDoesNotExist:
-	#	raise Http404
-	#except Exception:
-	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	except ObjectDoesNotExist:
+		raise Http404
+	except Exception:
+		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):
 	try:
 		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, False)
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
 		if request.GET.get('t'):
