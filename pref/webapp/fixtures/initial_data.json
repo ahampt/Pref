@@ -1,0 +1,30 @@
+[
+	{
+		"model": "webapp.ConsumeableTypes",
+		"pk": 1,
+		"fields": {
+			"Description": "MOVIE"
+		}
+	},
+	{
+		"model": "webapp.PropertyTypes",
+		"pk": 1,
+		"fields": {
+			"Description": "DIRECTOR"
+		}
+	},
+	{
+		"model": "webapp.PropertyTypes",
+		"pk": 2,
+		"fields": {
+			"Description": "WRITER"
+		}
+	},
+	{
+		"model": "webapp.PropertyTypes",
+		"pk": 3,
+		"fields": {
+			"Description": "ACTOR"
+		}
+	}
+]

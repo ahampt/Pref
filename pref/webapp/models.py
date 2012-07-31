@@ -40,6 +40,9 @@ class Profiles(models.Model):
 					indicators += ','
 			self.StarIndicators = indicators[0:-1]
 
+class PropertyTypes(models.Model):
+	Description = models.CharField(max_length=50,unique=True)
+
 class People(models.Model):
 	Name = models.CharField(max_length=100,unique=True)
 	UrlName = models.CharField(max_length=100,null=True,blank=True,unique=True)
@@ -76,6 +79,9 @@ class Genres(models.Model):
 		data = self.Description
 		if data and len(data) > 0 and not data.encode('ascii', 'replace').isalnum():
 			raise ValidationError("Description can only contain alphanumeric characters.")
+
+class ConsumeableTypes(models.Model):
+	Description = models.CharField(max_length=50,unique=True)
 	
 class Movies(models.Model):
 	Title = models.CharField(max_length=100)
