@@ -175,7 +175,7 @@ def view(request, urltitle):
 					profile_movie = ProfileMovies(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
 					profile_movie.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
-					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies.', 'success')
+					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies. Please check that the information on this page is accurate as Pref relies on user feedback to correct errors. If you notice an error, such as an actor with a similar (same) name to a different actor being shown here, click on the offending piece of information and click on the correction link to let Pref know about it. Thanks.', 'success')
 				elif request.GET.get('recent'):
 					'''*****************************************************************************
 					Update association based on a user recently watching a movie and redirect to movie page
