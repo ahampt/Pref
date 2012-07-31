@@ -1,6 +1,6 @@
 import json, urllib, urllib2
 from django.conf import settings
-from webapp.models import Movies, People, Genres, MovieProperties
+from webapp.models import Movies, People, Genres
 from oauth import OAuthRequest
 from oauth.signature_method.hmac_sha1 import OAuthSignatureMethod_HMAC_SHA1
 from xml.dom.minidom import parseString

@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info
-from webapp.models import Profiles, Movies, ProfileMovies
+from webapp.models import Profiles, Movies, Associations
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 profile_logger = logging.getLogger('log.profile')
@@ -262,19 +262,19 @@ def view(request, username):
 					# If unranked, ignore
 					if ids[i][0] == "u":
 						try:
-							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i][1:])
-							unranked_movies.append(associated_movie.MovieId)
+							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i][1:])
+							unranked_movies.append(association.MovieId)
 						except Exception:
 							continue
 					# Else, update rank according to iteration number of for loop
 					else:
 						try:
-							associated_movie = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i])
-							if associated_movie.Rank != i+1:
-								associated_movie.Rank = i+1
-								associated_movie.save()
-								associate_logger.info(associated_movie.MovieId.UrlTitle + ' Update rank to ' + str(associated_movie.Rank) + ' Success')
-							movies.append(associated_movie.MovieId)
+							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i])
+							if association.Rank != i+1:
+								association.Rank = i+1
+								association.save()
+								associate_logger.info(association.MovieId.UrlTitle + ' Update rank to ' + str(association.Rank) + ' Success')
+							movies.append(association.MovieId)
 						except Exception:
 							continue
 				size = len(movies) + len(unranked_movies)
@@ -287,8 +287,8 @@ def view(request, username):
 				*****************************************************************************'''
 				movies, unranked_movies = [], []
 				# Get all ranked and unranked (watched with no rank) titles and sort by rank followed by descending year followed by title (same for almost all lists)
-				associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], Watched = True).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
-				for assoc in associated_movies:
+				associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], Watched = True).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+				for assoc in associations:
 					if assoc.Rank:
 						movies.append(assoc.MovieId)
 					else:
@@ -301,8 +301,8 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
 			movies, unranked_movies, unseen_movies = [], [], []
-			associated_movies = ProfileMovies.objects.select_related().filter(ProfileId = logged_in_profile_info['id']).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
-			for assoc in associated_movies:
+			associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id']).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+			for assoc in associations:
 				if assoc.Rank:
 					movies.append(assoc.MovieId)
 				elif assoc.Watched:
@@ -449,7 +449,7 @@ def view(request, username):
 				prof = logout_command(request)
 				profile_logger.info(prof.Username + ' Logout Success')
 			# Delete all associations
-			ProfileMovies.objects.filter(ProfileId=profile).delete()
+			Associations.objects.filter(ProfileId=profile).delete()
 			profile.delete()
 			profile_logger.info(profile.Username + ' Delete Success by ' + logged_in_profile_info['username'])
 			set_msg(request, 'Goodbye ' + profile.Username + '!', 'Your profile has successfully been deleted.', 'danger')

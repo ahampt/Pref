@@ -10,7 +10,7 @@ from django.template import RequestContext
 from webapp.tools.id_tools import wikipedia_id_from_movie, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
 from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info
 from webapp.tools.search_tools import movies_from_term
-from webapp.models import Profiles, People, Genres, Movies, MovieProperties, ProfileMovies
+from webapp.models import Profiles, People, Genres, Movies, Properties, Associations
 
 site_logger = logging.getLogger('log.site')
 movie_logger = logging.getLogger('log.movie')
@@ -131,7 +131,7 @@ def view_list(request):
 			# Get all associations with logged in profile to correctly display links (seen later as well)
 			for movie in paginated_movies:
 				try:
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					movies.append((movie, True))
 				except Exception:
 					movies.append((movie, False))
@@ -152,7 +152,7 @@ def view(request, urltitle):
 			return redirect('webapp.views.profile.login')
 		movie = Movies.objects.get(UrlTitle=urltitle)
 		# Get all properties associated with movie (actors, directors, writers, genres)
-		properties = MovieProperties.objects.filter(MovieId=movie)
+		properties = Properties.objects.filter(MovieId=movie)
 		directors, writers, actors, genres = [], [], [], []
 		for property in properties:
 			if property.Type == 0:
@@ -172,8 +172,8 @@ def view(request, urltitle):
 					*****************************************************************************'''
 					watched = True if request.GET.get('seen') else False
 					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-					profile_movie = ProfileMovies(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
-					profile_movie.save()
+					association = Associations(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
+					association.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
 					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies. Please check that the information on this page is accurate as Pref relies on user feedback to correct errors. If you notice an error, such as an actor with a similar (same) name to a different actor being shown here, click on the offending piece of information and click on the correction link to let Pref know about it. Thanks.', 'success')
 				elif request.GET.get('recent'):
@@ -181,7 +181,7 @@ def view(request, urltitle):
 					Update association based on a user recently watching a movie and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,recent; MISC: none;
 					*****************************************************************************'''
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					# First time watching the specified movie
 					if not association.Watched:
 						association.Watched = True
@@ -196,7 +196,7 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - assoc,update; MISC: none;
 					*****************************************************************************'''
 					rankings_changed = False
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					# If first time user watched the movie, update both times
 					if not association.Watched and request.POST.get('watched') == 'Watched':
 						association.CreatedAt = datetime.now()
@@ -237,7 +237,7 @@ def view(request, urltitle):
 					Delete association and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,remove; MISC: none;
 					*****************************************************************************'''
-					association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 					association.delete()
 					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					# Fill in the gap in rankings
@@ -252,9 +252,9 @@ def view(request, urltitle):
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-				association = ProfileMovies.objects.get(ProfileId = profile, MovieId = movie, Watched=True)
+				association = Associations.objects.get(ProfileId = profile, MovieId = movie, Watched=True)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
-				associations = ProfileMovies.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
+				associations = Associations.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
 				if request.method == 'POST':
 					'''*****************************************************************************
 					Tree ranker substep consisting of providing new comparison if not done ranking or redirecting to movie page if done ranking
@@ -288,7 +288,7 @@ def view(request, urltitle):
 					# Else continue ranking by finding new comparison movie
 					else:
 						compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
-						compare_association = ProfileMovies.objects.get(ProfileId = profile, MovieId = compare_movie)
+						compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
 						compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 						# Use in deciding to pick which movie on left or right
 						rand = random.randint(0,1)
@@ -308,7 +308,7 @@ def view(request, urltitle):
 					max = associations.count()-1
 					mid = (min + max) / 2
 					compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
-					compare_association = ProfileMovies.objects.get(ProfileId = profile, MovieId = compare_movie)
+					compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
 					compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 					rand = random.randint(0,1)
 					return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie if rand == 0 else compare_movie, 'movie2' : compare_movie if rand == 0 else movie, 'association1' : association if rand == 0 else compare_association, 'association2' : compare_association if rand == 0 else association, 'min1' : min if rand == 0 else mid + 1, 'max1' : mid - 1 if rand == 0 else max, 'min2' : mid + 1 if rand == 0 else min, 'max2' : max if rand == 0 else mid - 1}, RequestContext(request))
@@ -320,7 +320,7 @@ def view(request, urltitle):
 			PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - rank; MISC: none;
 			*****************************************************************************'''
 			try:
-				association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
 				association.Rank = None
 				association.save()
 				associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Reset Rank Success')
@@ -410,7 +410,7 @@ def view(request, urltitle):
 						genre.delete()
 						property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 			# Delete all profile associations (Update rankings afterwards)
-			for association in ProfileMovies.objects.select_related().filter(MovieId=movie):
+			for association in Associations.objects.select_related().filter(MovieId=movie):
 				association.delete()
 				associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 				update_rankings(association.ProfileId)
@@ -437,7 +437,7 @@ def view(request, urltitle):
 				gens.append(value)
 			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
 			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 'success')
-			properties = MovieProperties.objects.filter(MovieId=movie)
+			properties = Properties.objects.filter(MovieId=movie)
 			directors, writers, actors, genres = [], [], [], []
 			for property in properties:
 				if property.Type == 0:
@@ -459,7 +459,7 @@ def view(request, urltitle):
 			indicators = []
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-				association = ProfileMovies.objects.get(ProfileId = profile, MovieId = movie)
+				association = Associations.objects.get(ProfileId = profile, MovieId = movie)
 				# Scale rating to profile preference (i.e. from percentage rating to n stars)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 				indicators = profile.StarIndicators.split(',')
@@ -510,7 +510,7 @@ def search(request):
 							found = True
 							if (imdb_movie, False) not in old_movies and (imdb_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = imdb_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = imdb_movie)
 									old_movies.append((imdb_movie, True))
 								except Exception:
 									old_movies.append((imdb_movie, False))
@@ -522,7 +522,7 @@ def search(request):
 							found = True
 							if (netflix_movie, False) not in old_movies and (netflix_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = netflix_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = netflix_movie)
 									old_movies.append((netflix_movie, True))
 								except Exception:
 									old_movies.append((netflix_movie, False))
@@ -534,7 +534,7 @@ def search(request):
 							found = True
 							if (rt_movie, False) not in old_movies and (rt_movie, True) not in old_movies:
 								try:
-									association = ProfileMovies.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = rt_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = rt_movie)
 									old_movies.append((rt_movie, True))
 								except Exception:
 									old_movies.append((rt_movie, False))

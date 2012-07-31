@@ -2,7 +2,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
-from webapp.models import Profiles, Movies, People, Genres, MovieProperties, ProfileMovies
+from webapp.models import Profiles, Movies, People, Genres, Properties, Associations
 
 profile_logger = logging.getLogger('log.profile')
 movie_logger = logging.getLogger('log.movie')
@@ -12,7 +12,7 @@ associate_logger = logging.getLogger('log.associate')
 # Create and save association given movie and property
 def create_movie_property(movie, property_id, property_name, type, logged_in_profile_username):
 	try:
-		property = MovieProperties(MovieId = movie, PropertyId = property_id, Type = type)
+		property = Properties(MovieId = movie, PropertyId = property_id, Type = type)
 		property.save()
 		associate_logger.info(movie.UrlTitle + ' Associated ' + property_name + ' Success by ' + logged_in_profile_username)
 	except:
@@ -197,7 +197,7 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access = F
 
 # Return true if property is associated with any movies
 def person_is_relevant(person):
-	properties = MovieProperties.objects.filter(PropertyId=person.id)
+	properties = Properties.objects.filter(PropertyId=person.id)
 	for property in properties:
 		if property.Type == 0 or property.Type == 1 or property.Type == 2:
 			return True
@@ -205,7 +205,7 @@ def person_is_relevant(person):
 
 # Return true if property is associated with any movies
 def genre_is_relevant(genre):
-	properties = MovieProperties.objects.filter(PropertyId=genre.id)
+	properties = Properties.objects.filter(PropertyId=genre.id)
 	for property in properties:
 		if property.Type == 3:
 			return True
@@ -213,7 +213,7 @@ def genre_is_relevant(genre):
 
 # Iterate through all ranked titles and set rank to increments of one
 def update_rankings(profile):
-	assoc_movies = ProfileMovies.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
-	for i in range(len(assoc_movies)):
-		assoc_movies[i].Rank = i+1
-		assoc_movies[i].save()
+	associations = Associations.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
+	for i in range(len(associations)):
+		associations[i].Rank = i+1
+		associations[i].save()

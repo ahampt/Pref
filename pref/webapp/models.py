@@ -124,7 +124,7 @@ class Movies(models.Model):
 			else:
 				raise ValidationError("WikipediaId must contain at least one character.")
 		
-class MovieProperties(models.Model):
+class Properties(models.Model):
 	MovieId = models.ForeignKey(Movies,related_name='+')
 	PropertyId = models.IntegerField()
 	Type = models.PositiveSmallIntegerField()
@@ -139,7 +139,7 @@ class MovieProperties(models.Model):
 	class Meta:
 		unique_together = ('MovieId', 'PropertyId', 'Type')
 	
-class ProfileMovies(models.Model):
+class Associations(models.Model):
 	ProfileId = models.ForeignKey(Profiles,related_name='+')
 	MovieId = models.ForeignKey(Movies,related_name='+')
 	Watched = models.BooleanField()
