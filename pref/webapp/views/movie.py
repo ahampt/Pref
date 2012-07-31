@@ -253,7 +253,6 @@ def view(request, urltitle):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				association = Associations.objects.get(ProfileId = profile, MovieId = movie, Watched=True)
-				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 				associations = Associations.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
 				if request.method == 'POST':
 					'''*****************************************************************************
@@ -287,6 +286,7 @@ def view(request, urltitle):
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 					# Else continue ranking by finding new comparison movie
 					else:
+						association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 						compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
 						compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
 						compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
@@ -307,6 +307,7 @@ def view(request, urltitle):
 					min = 0
 					max = associations.count()-1
 					mid = (min + max) / 2
+					association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 					compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
 					compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
 					compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
