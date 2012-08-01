@@ -42,6 +42,10 @@ class Profiles(models.Model):
 
 class PropertyTypes(models.Model):
 	Description = models.CharField(max_length=50,unique=True)
+	TableName = models.CharField(max_length=50)
+
+	class Meta:
+		unique_together = ('Description', 'TableName')
 
 class People(models.Model):
 	Name = models.CharField(max_length=100,unique=True)
@@ -82,6 +86,14 @@ class Genres(models.Model):
 
 class ConsumeableTypes(models.Model):
 	Description = models.CharField(max_length=50,unique=True)
+
+class Sources(models.Model):
+	ProfileId = models.ForeignKey(Profiles,related_name='+')
+	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
+	Description = models.CharField(max_length=50)
+
+	class Meta:
+		unique_together = ('ProfileId', 'ConsumeableTypeId', 'Description')
 	
 class Movies(models.Model):
 	Title = models.CharField(max_length=100)

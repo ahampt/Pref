@@ -10,21 +10,32 @@
 		"model": "webapp.PropertyTypes",
 		"pk": 1,
 		"fields": {
-			"Description": "DIRECTOR"
+			"Description": "DIRECTOR",
+			"TableName": "PEOPLE"
 		}
 	},
 	{
 		"model": "webapp.PropertyTypes",
 		"pk": 2,
 		"fields": {
-			"Description": "WRITER"
+			"Description": "WRITER",
+			"TableName": "PEOPLE"
 		}
 	},
 	{
 		"model": "webapp.PropertyTypes",
 		"pk": 3,
 		"fields": {
-			"Description": "ACTOR"
+			"Description": "ACTOR",
+			"TableName": "PEOPLE"
+		}
+	},
+	{
+		"model": "webapp.PropertyTypes",
+		"pk": 4,
+		"fields": {
+			"Description": "GENRE",
+			"TableName": "GENRE"
 		}
 	}
 ]
