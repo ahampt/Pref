@@ -7,12 +7,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info
-from webapp.models import Profiles, Movies, Associations
+from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
+from webapp.models import Profiles, Sources, Movies, Associations
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 profile_logger = logging.getLogger('log.profile')
 associate_logger = logging.getLogger('log.associate')
+source_logger = logging.getLogger('log.source')
 
 # User registration/Profile creation
 def register(request):
@@ -246,6 +247,7 @@ def view(request, username):
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
+		type_dict = get_type_dict()
 		profile = Profiles.objects.get(Username=username)
 		admin_rights = logged_in_profile_info['id'] and (logged_in_profile_info['id'] == profile.id or logged_in_profile_info['admin'])
 		if logged_in_profile_info['id'] == profile.id and request.GET.get('rank'):
@@ -262,19 +264,19 @@ def view(request, username):
 					# If unranked, ignore
 					if ids[i][0] == "u":
 						try:
-							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i][1:])
-							unranked_movies.append(association.MovieId)
+							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = ids[i][1:], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
+							unranked_movies.append(association.ConsumeableId)
 						except Exception:
 							continue
 					# Else, update rank according to iteration number of for loop
 					else:
 						try:
-							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = ids[i])
+							association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = ids[i], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 							if association.Rank != i+1:
 								association.Rank = i+1
 								association.save()
-								associate_logger.info(association.MovieId.UrlTitle + ' Update rank to ' + str(association.Rank) + ' Success')
-							movies.append(association.MovieId)
+								associate_logger.info(association.ConsumeableId.UrlTitle + ' Update rank to ' + str(association.Rank) + ' Success')
+							movies.append(association.ConsumeableId)
 						except Exception:
 							continue
 				size = len(movies) + len(unranked_movies)
@@ -287,12 +289,12 @@ def view(request, username):
 				*****************************************************************************'''
 				movies, unranked_movies = [], []
 				# Get all ranked and unranked (watched with no rank) titles and sort by rank followed by descending year followed by title (same for almost all lists)
-				associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], Watched = True).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+				associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = True).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 				for assoc in associations:
 					if assoc.Rank:
-						movies.append(assoc.MovieId)
+						movies.append(assoc.ConsumeableId)
 					else:
-						unranked_movies.append(assoc.MovieId)
+						unranked_movies.append(assoc.ConsumeableId)
 				size = len(movies) + len(unranked_movies)
 				return render_to_response('profile/dnd_rank.html', {'header' : generate_header_dict(request, profile.Username + '\'s Rankings'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'size' : size}, RequestContext(request))
 		elif request.GET.get('movies'):
@@ -301,14 +303,14 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
 			movies, unranked_movies, unseen_movies = [], [], []
-			associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id']).order_by('Rank', '-MovieId__Year', 'MovieId__Title')
+			associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 			for assoc in associations:
 				if assoc.Rank:
-					movies.append(assoc.MovieId)
-				elif assoc.Watched:
-					unranked_movies.append(assoc.MovieId)
+					movies.append(assoc.ConsumeableId)
+				elif assoc.Consumed:
+					unranked_movies.append(assoc.ConsumeableId)
 				else:
-					unseen_movies.append(assoc.MovieId)
+					unseen_movies.append(assoc.ConsumeableId)
 			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies}, RequestContext(request))
 		elif request.GET.get('suggestion'):
 			if request.method == 'POST':
@@ -450,6 +452,8 @@ def view(request, username):
 				profile_logger.info(prof.Username + ' Logout Success')
 			# Delete all associations
 			Associations.objects.filter(ProfileId=profile).delete()
+			# Delete all sources
+			Sources.objects.filter(ProfileId=profile).delete()
 			profile.delete()
 			profile_logger.info(profile.Username + ' Delete Success by ' + logged_in_profile_info['username'])
 			set_msg(request, 'Goodbye ' + profile.Username + '!', 'Your profile has successfully been deleted.', 'danger')

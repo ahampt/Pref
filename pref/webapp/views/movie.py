@@ -8,18 +8,19 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from webapp.tools.id_tools import wikipedia_id_from_movie, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
-from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info
+from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
 from webapp.tools.search_tools import movies_from_term
-from webapp.models import Profiles, People, Genres, Movies, Properties, Associations
+from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
 
 site_logger = logging.getLogger('log.site')
 movie_logger = logging.getLogger('log.movie')
 property_logger = logging.getLogger('log.property')
 associate_logger = logging.getLogger('log.associate')
+source_logger = logging.getLogger('log.source')
 
 # Display movie list and tools for admin add movie, and add movie with ids
 def view_list(request):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -27,6 +28,7 @@ def view_list(request):
 		if not logged_in_profile_info['id']:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 			return redirect('webapp.views.profile.login')
+		type_dict = get_type_dict()
 		if request.GET.get('add') and request.GET.get('i') and request.GET.get('r') and request.GET.get('n'):
 			'''*****************************************************************************
 			Add movie given imdb identifier (rotten tomatoes and netflix ids required as well) and redirect to movie page by way of association functions if success otherwise back to search with errors
@@ -131,18 +133,18 @@ def view_list(request):
 			# Get all associations with logged in profile to correctly display links (seen later as well)
 			for movie in paginated_movies:
 				try:
-					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					movies.append((movie, True))
 				except Exception:
 					movies.append((movie, False))
 			return render_to_response('movie/view_list.html', {'header' : generate_header_dict(request, 'Movie List'), 'movies' : movies, 'page' : paginated_movies}, RequestContext(request))
-	except Exception:
-		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	#except Exception:
+	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -151,20 +153,21 @@ def view(request, urltitle):
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'danger')
 			return redirect('webapp.views.profile.login')
 		movie = Movies.objects.get(UrlTitle=urltitle)
+		type_dict = get_type_dict()
 		# Get all properties associated with movie (actors, directors, writers, genres)
-		properties = Properties.objects.filter(MovieId=movie)
+		properties = Properties.objects.filter(ConsumeableId=movie, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'])
 		directors, writers, actors, genres = [], [], [], []
 		for property in properties:
-			if property.Type == 0:
+			if property.PropertyTypeId.Description == 'DIRECTOR':
 				directors.append(People.objects.get(id=property.PropertyId))
-			elif property.Type == 1:
+			elif property.PropertyTypeId.Description == 'WRITER':
 				writers.append(People.objects.get(id=property.PropertyId))
-			elif property.Type == 2:
+			elif property.PropertyTypeId.Description == 'ACTOR':
 				actors.append(People.objects.get(id=property.PropertyId))
-			elif property.Type == 3:
+			elif property.PropertyTypeId.Description == 'GENRE':
 				genres.append(Genres.objects.get(id=property.PropertyId))
 		if request.GET.get('assoc'):
-			try:
+			#try:
 				if request.GET.get('add'):
 					'''*****************************************************************************
 					Create association and redirect to movie page
@@ -172,7 +175,7 @@ def view(request, urltitle):
 					*****************************************************************************'''
 					watched = True if request.GET.get('seen') else False
 					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-					association = Associations(ProfileId = profile, MovieId = movie, Watched = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
+					association = Associations(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
 					association.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
 					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies. Please check that the information on this page is accurate as Pref relies on user feedback to correct errors. If you notice an error, such as an actor with a similar (same) name to a different actor being shown here, click on the offending piece of information and click on the correction link to let Pref know about it. Thanks.', 'success')
@@ -181,10 +184,10 @@ def view(request, urltitle):
 					Update association based on a user recently watching a movie and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,recent; MISC: none;
 					*****************************************************************************'''
-					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					# First time watching the specified movie
-					if not association.Watched:
-						association.Watched = True
+					if not association.Consumed:
+						association.Consumed = True
 						association.CreatedAt = datetime.now()
 					association.UpdatedAt = datetime.now()
 					association.save()
@@ -196,13 +199,14 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - assoc,update; MISC: none;
 					*****************************************************************************'''
 					rankings_changed = False
-					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
+					association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					# If first time user watched the movie, update both times
-					if not association.Watched and request.POST.get('watched') == 'Watched':
+					if not association.Consumed and request.POST.get('watched') == 'Watched':
 						association.CreatedAt = datetime.now()
 						association.UpdatedAt = datetime.now()
 					# Else if user is unwatching movie (should not be allowed but mistakes happen), delete saved data
-					elif association.Watched and not request.POST.get('watched') == 'Watched':
+					elif association.Consumed and not request.POST.get('watched') == 'Watched':
 						association.CreatedAt = None
 						association.UpdatedAt = None
 						association.Rank = None
@@ -214,19 +218,34 @@ def view(request, urltitle):
 						if request.POST.get('rating_rated') and request.POST.get('rating_rated') != 'false':
 							# Handle bad float coercion by ignoring the rating
 							try:
-								profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 								association.Rating = int(math.ceil(float(request.POST.get('rating_rated')) * int(math.ceil(100 / profile.NumberOfStars))))
 							except Exception:
 								pass
 						association.Review = request.POST.get('review')
-					association.Watched = request.POST.get('watched') == 'Watched'
-					# Clear source information if no longer accessiblt
+					# Clear source information if no longer accessible or update it with new source object
+					old_source = None
+					if association.SourceId:
+						old_source = association.SourceId
 					if association.Accessible and not request.POST.get('accessible') == 'Accessible':
-						association.Source = None
+						association.SourceId = None
 					else:
-						association.Source = request.POST.get('source')
+						source_text = request.POST.get('source')
+						if source_text:
+							try:
+								existing_source = Sources.objects.get(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Description = source_text)
+								association.SourceId = existing_source
+							except ObjectDoesNotExist:
+								new_source = Sources(ProfileId=profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], Description=source_text)
+								new_source.save()
+								source_logger.info(new_source.Description + ' Create Success by ' + profile.Username)
+								association.SourceId = new_source
+					association.Consumed = request.POST.get('watched') == 'Watched'
 					association.Accessible = request.POST.get('accessible') == 'Accessible'
 					association.save()
+					# Delete old source if no longer relevant
+					if old_source and old_source != association.SourceId and not source_is_relevant(old_source):
+						old_source.delete()
+						source_logger.info(old_source.Description + ' Delete Success by ' + profile.Username)
 					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
 					# Update rankings if ranking of movie was altered in some way
 					if rankings_changed:
@@ -237,23 +256,30 @@ def view(request, urltitle):
 					Delete association and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,remove; MISC: none;
 					*****************************************************************************'''
-					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+					source = None
+					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
+					if association.SourceId:
+						source = association.SourceId
+						association.SourceId = None
 					association.delete()
+					if source and not source_is_relevant(source):
+						source.delete()
+						source_logger.info(source.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
-			except ObjectDoesNotExist:
-				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
-			except Exception:
-				associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-				return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-			return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+			#except ObjectDoesNotExist:
+			#	set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
+			#except Exception:
+			#	associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+			#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-				association = Associations.objects.get(ProfileId = profile, MovieId = movie, Watched=True)
-				associations = Associations.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
+				association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed=True)
+				associations = Associations.objects.filter(ProfileId=profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], Consumed=True).exclude(Rank__isnull=True).order_by('Rank')
 				if request.method == 'POST':
 					'''*****************************************************************************
 					Tree ranker substep consisting of providing new comparison if not done ranking or redirecting to movie page if done ranking
@@ -287,8 +313,8 @@ def view(request, urltitle):
 					# Else continue ranking by finding new comparison movie
 					else:
 						association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
-						compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
-						compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
+						compare_movie = Movies.objects.get(id=associations[mid].ConsumeableId.id)
+						compare_association = Associations.objects.get(ProfileId = profile, ConsumeableId = compare_movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 						compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 						# Use in deciding to pick which movie on left or right
 						rand = random.randint(0,1)
@@ -308,8 +334,8 @@ def view(request, urltitle):
 					max = associations.count()-1
 					mid = (min + max) / 2
 					association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
-					compare_movie = Movies.objects.get(id=associations[mid].MovieId.id)
-					compare_association = Associations.objects.get(ProfileId = profile, MovieId = compare_movie)
+					compare_movie = Movies.objects.get(id=associations[mid].ConsumeableId.id)
+					compare_association = Associations.objects.get(ProfileId = profile, ConsumeableId = compare_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 					rand = random.randint(0,1)
 					return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie if rand == 0 else compare_movie, 'movie2' : compare_movie if rand == 0 else movie, 'association1' : association if rand == 0 else compare_association, 'association2' : compare_association if rand == 0 else association, 'min1' : min if rand == 0 else mid + 1, 'max1' : mid - 1 if rand == 0 else max, 'min2' : mid + 1 if rand == 0 else min, 'max2' : max if rand == 0 else mid - 1}, RequestContext(request))
@@ -321,7 +347,7 @@ def view(request, urltitle):
 			PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - rank; MISC: none;
 			*****************************************************************************'''
 			try:
-				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				association.Rank = None
 				association.save()
 				associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Reset Rank Success')
@@ -339,7 +365,7 @@ def view(request, urltitle):
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				email_from = settings.DEFAULT_FROM_EMAIL
-				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
+				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' ConsumeableId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
@@ -390,20 +416,19 @@ def view(request, urltitle):
 			Delete movie and redirect to home
 			PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - delete; MISC: logged_in_profile.IsAdmin;
 			*****************************************************************************'''
-			print 'here'
 			for property in properties:
 				person, genre = None, None
 				# Delete all property associations
 				property.delete()
 				# Delete actual property if no longer relevant (i.e. has another movie associated with it)
-				if property.Type == 0 or property.Type == 1 or property.Type == 2:
+				if property.PropertyTypeId.TableName == 'PEOPLE':
 					person = People.objects.get(id=property.PropertyId)
 					if person_is_relevant(person):
 						continue
 					else:
 						person.delete()
 						property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
-				elif property.Type == 3:
+				elif property.PropertyTypeId.TableName == 'GENRES':
 					genre = Genres.objects.get(id=property.PropertyId)
 					if genre_is_relevant(genre):
 						continue
@@ -411,8 +436,14 @@ def view(request, urltitle):
 						genre.delete()
 						property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 			# Delete all profile associations (Update rankings afterwards)
-			for association in Associations.objects.select_related().filter(MovieId=movie):
+			for association in Associations.objects.select_related().filter(ConsumeableId=movie,ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE']):
+				if association.SourceId:
+					source = association.SourceId
+					association.SourceId = None
 				association.delete()
+				if source and not source_is_relevant(source):
+					source.delete()
+					source_logger.info(source.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 				associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 				update_rankings(association.ProfileId)
 			# Delete movie
@@ -426,28 +457,28 @@ def view(request, urltitle):
 			PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - add; MISC: logged_in_profile.IsAdmin;
 			*****************************************************************************'''
 			dirs, writs, acts, gens = [], [], [], []
-			type = int(request.GET.get('t')) if request.GET.get('t') and request.GET.get('t').isdigit() else -1
+			type = str(request.GET.get('t')) if request.GET.get('t') else None
 			value = request.POST.get('add')
-			if type ==  0:
+			if type and type ==  'DIRECTOR':
 				dirs.append(value)
-			elif type == 1:
+			elif type and type ==  'WRITER':
 				writs.append(value)
-			elif type == 2:
+			elif type and type ==  'ACTOR':
 				acts.append(value)
-			elif type == 3:
+			elif type and type ==  'GENRE':
 				gens.append(value)
 			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
 			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 'success')
-			properties = Properties.objects.filter(MovieId=movie)
+			properties = Properties.objects.filter(ConsumeableId=movie, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'])
 			directors, writers, actors, genres = [], [], [], []
 			for property in properties:
-				if property.Type == 0:
+				if property.PropertyTypeId.Description == 'DIRECTOR':
 					directors.append(People.objects.get(id=property.PropertyId))
-				elif property.Type == 1:
+				elif property.PropertyTypeId.Description == 'WRITER':
 					writers.append(People.objects.get(id=property.PropertyId))
-				elif property.Type == 2:
+				elif property.PropertyTypeId.Description == 'ACTOR':
 					actors.append(People.objects.get(id=property.PropertyId))
-				elif property.Type == 3:
+				elif property.PropertyTypeId.Description == 'GENRE':
 					genres.append(Genres.objects.get(id=property.PropertyId))
 			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 		else:
@@ -458,20 +489,25 @@ def view(request, urltitle):
 			association = None
 			profile = None
 			indicators = []
+			sources = []
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-				association = Associations.objects.get(ProfileId = profile, MovieId = movie)
+				association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				# Scale rating to profile preference (i.e. from percentage rating to n stars)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 				indicators = profile.StarIndicators.split(',')
 			except Exception:
 				pass
-			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	except ObjectDoesNotExist:
-		raise Http404
-	except Exception:
-		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+			try:
+				sources = Sources.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).values_list('Description', flat=True).order_by('Description')
+			except Exception:
+				pass
+			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
+	#except ObjectDoesNotExist:
+	#	raise Http404
+	#except Exception:
+	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):
@@ -480,6 +516,7 @@ def search(request):
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
+		type_dict = get_type_dict()
 		if request.GET.get('t'):
 			'''*****************************************************************************
 			Search for movie and display movie page or search results page appropriately
@@ -511,7 +548,7 @@ def search(request):
 							found = True
 							if (imdb_movie, False) not in old_movies and (imdb_movie, True) not in old_movies:
 								try:
-									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = imdb_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = imdb_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 									old_movies.append((imdb_movie, True))
 								except Exception:
 									old_movies.append((imdb_movie, False))
@@ -523,7 +560,7 @@ def search(request):
 							found = True
 							if (netflix_movie, False) not in old_movies and (netflix_movie, True) not in old_movies:
 								try:
-									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = netflix_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = netflix_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 									old_movies.append((netflix_movie, True))
 								except Exception:
 									old_movies.append((netflix_movie, False))
@@ -535,7 +572,7 @@ def search(request):
 							found = True
 							if (rt_movie, False) not in old_movies and (rt_movie, True) not in old_movies:
 								try:
-									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = rt_movie)
+									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = rt_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 									old_movies.append((rt_movie, True))
 								except Exception:
 									old_movies.append((rt_movie, False))

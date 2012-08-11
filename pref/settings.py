@@ -129,6 +129,12 @@ LOGGING = {
 			'class': 'logging.FileHandler',
 			'formatter': 'verbose',
 			'filename': LOGGING_DIR + 'associate.log'
+		},
+		'source': {
+			'level': 'DEBUG',
+			'class': 'logging.FileHandler',
+			'formatter': 'verbose',
+			'filename': LOGGING_DIR + 'source.log'
 		}
 	},
 	'loggers': {
@@ -154,6 +160,11 @@ LOGGING = {
 		},
 		'log.associate': {
 			'handlers': ['associate'],
+			'level': 'DEBUG',
+			'propogate': False,
+		},
+		'log.source': {
+			'handlers': ['source'],
 			'level': 'DEBUG',
 			'propogate': False,
 		}

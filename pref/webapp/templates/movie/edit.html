@@ -78,9 +78,9 @@
 		<ul id="directors-list">
 			{% for director in directors %}
 				{% url webapp.views.property.person urlname=director.UrlName as director_url %}
-				<li><a href="{{director_url}}">{{director.Name}}</a> - <a href="{{director_url}}?remove=1&i={{movie.UrlTitle}}&t=0&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{director_url}}?edit=1">Edit</a> <a href="{{director_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{director_url}}">{{director.Name}}</a> - <a href="{{director_url}}?remove=1&i={{movie.UrlTitle}}&t=DIRECTOR&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{director_url}}?edit=1">Edit</a> <a href="{{director_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
-			<form action="{{movie_url}}?add=1&t=0" method="POST"> {% csrf_token %}
+			<form action="{{movie_url}}?add=1&t=DIRECTOR" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
 					<input type="submit" value="Add" />
@@ -93,9 +93,9 @@
 		<ul id="writers-list">
 			{% for writer in writers %}
 				{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
-				<li><a href="{{writer_url}}">{{writer.Name}}</a> - <a href="{{writer_url}}?remove=1&i={{movie.UrlTitle}}&t=1&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{writer_url}}?edit=1">Edit</a> <a href="{{writer_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{writer_url}}">{{writer.Name}}</a> - <a href="{{writer_url}}?remove=1&i={{movie.UrlTitle}}&t=WRITER&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{writer_url}}?edit=1">Edit</a> <a href="{{writer_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
-			<form action="{{movie_url}}?add=1&t=1" method="POST"> {% csrf_token %}
+			<form action="{{movie_url}}?add=1&t=WRITER" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
 					<input type="submit" value="Add" />
@@ -108,9 +108,9 @@
 		<ul id="actors-list">
 			{% for actor in actors %}
 				{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
-				<li><a href="{{actor_url}}">{{actor.Name}}</a> - <a href="{{actor_url}}?remove=1&i={{movie.UrlTitle}}&t=2&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{actor_url}}?edit=1">Edit</a> <a href="{{actor_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{actor_url}}">{{actor.Name}}</a> - <a href="{{actor_url}}?remove=1&i={{movie.UrlTitle}}&t=ACTOR&redirect=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{actor_url}}?edit=1">Edit</a> <a href="{{actor_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
-			<form action="{{movie_url}}?add=1&t=2" method="POST"> {% csrf_token %}
+			<form action="{{movie_url}}?add=1&t=ACTOR" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
 					<input type="submit" value="Add" />
@@ -125,7 +125,7 @@
 				{% url webapp.views.property.genre description=genre.Description as genre_url %}
 				<li><a href="{{genre_url}}">{{genre.Description}}</a> - <a href="{{genre_url}}?remove=1&i={{movie.UrlTitle}}&redirect=1" onclick="return confirmAction('Remove Genre?')">Remove</a> <a href="{{genre_url}}?edit=1">Edit</a> <a href="{{genre_url}}?delete=1" onclick="return confirmAction('Delete Genre?')">Delete</a></li>
 			{% endfor %}
-			<form action="{{movie_url}}?add=1&t=3" method="POST"> {% csrf_token %}
+			<form action="{{movie_url}}?add=1&t=GENRE" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{genres_list|join:'","'}}"]' name="add" id="add" />
 					<input type="submit" value="Add" />

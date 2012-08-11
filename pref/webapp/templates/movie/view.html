@@ -119,12 +119,12 @@
 						<a class="btn btn-success" href="{{movie_url}}?assoc=1&recent=1">Watched Today</a>
 					</div>
 					<div class="span1">
-						{% if association.Watched and association.Rank %}
+						{% if association.Consumed and association.Rank %}
 							<a class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')" rel="popover">{{association.Rank}}</a>
 							<script type="text/javascript">
 								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rerank {{movie.Title}}'});
 							</script>
-						{% elif association.Watched %}
+						{% elif association.Consumed %}
 							<a class="btn btn-large btn-primary" href="{{movie_url}}?rank=1" rel="popover">-</a>
 							<script type="text/javascript">
 								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rank {{movie.Title}} for the first time'});
@@ -133,7 +133,7 @@
 					</div>
 				</div>
 				<br />
-				{% if association.Watched %}
+				{% if association.Consumed %}
 					<div class="row">
 						<div class="span3">
 							First Viewed On: {{association.CreatedAt.date}}
@@ -147,7 +147,7 @@
 				<form action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
 					<div class="row">
 						<div class="span2">
-							{% if association.Watched %}
+							{% if association.Consumed %}
 								<input type="checkbox" name="watched" id="watched" value="Watched" checked /> Watched
 							{% else %}
 								<input type="checkbox" name="watched" id="watched" value="Watched" /> Watched
@@ -161,15 +161,15 @@
 							{% endif %}
 						</div>
 						{% if association.Accessible %}
-							{% if association.Source %}
-								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["Amazon", "Blu-ray", "DVD", "Digital", "Hulu", "Netflix"]' name="source" id="source" value="{{association.Source}}" />
+							{% if association.SourceId %}
+								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" value="{{association.SourceId.Description}}" />
 							{% else %}
-								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["Amazon", "Blu-ray", "DVD", "Digital", "Hulu", "Netflix"]' name="source" id="source" placeholder="Search" />
+								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" placeholder="Source" />
 							{% endif %}
 						{% endif %}
 					</div>
 					<br />
-					{% if association.Watched %}
+					{% if association.Consumed %}
 						<div class="row">
 							<div class="span2">
 								{% if not association.Rating %}

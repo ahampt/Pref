@@ -88,9 +88,9 @@ class ConsumeableTypes(models.Model):
 	Description = models.CharField(max_length=50,unique=True)
 
 class Sources(models.Model):
+	Description = models.CharField(max_length=50)	
 	ProfileId = models.ForeignKey(Profiles,related_name='+')
 	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
-	Description = models.CharField(max_length=50)
 
 	class Meta:
 		unique_together = ('ProfileId', 'ConsumeableTypeId', 'Description')
@@ -143,26 +143,23 @@ class Movies(models.Model):
 				raise ValidationError("WikipediaId must contain at least one character.")
 		
 class Properties(models.Model):
-	MovieId = models.ForeignKey(Movies,related_name='+')
+	ConsumeableId = models.ForeignKey(Movies,related_name='+')
+	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
 	PropertyId = models.IntegerField()
-	Type = models.PositiveSmallIntegerField()
+	PropertyTypeId = models.ForeignKey(PropertyTypes,related_name='+')
 	CreatedAt= models.DateTimeField(auto_now_add=True)
 	UpdatedAt = models.DateTimeField(auto_now=True)
-	
-	def clean(self):
-		type = self.Type
-		if not (type and Type >= 0 and Type <= 3):
-			raise ValidationError("Type must be between 0 and 3 (inclusive).")
-	
+
 	class Meta:
-		unique_together = ('MovieId', 'PropertyId', 'Type')
+		unique_together = ('ConsumeableId', 'ConsumeableTypeId', 'PropertyId', 'PropertyTypeId')
 	
 class Associations(models.Model):
 	ProfileId = models.ForeignKey(Profiles,related_name='+')
-	MovieId = models.ForeignKey(Movies,related_name='+')
-	Watched = models.BooleanField()
+	ConsumeableId = models.ForeignKey(Movies,related_name='+')
+	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
+	Consumed = models.BooleanField()
 	Accessible = models.BooleanField()
-	Source = models.CharField(max_length=45,null=True,blank=True)
+	SourceId =  models.ForeignKey(Sources,related_name='+',null=True,blank=True)
 	Rank = models.PositiveIntegerField(null=True,blank=True)
 	Rating = models.PositiveSmallIntegerField(null=True,blank=True)
 	Review = models.TextField(null=True,blank=True)
@@ -175,4 +172,4 @@ class Associations(models.Model):
 			raise ValidationError("Rating must be an integer between 1 and 100 (inclusive).")
 	
 	class Meta:
-		unique_together = ('ProfileId', 'MovieId')
+		unique_together = ('ProfileId', 'ConsumeableId', 'ConsumeableTypeId')

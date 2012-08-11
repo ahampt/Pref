@@ -43,10 +43,10 @@
 		{% if directed_movies|length > 0 %}
 			{% for movie in directed_movies %}
 				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
-				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=DIRECTOR" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}
-		<form action="{{person_url}}?add=1&t=0" method="POST"> {% csrf_token %}
+		<form action="{{person_url}}?add=1&t=DIRECTOR" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
 				<input type="submit" value="Add" />
@@ -58,10 +58,10 @@
 		{% if written_movies|length > 0 %}
 			{% for movie in written_movies %}
 				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
-				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=WRITER" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}
-		<form action="{{person_url}}?add=1&t=1" method="POST"> {% csrf_token %}
+		<form action="{{person_url}}?add=1&t=WRITER" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
 				<input type="submit" value="Add" />
@@ -73,10 +73,10 @@
 		{% if acted_movies|length > 0 %}
 			{% for movie in acted_movies %}
 				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
-				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=0" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
+				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=ACTOR" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}
-		<form action="{{person_url}}?add=1&t=2" method="POST"> {% csrf_token %}
+		<form action="{{person_url}}?add=1&t=ACTOR" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
 				<input type="submit" value="Add" />

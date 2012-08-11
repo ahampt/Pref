@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import create_properties, create_movie_property, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, check_and_get_session_info
+from webapp.tools.misc_tools import create_properties, create_movie_property, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
 from webapp.models import Profiles, People, Genres, Movies, Properties, Associations
 
 property_logger = logging.getLogger('log.property')
@@ -48,33 +48,34 @@ def person(request, urlname):
 		if permission_response != True:
 			return permission_response
 		# Get all movie associations with person and get all profile associations with said movies
+		type_dict = get_type_dict()
 		person = People.objects.get(UrlName=urlname)
-		directed_properties = Properties.objects.select_related().filter(Type=0, PropertyId=person.id).order_by('-MovieId__Year', 'MovieId__Title')
-		written_properties = Properties.objects.select_related().filter(Type=1, PropertyId=person.id).order_by('-MovieId__Year', 'MovieId__Title')
-		acted_properties = Properties.objects.select_related().filter(Type=2, PropertyId=person.id).order_by('-MovieId__Year', 'MovieId__Title')
+		directed_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_DIRECTOR'], PropertyId=person.id).order_by('-ConsumeableId__Year', 'ConsumeableId__Title')
+		written_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_WRITER'], PropertyId=person.id).order_by('-ConsumeableId__Year', 'ConsumeableId__Title')
+		acted_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_ACTOR'], PropertyId=person.id).order_by('-ConsumeableId__Year', 'ConsumeableId__Title')
 		directed_movies, written_movies, acted_movies = [], [], []
 		directed_movies_tuples, written_movies_tuples, acted_movies_tuples = [], [], []
 		for prop in directed_properties:
-			movie = prop.MovieId
+			movie = prop.ConsumeableId
 			directed_movies.append(movie)
 			try:
-				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				directed_movies_tuples.append((movie, True))
 			except Exception:
 				directed_movies_tuples.append((movie, False))
 		for prop in written_properties:
-			movie = prop.MovieId
+			movie = prop.ConsumeableId
 			written_movies.append(movie)
 			try:
-				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				written_movies_tuples.append((movie, True))
 			except Exception:
 				written_movies_tuples.append((movie, False))
 		for prop in acted_properties:
-			movie = prop.MovieId
+			movie = prop.ConsumeableId
 			acted_movies.append(movie)
 			try:
-				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				acted_movies_tuples.append((movie, True))
 			except Exception:
 				acted_movies_tuples.append((movie, False))
@@ -134,13 +135,13 @@ def person(request, urlname):
 			# Delete all movie associations with person
 			for prop in directed_properties:
 				prop.delete()
-				associate_logger.info(prop.MovieId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
+				associate_logger.info(prop.ConsumeableId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
 			for prop in written_properties:
 				prop.delete()
-				associate_logger.info(prop.MovieId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
+				associate_logger.info(prop.ConsumeableId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
 			for prop in acted_properties:
 				prop.delete()
-				associate_logger.info(prop.MovieId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
+				associate_logger.info(prop.ConsumeableId.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
 			# Delete person
 			person.delete()
 			property_logger.info(person.UrlName + ' Delete Success by ' + logged_in_profile_info['username'])
@@ -155,19 +156,19 @@ def person(request, urlname):
 				value = request.POST.get('add')
 				title = value[:len(value) - 7] if value and len(value) > 7 else None
 				year = int(value[len(value) - 5:len(value)-1]) if value and len(value) > 7 and value[len(value) - 5:len(value)-1].isdigit() else None
-				type = int(request.GET.get('t')) if request.GET.get('t') and request.GET.get('t').isdigit() else -1
+				type = str(request.GET.get('t')) if request.GET.get('t') else None
 				movie = Movies.objects.get(Title=title, Year=year)
 				create_movie_property(movie, person.id, person.UrlName, type, logged_in_profile_info['username'])
-				directed_properties = Properties.objects.select_related().filter(Type=0, PropertyId=person.id)
-				written_properties = Properties.objects.select_related().filter(Type=1, PropertyId=person.id)
-				acted_properties = Properties.objects.select_related().filter(Type=2, PropertyId=person.id)
+				directed_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_DIRECTOR'], PropertyId=person.id)
+				written_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_WRITER'], PropertyId=person.id)
+				acted_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_ACTOR'], PropertyId=person.id)
 				directed_movies, written_movies, acted_movies = [], [], []
 				for prop in directed_properties:
-					directed_movies.append(prop.MovieId)
+					directed_movies.append(prop.ConsumeableId)
 				for prop in written_properties:
-					written_movies.append(prop.MovieId)
+					written_movies.append(prop.ConsumeableId)
 				for prop in acted_properties:
-					acted_movies.append(prop.MovieId)
+					acted_movies.append(prop.ConsumeableId)
 				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to ' + person.Name + '\'s career.', 'success')
 				return render_to_response('property/edit_person.html', {'header' : generate_header_dict(request, 'Update'), 'person' : person, 'directed_movies' : directed_movies, 'written_movies' : written_movies, 'acted_movies' : acted_movies}, RequestContext(request))
 			except ObjectDoesNotExist:
@@ -183,9 +184,9 @@ def person(request, urlname):
 			*****************************************************************************'''
 			re = True if request.GET.get('redirect') else False
 			id = request.GET.get('i')
-			type = int(request.GET.get('t')) if request.GET.get('t') and request.GET.get('t').isdigit() else -1
+			type = str(request.GET.get('t')) if request.GET.get('t') else None
 			movie = Movies.objects.get(UrlTitle=id)
-			prop = Properties.objects.get(MovieId=movie, PropertyId=person.id, Type=type)
+			prop = Properties.objects.get(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], ConsumeableId=movie, PropertyId=person.id, PropertyTypeId=type_dict['PROPERTY_' + type])
 			prop.delete()
 			associate_logger.info(movie.UrlTitle + ' Disassociated ' + person.UrlName + ' Success by ' + logged_in_profile_info['username'])
 			if person_is_relevant(person):
@@ -259,8 +260,9 @@ def genre(request, description):
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
 			return permission_response
+		type_dict = get_type_dict()
 		genre = Genres.objects.get(Description=description)
-		properties = Properties.objects.select_related().filter(Type=3, PropertyId=genre.id).order_by('-MovieId__Year', 'MovieId__Title')
+		properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_GENRE'], PropertyId=genre.id).order_by('-ConsumeableId__Year', 'ConsumeableId__Title')
 		length = int(request.GET.get('length')) if request.GET.get('length') and request.GET.get('length').isdigit() else 25
 		length = length if length <= 100 else 100
 		paginator = Paginator(properties, length)
@@ -273,10 +275,10 @@ def genre(request, description):
 			genre_movies = paginator.page(paginator.num_pages)
 		movies, movies_tuples = [], []
 		for prop in genre_movies:
-			movie = prop.MovieId
+			movie = prop.ConsumeableId
 			movies.append(movie)
 			try:
-				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], MovieId = movie)
+				association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 				movies_tuples.append((movie, True))
 			except Exception:
 				movies_tuples.append((movie, False))
@@ -335,7 +337,7 @@ def genre(request, description):
 			*****************************************************************************'''
 			for prop in properties:
 				prop.delete()
-				associate_logger.info(prop.MovieId.UrlTitle + ' Disassociated ' + genre.Description + ' Success by ' + logged_in_profile_info['username'])
+				associate_logger.info(prop.ConsumeableId.UrlTitle + ' Disassociated ' + genre.Description + ' Success by ' + logged_in_profile_info['username'])
 			genre.delete()
 			property_logger.info(genre.Description + ' Delete Success by' + logged_in_profile_info['username'])
 			set_msg(request, 'Genre Deleted!', genre.Description + ' has successfully been deleted.', 'danger')
@@ -351,10 +353,10 @@ def genre(request, description):
 				year = int(value[len(value) - 5:len(value)-1]) if value and len(value) > 7 and value[len(value) - 5:len(value)-1].isdigit() else None
 				movie = Movies.objects.get(Title=title, Year=year)
 				create_movie_property(movie, genre.id, genre.Description, 3, logged_in_profile_info['username'])
-				properties = Properties.objects.select_related().filter(Type=3, PropertyId=genre.id)
+				properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_GENRE'], PropertyId=genre.id)
 				movies = []
 				for prop in properties:
-					movies.append(prop.MovieId)
+					movies.append(prop.ConsumeableId)
 				set_msg(request, 'Movie Added!', movie.Title + ' has successfully been added to' + genre.Description + ' movies.', 'warning')
 				return render_to_response('property/edit_genre.html', {'header' : generate_header_dict(request, 'Update'), 'genre' : genre, 'movies' : movies}, RequestContext(request))
 			except ObjectDoesNotExist:
@@ -371,7 +373,7 @@ def genre(request, description):
 			re = True if request.GET.get('redirect') else False
 			id = request.GET.get('i')
 			movie = Movies.objects.get(UrlTitle=id)
-			prop = Properties.objects.get(MovieId=movie, PropertyId=genre.id, Type=3)
+			prop = Properties.objects.get(ConsumeableId=movie, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyId=genre.id, PropertyTypeId=type_dict['PROPERTY_GENRE'])
 			prop.delete()
 			associate_logger.info(movie.UrlTitle + ' Disassociated ' + genre.Description + ' Success by ' + logged_in_profile_info['username'])
 			if genre_is_relevant(genre):

@@ -2,7 +2,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
-from webapp.models import Profiles, Movies, People, Genres, Properties, Associations
+from webapp.models import Profiles, Movies, ConsumeableTypes, People, Genres, Properties, PropertyTypes, Associations
 
 profile_logger = logging.getLogger('log.profile')
 movie_logger = logging.getLogger('log.movie')
@@ -10,9 +10,9 @@ property_logger = logging.getLogger('log.property')
 associate_logger = logging.getLogger('log.associate')
 
 # Create and save association given movie and property
-def create_movie_property(movie, property_id, property_name, type, logged_in_profile_username):
+def create_movie_property(movie, property_id, property_name, property_type, logged_in_profile_username):
 	try:
-		property = Properties(MovieId = movie, PropertyId = property_id, Type = type)
+		property = Properties(ConsumeableId = movie, ConsumeableTypeId = ConsumeableTypes.objects.get(Description='MOVIE'), PropertyId = property_id, PropertyTypeId = PropertyTypes.objects.get(Description=property_type))
 		property.save()
 		associate_logger.info(movie.UrlTitle + ' Associated ' + property_name + ' Success by ' + logged_in_profile_username)
 	except:
@@ -24,49 +24,49 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 		# Associate old property
 		try:
 			person = People.objects.get(Name=director)
-			create_movie_property(movie, person.id, person.UrlName, 0, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
 		# Create and associate new property
 		except:
 			person = People(Name=director)
 			person.full_clean()
 			person.save()
 			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 0, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
 	for writer in writers:
 		# Associate old property
 		try:
 			person = People.objects.get(Name=writer)
-			create_movie_property(movie, person.id, person.UrlName, 1, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
 		# Create and associate new property
 		except:
 			person = People(Name=writer)
 			person.full_clean()
 			person.save()
 			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 1, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
 	for actor in actors:
 		# Associate old property
 		try:
 			person = People.objects.get(Name=actor)
-			create_movie_property(movie, person.id, person.UrlName, 2, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
 		# Create and associate new property
 		except:
 			person = People(Name=actor)
 			person.full_clean()
 			person.save()
 			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 2, logged_in_profile_username)
+			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
 	for genre in genres:
 		# Associate old property
 		try:
 			g = Genres.objects.get(Description=genre)
-			create_movie_property(movie, g.id, person.UrlName, 3, logged_in_profile_username)
+			create_movie_property(movie, g.id, person.UrlName, 'GENRE', logged_in_profile_username)
 		# Create and associate new property
 		except:
 			g = Genres(Description=genre)
 			g.save()
 			property_logger.info(g.Description + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, g.id, g.Description, 3, logged_in_profile_username)
+			create_movie_property(movie, g.id, g.Description, 'GENRE', logged_in_profile_username)
 
 # Return imdb url given movie
 def imdb_link_for_movie(movie):
@@ -197,23 +197,35 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access = F
 
 # Return true if property is associated with any movies
 def person_is_relevant(person):
-	properties = Properties.objects.filter(PropertyId=person.id)
+	properties = Properties.objects.filter(ConsumeableTypeId=ConsumeableTypes.objects.get(Description='MOVIE'), PropertyId=person.id)
 	for property in properties:
-		if property.Type == 0 or property.Type == 1 or property.Type == 2:
+		if property.PropertyTypeId.TableName == 'PEOPLE':
 			return True
 	return False
 
 # Return true if property is associated with any movies
 def genre_is_relevant(genre):
-	properties = Properties.objects.filter(PropertyId=genre.id)
+	properties = Properties.objects.filter(ConsumeableTypeId=ConsumeableTypes.objects.get(Description='MOVIE'), PropertyId=genre.id)
 	for property in properties:
-		if property.Type == 3:
+		if property.PropertyTypeId.TableName == 'GENRES':
 			return True
 	return False
 
+def source_is_relevant(source):
+	return Associations.objects.filter(SourceId=source).count() > 0
+
 # Iterate through all ranked titles and set rank to increments of one
 def update_rankings(profile):
-	associations = Associations.objects.filter(ProfileId=profile,Watched=True).exclude(Rank__isnull=True).order_by('Rank')
+	associations = Associations.objects.filter(ProfileId=profile,Consumed=True).exclude(Rank__isnull=True).order_by('Rank')
 	for i in range(len(associations)):
 		associations[i].Rank = i+1
 		associations[i].save()
+
+# Return dictionary of all consumeable and property types
+def get_type_dict():
+	type_dict = {}
+	for consumeable_type in ConsumeableTypes.objects.all():
+		type_dict['CONSUMEABLE_' + consumeable_type.Description] = consumeable_type
+	for property_type in PropertyTypes.objects.all():
+		type_dict['PROPERTY_' + property_type.Description] = property_type
+	return type_dict
