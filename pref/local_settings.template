@@ -29,6 +29,9 @@ EMAIL_PORT = 25
 # DEBUG = False
 # TEMPLATE_DEBUG = DEBUG
 # 
+# Uncomment in production environment if using https for entire site
+# SESSION_COOKIE_SECURE = True
+# 
 # Make sure that this is strong enough that brute force will not work
 # ACCESS_PASSWORD = ''
 # 
