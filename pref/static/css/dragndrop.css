@@ -1,7 +1,8 @@
 #dhtmlgoodies_dragDropContainer ul{float:left}
 #right_col ul{float:right}
 #right_col li{list-style-type:none;height:15px;border:1px solid #000;margin-bottom:2px;font-size:13px;line-height:15px;padding:2px}
-#dhtmlgoodies_dragDropContainer li,#dragContent li,li#indicateDestination{list-style-type:none;height:15px;background-color:#F5F5F5;border:1px solid #000;margin-bottom:2px;cursor:pointer;font-size:13px;line-height:15px;padding:2px}
+#dhtmlgoodies_dragDropContainer li,li#indicateDestination{list-style-type:none;height:15px;background-color:#F5F5F5;border:1px solid #000;margin-bottom:2px;cursor:pointer;font-size:13px;line-height:15px;padding:2px}
+#dragContent li{list-style-type:none;height:15px;background-color:#F5F5F5;border:1px solid #000;margin-bottom:2px;cursor:move;font-size:13px;line-height:15px;padding:2px}
 #dhtmlgoodies_listOfItems ul{width:480px}
 div#dhtmlgoodies_listOfItems div{border:1px solid #999}
 div#dhtmlgoodies_listOfItems div ul{margin-left:10px}
