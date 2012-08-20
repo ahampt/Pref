@@ -37,9 +37,11 @@
 
 	<!-- javascript -->
 	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-	{% if static == 'starbox' %}<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1/prototype.js"></script>
-	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
-	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>{% endif %}
+	{% if static == 'starbox' %}
+		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1/prototype.js"></script>
+		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>
+	{% endif %}
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
 	{% if header.tracking_code %}
 		<script language="javascript" type="text/javascript">

@@ -20,7 +20,7 @@ source_logger = logging.getLogger('log.source')
 
 # Display movie list and tools for admin add movie, and add movie with ids
 def view_list(request):
-	#try:
+	try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -138,13 +138,13 @@ def view_list(request):
 				except Exception:
 					movies.append((movie, False))
 			return render_to_response('movie/view_list.html', {'header' : generate_header_dict(request, 'Movie List'), 'movies' : movies, 'page' : paginated_movies}, RequestContext(request))
-	#except Exception:
-	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	except Exception:
+		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	#try:
+	try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -167,7 +167,7 @@ def view(request, urltitle):
 			elif property.PropertyTypeId.Description == 'GENRE':
 				genres.append(Genres.objects.get(id=property.PropertyId))
 		if request.GET.get('assoc'):
-			#try:
+			try:
 				if request.GET.get('add'):
 					'''*****************************************************************************
 					Create association and redirect to movie page
@@ -269,12 +269,12 @@ def view(request, urltitle):
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
-			#except ObjectDoesNotExist:
-			#	set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
-			#except Exception:
-			#	associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-			#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+			except ObjectDoesNotExist:
+				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
+			except Exception:
+				associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+				return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+			return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
@@ -318,7 +318,22 @@ def view(request, urltitle):
 						compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 						# Use in deciding to pick which movie on left or right
 						rand = random.randint(0,1)
-						return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie if rand == 0 else compare_movie, 'movie2' : compare_movie if rand == 0 else movie, 'association1' : association if rand == 0 else compare_association, 'association2' : compare_association if rand == 0 else association, 'min1' : min if rand == 0 else mid + 1, 'max1' : mid - 1 if rand == 0 else max, 'min2' : mid + 1 if rand == 0 else min, 'max2' : max if rand == 0 else mid - 1}, RequestContext(request))
+
+						movie1 = movie if rand == 0 else compare_movie
+						movie2 = compare_movie if rand == 0 else movie
+						association1 = association if rand == 0 else compare_association
+						association2 = compare_association if rand == 0 else association
+						min1 = min if rand == 0 else mid + 1
+						max1 = mid - 1 if rand == 0 else max
+						min2 = mid + 1 if rand == 0 else min
+						max2 = max if rand == 0 else mid - 1
+
+						current_progress = int(request.POST.get('hiddenCurrentProgress')) + 1 if request.POST.get('hiddenCurrentProgress') and request.POST.get('hiddenCurrentProgress').isdigit() else 1
+						max_progress = int(request.POST.get('hiddenMaxProgress')) if request.POST.get('hiddenMaxProgress') and request.POST.get('hiddenMaxProgress').isdigit() else 1
+						progress = int(round((float(current_progress) / float(max_progress)) * 100))
+						print str(current_progress) + ' - ' + str(max_progress) + ' - ' + str(progress)
+
+						return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie1, 'movie2' : movie2, 'association1' : association1, 'association2' : association2, 'min1' : min1, 'max1' : max1, 'min2' : min2, 'max2' : max2, 'current_progress' : current_progress, 'max_progress' : max_progress, 'progress' : progress}, RequestContext(request))
 				else:
 					'''*****************************************************************************
 					Tree ranker start displaying first comparison or redirecting to movie page if first ranking
@@ -338,7 +353,21 @@ def view(request, urltitle):
 					compare_association = Associations.objects.get(ProfileId = profile, ConsumeableId = compare_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					compare_association.Rating = compare_association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if compare_association.Rating else None
 					rand = random.randint(0,1)
-					return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie if rand == 0 else compare_movie, 'movie2' : compare_movie if rand == 0 else movie, 'association1' : association if rand == 0 else compare_association, 'association2' : compare_association if rand == 0 else association, 'min1' : min if rand == 0 else mid + 1, 'max1' : mid - 1 if rand == 0 else max, 'min2' : mid + 1 if rand == 0 else min, 'max2' : max if rand == 0 else mid - 1}, RequestContext(request))
+
+					movie1 = movie if rand == 0 else compare_movie
+					movie2 = compare_movie if rand == 0 else movie
+					association1 = association if rand == 0 else compare_association
+					association2 = compare_association if rand == 0 else association
+					min1 = min if rand == 0 else mid + 1
+					max1 = mid - 1 if rand == 0 else max
+					min2 = mid + 1 if rand == 0 else min
+					max2 = max if rand == 0 else mid - 1
+
+					current_progress = 0
+					max_progress = int(math.ceil(math.log(associations.count(), 2))) + 1
+					progress = 0
+
+					return render_to_response('movie/t_rank.html', {'header' : generate_header_dict(request, 'Movie Ranker'), 'movie' : movie, 'movie1' : movie1, 'movie2' : movie2, 'association1' : association1, 'association2' : association2, 'min1' : min1, 'max1' : max1, 'min2' : min2, 'max2' : max2, 'current_progress' : current_progress, 'max_progress' : max_progress, 'progress' : progress}, RequestContext(request))
 			except Exception:
 				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rerank'):
@@ -503,11 +532,11 @@ def view(request, urltitle):
 			except Exception:
 				pass
 			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	#except ObjectDoesNotExist:
-	#	raise Http404
-	#except Exception:
-	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	except ObjectDoesNotExist:
+		raise Http404
+	except Exception:
+		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):

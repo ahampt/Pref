@@ -43,6 +43,7 @@
 				nodes[no].innerHTML = no+1 + oldHTML.substring(oldHTML.indexOf("."));
 			}
 		}
+		setPieconProgress();
 	}
 	
 	window.onload = initDragDropScript;

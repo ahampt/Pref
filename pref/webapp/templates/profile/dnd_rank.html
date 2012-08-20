@@ -6,6 +6,14 @@
 	{% include 'includes/header.html' %}
 	
 	{% if movies or unranked_movies %}
+		<script language="javascript" type="text/javascript">
+			var setPieconProgress = function() {
+				Piecon.setProgress((($("li[id]").length - $("li[id^=u]").length) / $("li[id]").length) * 100);
+			};
+			$(document).ready(function() {
+				setPieconProgress();
+			});
+		</script>
 		<div class="row">
 			<div id="dhtmlgoodies_dragDropContainer">
 				<div id="dhtmlgoodies_listOfItems">	
@@ -17,7 +25,7 @@
 							<li id="u{{movie.id}}">Unranked: {{movie.Title}} ({{movie.Year}})</li>
 						{% endfor %}
 					</ul>
-				</div>	
+				</div>
 			</div>
 			<ul id="dragContent"></ul>
 			<div id="dragDropIndicator"><img src="{{STATIC_URL}}img/insert.gif"></div>

@@ -5,18 +5,28 @@
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
 	{% if movie %}
+		<script language="javascript" type="text/javascript">
+			$(document).ready(function() {
+				Piecon.setProgress({{progress}});
+			});
+		</script>
 		{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: {{progress}}%;"></div>
+		</div>
 		{% if movie1 %}
 			<div class="well span3">
 				<div class="row">
 					<form id="leftForm" action="{{movie_url}}?rank=1" method="post"> {% csrf_token %}
-						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min1}}">
-						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max1}}">
+						<input type="hidden" id="hiddenCurrentProgress" name="hiddenCurrentProgress" value="{{current_progress}}">
+						<input type="hidden" id="hiddenMaxProgress" name="hiddenMaxProgress" value="{{max_progress}}">
+						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min1}}" />
+						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max1}}" />
 						{% if movie.id == movie1.id %}
-							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association2.Rank}}">
+							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association2.Rank}}" />
 						{% else %}
-							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association1.Rank}}">
-						{% endif %}						
+							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association1.Rank}}" />
+						{% endif %}
 						<div class="span1 offset1">
 							<input class="btn btn-large btn-primary" type="submit" value="Pick" />
 						</div>
@@ -34,13 +44,15 @@
 			<div class="well span3">
 				<div class="row">
 					<form id="rightForm" action="{{movie_url}}?rank=1" method="post"> {% csrf_token %}
-						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min2}}">
-						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max2}}">
+						<input type="hidden" id="hiddenCurrentProgress" name="hiddenCurrentProgress" value="{{current_progress}}">
+						<input type="hidden" id="hiddenMaxProgress" name="hiddenMaxProgress" value="{{max_progress}}">
+						<input type="hidden" id="hiddenMin" name="hiddenMin" value="{{min2}}" />
+						<input type="hidden" id="hiddenMax" name="hiddenMax" value="{{max2}}" />
 						{% if movie.id == movie2.id %}
-							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association1.Rank}}">
+							<input type="hidden" id="hiddenPickNew" name="hiddenPickNew" value="{{association1.Rank}}" />
 						{% else %}
-							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association2.Rank}}">
-						{% endif %}		
+							<input type="hidden" id="hiddenPickOld" name="hiddenPickOld" value="{{association2.Rank}}" />
+						{% endif %}
 						<div class="span1 offset1">
 							<input class="btn btn-large btn-primary" type="submit" value="Pick" />
 						</div>
@@ -55,6 +67,6 @@
 			</div>
 		{% endif %}
 	{% endif %}
-	{% include 'includes/footer.html' %}
+	{% include 'includes/footer.html' with static='t_rank' %}
 </body>
 </html>

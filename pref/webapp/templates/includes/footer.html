@@ -17,32 +17,45 @@
 	</div> <!-- /container -->
 	<!-- javascript -->
 	{% if static == 'dnd' %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/dragndrop.js"></script>{% endif %}
+	{% if static == 'dnd' or static == 't_rank' %}
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/piecon.min.js"></script>
+		<script language="javascript" type="text/javascript">
+			Piecon.setOptions({
+				color: '#ff0084', // Pie chart color
+				background: '#bbb', // Empty pie chart color
+				shadow: '#fff', // Outer ring color
+				fallback: 'force' // Toggles displaying percentage in the title bar (possible values - true, false, 'force')
+			});
+		</script>
+	{% endif %}
 	
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/std.js"></script>
-	<script language="javascript" type="text/javascript">
-		function starboxChangedText(event) {
-			var indicator = this.down('.indicator'),
-			pick = (event.memo.rating || 0) * {{profile.SubStars}} - 1,
-			indicator = this.down('.indicator');
-			// for restoring, store the indicator text on the star if it was not set before.
-			this.starboxResetText = this.starboxResetText || indicator.innerHTML;
-			this.down('.indicator').update(
-			["{{indicators|join:'","'}}"]
-			[pick]);  
-		}
-		// when the link is clicked update the restore value
-		function starboxRatedText() {
-			var indicator = this.down('.indicator');
-			this.starboxResetText = indicator.innerHTML;
-		}
-		// here we restore the indicator on mouseout, if needed
-		function starboxLeftText() {
-			this.down('.indicator').update(this.starboxResetText || '');
-		}
-		// attach the custom events after the DOM is loaded
-		document.observe('dom:loaded', function() {
-			$('rating').observe('starbox:changed', starboxChangedText) // observe the mouseover
-			.observe('starbox:rated', starboxRatedText) // observe the click
-			.observe('starbox:left', starboxLeftText); // observe the mouseout
-		});
-	</script>
+	{% if static == 'starbox' %}
+		<script language="javascript" type="text/javascript">
+			function starboxChangedText(event) {
+				var indicator = this.down('.indicator'),
+				pick = (event.memo.rating || 0) * {{profile.SubStars}} - 1,
+				indicator = this.down('.indicator');
+				// for restoring, store the indicator text on the star if it was not set before.
+				this.starboxResetText = this.starboxResetText || indicator.innerHTML;
+				this.down('.indicator').update(
+				["{{indicators|join:'","'}}"]
+				[pick]);  
+			}
+			// when the link is clicked update the restore value
+			function starboxRatedText() {
+				var indicator = this.down('.indicator');
+				this.starboxResetText = indicator.innerHTML;
+			}
+			// here we restore the indicator on mouseout, if needed
+			function starboxLeftText() {
+				this.down('.indicator').update(this.starboxResetText || '');
+			}
+			// attach the custom events after the DOM is loaded
+			$(document).ready(function() {
+				$('rating').observe('starbox:changed', starboxChangedText) // observe the mouseover
+				.observe('starbox:rated', starboxRatedText) // observe the click
+				.observe('starbox:left', starboxLeftText); // observe the mouseout
+			});
+		</script>
+	{% endif %}
