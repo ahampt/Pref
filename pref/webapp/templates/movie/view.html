@@ -122,12 +122,12 @@
 						{% if association.Consumed and association.Rank %}
 							<a class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')" rel="popover">{{association.Rank}}</a>
 							<script type="text/javascript">
-								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rerank {{movie.Title}}'});
+								jQuery("a[rel=popover]").popover({placement: 'top', title: 'RERANK', content: 'Rethink movie\'s position in your rankings.'});
 							</script>
 						{% elif association.Consumed %}
 							<a class="btn btn-large btn-primary" href="{{movie_url}}?rank=1" rel="popover">-</a>
 							<script type="text/javascript">
-								jQuery("a[rel=popover]").popover({placement: 'top', title: 'Rank {{movie.Title}} for the first time'});
+								jQuery("a[rel=popover]").popover({placement: 'top', title: 'RANK', content: 'View movie in the context of others that you have watched.'});
 							</script>
 						{% endif %}
 					</div>
