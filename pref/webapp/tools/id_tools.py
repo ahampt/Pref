@@ -21,7 +21,7 @@ def get_wikipedia_dict(wikipedia_id):
 			dom = parseString(res.read())
 			if dom.getElementsByTagName('page'):
 				for elem in dom.getElementsByTagName('page'):
-					if elem.getAttribute('missing'):
+					if elem.hasAttribute('missing'):
 						return {'Response' : False}
 					else:
 						return {'Response' : True}
