@@ -5,7 +5,11 @@
 	{% include 'includes/navbar.html' %}
 	{% if movie %}
 		{% include 'includes/header.html' %}
-		{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+		{% if old_urltitle %}
+			{% url webapp.views.movie.view urltitle=old_urltitle as movie_url %}
+		{% else %}
+			{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+		{% endif %}
 		<ul class="nav nav-tabs">
 			<li><a href="{{movie_url}}">View</a></li>
 			<li class="active"><a href="{{movie_url}}?edit=1">Edit</a></li>

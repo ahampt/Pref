@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.id_tools import wikipedia_id_from_movie, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
+from webapp.tools.id_tools import wikipedia_movie_from_title, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
 from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
 from webapp.tools.search_tools import movies_from_term
 from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
@@ -41,10 +41,10 @@ def view_list(request):
 					error_text = None
 					movie = res_dict.get('movie')
 					# Get wikipedia id if resolved
-					res = wikipedia_id_from_movie(movie)
-					if res.get('id'):
-						movie.WikipediaId = res.get('id')
-					# Set rotten tomatoes and netflix id
+					res = wikipedia_movie_from_title(movie)
+					if res.get('movie'):
+						movie.WikipediaId = res.get('movie').WikipediaId
+					# Set rotten tomatoes, netflix, and wikipedia id
 					movie.RottenTomatoesId = request.GET.get('r')
 					test = movie_from_rottentomatoes_input(movie.RottenTomatoesId)
 					if not test.get('movie'):
@@ -167,7 +167,7 @@ def view(request, urltitle):
 			elif property.PropertyTypeId.Description == 'GENRE':
 				genres.append(Genres.objects.get(id=property.PropertyId))
 		if request.GET.get('assoc'):
-			#try:
+			try:
 				if request.GET.get('add'):
 					'''*****************************************************************************
 					Create association and redirect to movie page
@@ -295,12 +295,12 @@ def view(request, urltitle):
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
-			#except ObjectDoesNotExist:
-			#	set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
-			#except Exception:
-			#	associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-			#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+			except ObjectDoesNotExist:
+				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
+			except Exception:
+				associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+				return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+			return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
@@ -441,6 +441,9 @@ def view(request, urltitle):
 				Save changes made to movie and redirect to movie page
 				PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
+				has_error = False
+				old_urltitle = None
+				validation_dict = None
 				try:
 					movie.Title = request.POST.get('title')
 					movie.Year = request.POST.get('year')
@@ -449,17 +452,29 @@ def view(request, urltitle):
 					movie.RottenTomatoesId = request.POST.get('rottentomatoes')
 					movie.NetflixId = request.POST.get('netflix')
 					movie.WikipediaId = request.POST.get('wikipedia')
-					movie.full_clean()
-					movie.save()
-					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
-					set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 'success')
-					return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+					old_urltitle = movie.UrlTitle
+					validation_dict = movie_from_inputs(movie.ImdbId, movie.NetflixId, movie.RottenTomatoesId, movie.WikipediaId)
+					if validation_dict.get('success'):
+						movie.full_clean()
+						movie.save()
+						movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
+						set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 'success')
+						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+					else:
+						has_error = True
+						raise ValidationError('')
 				except ValidationError as e:
 					movie_logger.info(movie.UrlTitle + ' Update Failure by ' + logged_in_profile_info['username'])
-					error_msg = e.message_dict
-					for key in error_msg:
-						error_msg[key] = str(error_msg[key][0])
-					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+					error_msg = {}
+					if has_error:
+						if validation_dict and not validation_dict.get('success'):
+							for key, value in validation_dict.get('error_list').items():
+								error_msg[key] = value
+					else:
+						error_msg = e.message_dict
+						for key in error_msg:
+							error_msg[key] = str(error_msg[key][0])
+					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'old_urltitle' : old_urltitle, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display edit page
