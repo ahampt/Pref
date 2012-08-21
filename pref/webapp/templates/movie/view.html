@@ -133,18 +133,18 @@
 					</div>
 				</div>
 				<br />
-				{% if association.Consumed %}
-					<div class="row">
-						<div class="span3">
-							First Viewed On: {{association.CreatedAt.date}}
-						</div>
-						<div class="span3">
-							Last Viewed On: {{association.UpdatedAt.date}}
-						</div>
-					</div>
-					<br />
-				{% endif %}
 				<form action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
+					{% if association.Consumed %}
+						<div class="row">
+							<div class="span3">
+								First Viewed On: <input type="text" class="input-small tcal" name="first_viewed" id="first_viewed" value="{{association.CreatedAt.month}}/{{association.CreatedAt.day}}/{{association.CreatedAt.year}}" />
+							</div>
+							<div class="span3">
+								Last Viewed On: <input type="text" class="input-small tcal" name="last_viewed" id="last_viewed" value="{{association.UpdatedAt.month}}/{{association.UpdatedAt.day}}/{{association.UpdatedAt.year}}" />
+							</div>
+						</div>
+						<br />
+					{% endif %}
 					<div class="row">
 						<div class="span2">
 							{% if association.Consumed %}

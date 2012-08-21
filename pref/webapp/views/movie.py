@@ -144,7 +144,7 @@ def view_list(request):
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -167,7 +167,7 @@ def view(request, urltitle):
 			elif property.PropertyTypeId.Description == 'GENRE':
 				genres.append(Genres.objects.get(id=property.PropertyId))
 		if request.GET.get('assoc'):
-			try:
+			#try:
 				if request.GET.get('add'):
 					'''*****************************************************************************
 					Create association and redirect to movie page
@@ -215,6 +215,32 @@ def view(request, urltitle):
 						rankings_changed = True
 					# Update the rest
 					else:
+						if request.POST.get('first_viewed') and request.POST.get('first_viewed') != (str(association.CreatedAt.month) + '/' + str(association.CreatedAt.day) + '/' + str(association.CreatedAt.year)):
+							try:
+								new_date_text = request.POST.get('first_viewed')
+								month = int(new_date_text[0:new_date_text.find('/')])
+								day = int(new_date_text[new_date_text.find('/')+1:new_date_text.find('/', new_date_text.find('/')+1)])
+								year = int(new_date_text[new_date_text.find('/', new_date_text.find('/')+1)+1:])
+								new_date = datetime(year, month, day)
+								if(new_date < datetime.now()):
+									association.CreatedAt = new_date
+								else:
+									association.CreatedAt = datetime.now()
+							except Exception:
+								pass
+						if request.POST.get('last_viewed') and request.POST.get('last_viewed') != (str(association.UpdatedAt.month) + '/' + str(association.UpdatedAt.day) + '/' + str(association.UpdatedAt.year)):
+							try:
+								new_date_text = request.POST.get('last_viewed')
+								month = int(new_date_text[0:new_date_text.find('/')])
+								day = int(new_date_text[new_date_text.find('/')+1:new_date_text.find('/', new_date_text.find('/')+1)])
+								year = int(new_date_text[new_date_text.find('/', new_date_text.find('/')+1)+1:])
+								new_date = datetime(year, month, day)
+								if(new_date < datetime.now()):
+									association.UpdatedAt = new_date
+								else:
+									association.UpdatedAt = datetime.now()
+							except Exception:
+								pass
 						if request.POST.get('rating_rated') and request.POST.get('rating_rated') != 'false':
 							# Handle bad float coercion by ignoring the rating
 							try:
@@ -269,12 +295,12 @@ def view(request, urltitle):
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
-			except ObjectDoesNotExist:
-				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
-			except Exception:
-				associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-				return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-			return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+			#except ObjectDoesNotExist:
+			#	set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
+			#except Exception:
+			#	associate_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+			#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+				return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
@@ -532,11 +558,11 @@ def view(request, urltitle):
 			except Exception:
 				pass
 			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	except ObjectDoesNotExist:
-		raise Http404
-	except Exception:
-		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	#except ObjectDoesNotExist:
+	#	raise Http404
+	#except Exception:
+	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):
