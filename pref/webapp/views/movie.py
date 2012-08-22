@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.id_tools import wikipedia_movie_from_title, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input
+from webapp.tools.id_tools import wikipedia_movie_from_title, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
 from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
 from webapp.tools.search_tools import movies_from_term
 from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
@@ -144,7 +144,7 @@ def view_list(request):
 
 # Movie tools including view, rank, delete, edit, suggestion, add property, and association tools (add, remove, edit)
 def view(request, urltitle):
-	#try:
+	try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -572,12 +572,12 @@ def view(request, urltitle):
 				sources = Sources.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).values_list('Description', flat=True).order_by('Description')
 			except Exception:
 				pass
-			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie)}, RequestContext(request))
-	#except ObjectDoesNotExist:
-	#	raise Http404
-	#except Exception:
-	#	movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'availability' : get_netflix_availability_dict(movie), 'supplements' : get_rottentomatoes_supplemental_dict(movie)}, RequestContext(request))
+	except ObjectDoesNotExist:
+		raise Http404
+	except Exception:
+		movie_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Display search results
 def search(request):

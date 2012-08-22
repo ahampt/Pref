@@ -26,16 +26,44 @@
 				<div class="span1">
 					<a class="btn btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
 				</div>
+				{% if movie.ImdbId %}
+					<div class="span1">
+						<a href="{{links.imdb}}" target="_blank" title="IMDb"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
+					</div>
+				{% endif %}
+				{% if movie.WikipediaId %}
+					<div class="span1">
+						<a href="{{links.wikipedia}}" target="_blank" title="Wikipedia"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
+					</div>
+				{% endif %}
+			{% else %}
+				{% if movie.ImdbId %}
+					<div class="span1 offset3">
+						<a href="{{links.imdb}}" target="_blank" title="IMDb"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
+					</div>
+				{% endif %}
+				{% if movie.WikipediaId %}
+					{% if movie.ImdbId %}
+						<div class="span1">
+					{% else %}
+						<div class="span1 offset3">
+					{% endif %}
+						<a href="{{links.wikipedia}}" target="_blank" title="Wikipedia"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
+					</div>
+				{% endif %}
 			{% endif %}
 		</div>
 		<br />
-		<div class="row">
-			<div class="span1">
+		{% if supplements.POSTER_HREF %}
+			<img src="{{supplements.POSTER_HREF}}" style="float: left;" />
+		{% endif %}
+		<div class="row" style="float: left;">
+			<div class="span1 offset1">
 			{% if movie.Runtime %}
 				{{movie.Runtime}} min
 			{% endif %}
 			</div>
-			<div class="span3">
+			<div class="span4">
 			{% if genres %}
 				{% for genre in genres %}
 					{% url webapp.views.property.genre description=genre.Description as genre_url %}
@@ -46,30 +74,10 @@
 				{% endfor %}
 			{% endif %}
 			</div>
-			<div class="span1">
-			{% if movie.ImdbId %}
-				<a href="{{links.imdb}}" target="_blank"><img src="{{STATIC_URL}}img/ico/imdb.jpg" /></a>
-			{% endif %}
-			</div>
-			<div class="span1">
-			{% if movie.RottenTomatoesId %}
-				<a href="{{links.rt}}" target="_blank"><img src="{{STATIC_URL}}img/ico/rotten_tomatoes.jpg" /></a>
-			{% endif %}
-			</div>
-			<div class="span1">
-			{% if movie.NetflixId %}
-				<a href="{{links.netflix}}" target="_blank"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
-			{% endif %}
-			</div>
-			<div class="span1">
-			{% if movie.WikipediaId %}
-				<a href="{{links.wikipedia}}" target="_blank"><img src="{{STATIC_URL}}img/ico/wikipedia.jpg" /></a>
-			{% endif %}
-			</div>
 		</div>
-		<br />
-		<div class="row">
-			<div class="span4">
+		<br /><br />
+		<div class="row" style="float: left;">
+			<div class="span4 offset1">
 			{% if directors %}
 				Directed By: 
 				{% for director in directors %}
@@ -81,31 +89,138 @@
 				{% endfor %}
 			{% endif %}
 			</div>
-			<div class="span4">
-			{% if writers %}
-				Writen By: 
-				{% for writer in writers %}
-					{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
-					<a href="{{writer_url}}">{{writer.Name}}</a>
-					{% if not forloop.last %}
-						,
-					{% endif %}
-				{% endfor %}
-			{% endif %}
+		</div>
+		<br /><br />
+		<div class="row" style="float: left;">
+			<div class="span4 offset1">
+				{% if writers %}
+					Writen By: 
+					{% for writer in writers %}
+						{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
+						<a href="{{writer_url}}">{{writer.Name}}</a>
+						{% if not forloop.last %}
+							,
+						{% endif %}
+					{% endfor %}
+				{% endif %}
 			</div>
 		</div>
-		<br />
-		{% if actors %}
-			Cast: 
-			{% for actor in actors %}
-				{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
-				<a href="{{actor_url}}">{{actor.Name}}</a>
-				{% if not forloop.last %}
-					,
+		<br /><br />
+		<div class="row" style="float: left;">
+			<div class="span5 offset1">
+				{% if actors %}
+					Cast: 
+					{% for actor in actors %}
+						{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
+						<a href="{{actor_url}}">{{actor.Name}}</a>
+						{% if not forloop.last %}
+							,
+						{% endif %}
+					{% endfor %}
 				{% endif %}
-			{% endfor %}
+			</div>
+		</div>
+		<br /><br />
+		{% if movie.RottenTomatoesId %}
+			<div class="row" style="float: left;">
+				<div class="tabbable span5 offset1">
+					<ul class="nav nav-tabs">
+						{% if supplements.CRITICS_RATING and supplements.CRITICS_SCORE %}
+							<li class="active"><a href="#critics" data-toggle="tab">Critics</a></li>
+							{% if supplements.AUDIENCE_RATING and supplements.AUDIENCE_SCORE %}
+								<li><a href="#audience" data-toggle="tab">Audience</a></li>
+							{% endif %}
+						{% elif supplements.AUDIENCE_RATING and supplements.AUDIENCE_SCORE %}
+							<li class="active"><a href="#audience" data-toggle="tab">Audience</a></li>
+						{% else %}
+							<li class="active"><a href="#rt" data-toggle="tab">Rotten Tomatoes</a></li>
+						{% endif %}
+					</ul>
+					<div class="tab-content" style="border-bottom: 1px solid #DDDDDD;">
+						{% if supplements.CRITICS_RATING and supplements.CRITICS_SCORE %}
+							<div class="tab-pane active" id="critics">
+								<div class="span2">
+									<a href="{{links.rt}}" target="_blank" title="Rotten Tomatoes"><img src="{{STATIC_URL}}img/rt/{{supplements.CRITICS_RATING}}" /></a>
+									<h1 style="display: inline;">&nbsp{{supplements.CRITICS_SCORE}}%</h1>
+								</div>
+								<div class="progress progress-striped span2">
+									{% if supplements.CRITICS_SCORE >= 60 %}
+										<div class="bar bar-danger" style="width: {{supplements.CRITICS_SCORE}}%;"></div>
+									{% else %}
+										<div class="bar bar-success" style="width: {{supplements.CRITICS_SCORE}}%;"></div>
+									{% endif %}
+								</div>
+								{% if supplements.CONSENSUS %}
+									<br /><br /><br />
+									<p>{{supplements.CONSENSUS}}</p>
+								{% endif %}
+							</div>
+							{% if supplements.AUDIENCE_RATING and supplements.AUDIENCE_SCORE %}
+								<div class="tab-pane" id="audience">
+									<div class="span2">
+										<a href="{{links.rt}}" target="_blank" title="Rotten Tomatoes"><img src="{{STATIC_URL}}img/rt/{{supplements.AUDIENCE_RATING}}" /></a>
+										<h1 style="display: inline;">&nbsp{{supplements.AUDIENCE_SCORE}}%</h1>
+									</div>
+									<div class="progress progress-striped span2">
+										{% if supplements.AUDIENCE_SCORE >= 60 %}
+											<div class="bar bar-danger" style="width: {{supplements.AUDIENCE_SCORE}}%;"></div>
+										{% else %}
+											<div class="bar bar-success" style="width: {{supplements.AUDIENCE_SCORE}}%;"></div>
+										{% endif %}
+									</div>
+									<br /><br /><br />
+								</div>
+							{% endif %}
+						{% elif supplements.AUDIENCE_RATING and supplements.AUDIENCE_SCORE %}
+							<div class="tab-pane active" id="audience">
+								<div class="span2">
+									<a href="{{links.rt}}" target="_blank" title="Rotten Tomatoes"><img src="{{STATIC_URL}}img/rt/{{supplements.AUDIENCE_RATING}}" /></a>
+									<h1 style="display: inline;">&nbsp{{supplements.AUDIENCE_SCORE}}%</h1>
+								</div>
+								<div class="progress progress-striped span2">
+									{% if supplements.AUDIENCE_SCORE >= 60 %}
+										<div class="bar bar-danger" style="width: {{supplements.AUDIENCE_SCORE}}%;"></div>
+									{% else %}
+										<div class="bar bar-success" style="width: {{supplements.AUDIENCE_SCORE}}%;"></div>
+									{% endif %}
+								</div>
+								<br /><br /><br />
+							</div>
+						{% else %}
+							<div class="tab-pane" id="rt">
+								<a href="{{links.rt}}" target="_blank" title="Rotten Tomatoes"><img src="{{STATIC_URL}}img/ico/rotten_tomatoes.jpg" /></a>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<br /><br /><br /><br /><br /><br /><br /><br /><br />
 		{% endif %}
 		<br /><br />
+		{% if movie.NetflixId %}
+			<div class="row" style="margin: 0; border-bottom: 1px solid #DDDDDD;">
+				{% if availability.DVD %}
+					<a id="disc_add" class="btn btn-danger" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'disc', 'disc_add');" style="float: right; margin-right: 60px;">Add to Queue</a>
+					<script type="text/javascript">
+						jQuery("#disc_add").popover({placement: 'top', trigger: 'hover', title: 'Add to Queue', content: 'Add DVD of this movie to your Netflix queue.'});
+					</script>
+				{% endif %}
+				{% if availability.INSTANT %}
+					<a id="instant_add" class="btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'instant', 'instant_add');" style="float: right; margin-right: 20px;">Add</a>
+					<script type="text/javascript">
+						jQuery("#instant_add").popover({placement: 'top', trigger: 'hover', title: 'Add Movie', content: 'Watch this movie later on Netflix.'});
+					</script>
+					<a id="instant_play" class="btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.openPlayer('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null);" style="float: right; margin-right: 20px;">Play</a>
+					<script type="text/javascript">
+						jQuery("#instant_play").popover({placement: 'top', trigger: 'hover', title: 'Play Movie', content: 'Watch this movie now on Netflix.'});
+					</script>
+				{% endif %}
+				<a href="{{links.netflix}}" target="_blank" title="Netflix" style="float: right; margin-right: 20px;"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
+				<br /><br /><br />
+			
+			</div>
+			<br /><br />
+		{% endif %}
 		{% if association and profile %}
 			<div class="well">
 				<div class="row">
@@ -120,14 +235,14 @@
 					</div>
 					<div class="span1">
 						{% if association.Consumed and association.Rank %}
-							<a class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')" rel="popover">{{association.Rank}}</a>
+							<a id="rerank_btn" class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')">{{association.Rank}}</a>
 							<script type="text/javascript">
-								jQuery("a[rel=popover]").popover({placement: 'top', title: 'RERANK', content: 'Rethink movie\'s position in your rankings.'});
+								jQuery("#rerank_btn").popover({placement: 'top', trigger: 'hover', title: 'RERANK', content: 'Rethink movie\'s position in your rankings.'});
 							</script>
 						{% elif association.Consumed %}
-							<a class="btn btn-large btn-primary" href="{{movie_url}}?rank=1" rel="popover">-</a>
+							<a id="rank_btn" class="btn btn-large btn-primary" href="{{movie_url}}?rank=1">-</a>
 							<script type="text/javascript">
-								jQuery("a[rel=popover]").popover({placement: 'top', title: 'RANK', content: 'View movie in the context of others that you have watched.'});
+								jQuery("#rank_btn").popover({placement: 'top', trigger: 'hover', title: 'RANK', content: 'View movie in the context of others that you have watched.'});
 							</script>
 						{% endif %}
 					</div>

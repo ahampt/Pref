@@ -248,6 +248,29 @@ def get_netflix_dom(netflix_id, href = None):
 	except Exception:
 		return {'Response' : False}
 
+# Return dictionary of netflix availability data for specified movie
+def get_netflix_availability_dict(movie):
+	if movie.NetflixId:
+		availability_dict = {'BLU_RAY' : False, 'DVD' : False, 'INSTANT' : False}
+		dom = get_netflix_dom(None, 'http://api.netflix.com/catalog/titles/movies/' + movie.NetflixId + '/format_availability')
+		try:
+			if dom.get('Response') == False:
+				return {'error_msg' : 'Invalid'}
+		except Exception:
+			pass
+		for node in dom.getElementsByTagName('availability'):
+			if node.getElementsByTagName('category') and node.getElementsByTagName('category')[0] and node.getElementsByTagName('category')[0].getAttribute('label'):
+				availability_label = node.getElementsByTagName('category')[0].getAttribute('label')
+				if availability_label == 'Blu-ray':
+					availability_dict['BLU-RAY'] = True
+				elif availability_label == 'DVD':
+					availability_dict['DVD'] = True
+				elif availability_label == 'instant':
+					availability_dict['INSTANT'] = True
+		return availability_dict
+	else:
+		return {'error_msg' : 'Invalid'}
+
 # Return movie given netflix url or id
 def movie_from_netflix_input(netflix_input):
 	movie = Movies()
@@ -347,6 +370,44 @@ def get_rottentomatoes_dict(rottentomatoes_id):
 			return {'Response' : False}
 	except Exception:
 		return {'Response' : False}
+
+# Return dictionary of supplemental rotten tomatoes data for specified movie
+def get_rottentomatoes_supplemental_dict(movie):
+	if movie.RottenTomatoesId:
+		supplemental_dict = {'POSTER_HREF' : False, 'CONSENSUS' : False, 'CRITICS_RATING' : False, 'CRITICS_SCORE' : False, 'AUDIENCE_RATING' : False, 'AUDIENCE_SCORE' : False}
+		rt_dict = get_rottentomatoes_dict(movie.RottenTomatoesId)
+		try:
+			if rt_dict.get('Response') == False:
+				return {'error_msg' : 'Invalid'}
+		except Exception:
+			pass
+		if rt_dict.get('posters'):
+			if rt_dict.get('posters').get('detailed'):
+				supplemental_dict['POSTER_HREF'] = rt_dict.get('posters').get('detailed')
+			elif rt_dict.get('posters').get('profile'):
+				supplemental_dict['POSTER_HREF'] = rt_dict.get('posters').get('profile')
+		if rt_dict.get('critics_consensus'):
+			supplemental_dict['CONSENSUS'] = rt_dict.get('critics_consensus')
+		if rt_dict.get('ratings'):
+			if rt_dict.get('ratings').get('critics_rating'):
+				if rt_dict.get('ratings').get('critics_rating') == 'Certified Fresh':
+					supplemental_dict['CRITICS_RATING'] = 'certified_fresh.png'
+				elif rt_dict.get('ratings').get('critics_rating') == 'Fresh':
+					supplemental_dict['CRITICS_RATING'] = 'fresh.png'
+				elif rt_dict.get('ratings').get('critics_rating') == 'Rotten':
+					supplemental_dict['CRITICS_RATING'] = 'rotten.png'
+			if rt_dict.get('ratings').get('audience_rating'):
+				if rt_dict.get('ratings').get('audience_rating') == 'Upright':
+					supplemental_dict['AUDIENCE_RATING'] = 'upright.png'
+				elif rt_dict.get('ratings').get('audience_rating') == 'Spilled':
+					supplemental_dict['AUDIENCE_RATING'] = 'spilled.png'
+			if rt_dict.get('ratings').get('critics_score'):
+				supplemental_dict['CRITICS_SCORE'] = rt_dict.get('ratings').get('critics_score')
+			if rt_dict.get('ratings').get('audience_score'):
+				supplemental_dict['AUDIENCE_SCORE'] = rt_dict.get('ratings').get('audience_score')
+		return supplemental_dict
+	else:
+		return {'error_msg' : 'Invalid'}
 
 # Return movie given rotten tomatoes id
 def movie_from_rottentomatoes_input(rottentomatoes_input):

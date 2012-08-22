@@ -31,6 +31,7 @@
 	
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/std.js"></script>
 	{% if static == 'starbox' %}
+		<script language="javascript" type="text/javascript" src="http://jsapi.netflix.com/us/api/js/api.js"></script>
 		<script language="javascript" type="text/javascript">
 			function starboxChangedText(event) {
 				var indicator = this.down('.indicator'),
