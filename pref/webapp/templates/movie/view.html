@@ -294,7 +294,7 @@
 								{% endif %}
 								<div id='rating'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
 								<script language="javascript" type='text/javascript'>
-									new Starbox('rating', {{association.Rating|default:"0"}}, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, color: '#FFD700', duration: 0.3, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, rated: {{association.Rating|default:"false"}}, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}, total: 1});
+									new Starbox('rating', {{association.Rating|default:"0"}}, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, color: '#FFD700', duration: 0.3, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, rated: {{association.Rating|default:"false"}}, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}, total: {% if association.Rating %} 1 {% else %} 0 {% endif %}});
 								</script>
 							</div>
 							<div class="span5">

@@ -53,7 +53,7 @@
 				this.down('.indicator').update(this.starboxResetText || '');
 			}
 			// attach the custom events after the DOM is loaded
-			$(document).ready(function() {
+			document.observe('dom:loaded', function() {
 				$('rating').observe('starbox:changed', starboxChangedText) // observe the mouseover
 				.observe('starbox:rated', starboxRatedText) // observe the click
 				.observe('starbox:left', starboxLeftText); // observe the mouseout

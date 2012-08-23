@@ -427,21 +427,45 @@ def view(request, username):
 						for key in error_msg:
 							error_msg[key] = str(error_msg[key][0])
 					# Used in displaying default rating in starbox (see template)
-					rate_range = []
+					rate_range, index_list, lookup_list = [], [], []
 					for i in range(profile.NumberOfStars):
 						for j in range(profile.SubStars):
 							rate_range.append(str(i + (float(j + 1) / profile.SubStars)))
-					return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'error_msg' : error_msg}, RequestContext(request))
+					index_list = range(0, len(rate_range), 2) if profile.SubStars != 1 else range(0, len(rate_range), 1)
+					i = 0
+					while i < len(index_list):
+						if profile.SubStars == 1:
+							lookup_list.append((index_list[i], i, 0, None))
+						elif profile.SubStars == 2:
+							lookup_list.append((index_list[i], i, 0, 1))
+						elif profile.SubStars == 4:
+							lookup_list.append((index_list[i], i / 2, 0, 1))
+							lookup_list.append((index_list[i+1], i / 2, 2, 3))
+							i = i + 1
+						i = i + 1
+					return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list, 'error_msg' : error_msg}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display edit page
 				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
 				*****************************************************************************'''
-				rate_range = []
+				rate_range, index_list, lookup_list = [], [], []
 				for i in range(profile.NumberOfStars):
 					for j in range(profile.SubStars):
 						rate_range.append(str(i + (float(j + 1) / profile.SubStars)))
-				return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range}, RequestContext(request))
+				index_list = range(0, len(rate_range), 2) if profile.SubStars != 1 else range(0, len(rate_range), 1)
+				i = 0
+				while i < len(index_list):
+					if profile.SubStars == 1:
+						lookup_list.append((index_list[i], i, 0, None))
+					elif profile.SubStars == 2:
+						lookup_list.append((index_list[i], i, 0, 1))
+					elif profile.SubStars == 4:
+						lookup_list.append((index_list[i], i / 2, 0, 1))
+						lookup_list.append((index_list[i+1], i / 2, 2, 3))
+						i = i + 1
+					i = i + 1
+				return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list}, RequestContext(request))
 		elif admin_rights and request.GET.get('delete'):
 			'''*****************************************************************************
 			Delete profile and redirect to home

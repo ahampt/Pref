@@ -103,25 +103,23 @@
 				<input type="radio" name="stars" value="0" {% if profile.StarImage == 0 %} checked {% endif %} /> <img src="{{STATIC_URL}}img/starbox/big.png" />
 			</div>
 		</div>
-		{% for star_number in profile.NumberOfStars|get_range %}
-			{% for sub_number in profile.SubStars|divide_rounding_up:2|get_range %}
-				<div class="row">
-					<div class="span2">
-						<div id='test_{{star_number}}_{{sub_number}}'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
-						<script language="javascript" type='text/javascript'>
-							new Starbox('test_{{star_number}}_{{sub_number}}', {{profile.SubStars|multiply:star_number|add:sub_number|get_item:rate_range}}, {buttons: {{star_number|add:1|multiply:profile.SubStars}}, duration: 0.25, effect: {mouseover: true, mouseout: true}, ghosting: true, max: {{star_number|add:1}}, rated: {{profile.SubStars|multiply:star_number|add:sub_number|get_item:rate_range}}, rerate: true, overlay: 'default.png', stars: {{star_number|add:1}}});
-						</script>
-					</div>
-					<div class="span2">
-						<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number|multiply:2}}" id="indicator_{{star_number}}_{{sub_number|multiply:2}}" value="{{profile.SubStars|multiply:star_number|add:sub_number|get_item:indicators}}" />
-					</div>
-					{% if profile.SubStars != 1 %}
-						<div class="span2">
-							<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number|multiply:2|add:1}}" id="indicator_{{star_number}}_{{sub_number|multiply:2|add:1}}" value="{{profile.SubStars|multiply:star_number|add:sub_number|add:1|get_item:indicators}}" />
-						</div>
-					{% endif %}
+		{% for index, star_number, sub_number_one, sub_number_two in lookup_list %}
+			<div class="row">
+				<div class="span2">
+					<div id='test_{{star_number}}_{{sub_number_one}}'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
+					<script language="javascript" type='text/javascript'>
+						new Starbox('test_{{star_number}}_{{sub_number_one}}', {{index|get_item:rate_range}}, {buttons: {{star_number|add:1|multiply:profile.SubStars}}, duration: 0.25, effect: {mouseover: true, mouseout: true}, ghosting: true, max: {{star_number|add:1}}, rated: {{index|get_item:rate_range}}, rerate: true, overlay: 'default.png', stars: {{star_number|add:1}}, total: 1});
+					</script>
 				</div>
-			{% endfor %}
+				<div class="span2">
+					<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number_one}}" id="indicator_{{star_number}}_{{sub_number_one}}" value="{{index|get_item:indicators}}" />
+				</div>
+				{% if profile.SubStars != 1 %}
+					<div class="span2">
+						<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number_two}}" id="indicator_{{star_number}}_{{sub_number_two}}" value="{{index|add:1|get_item:indicators}}" />
+					</div>
+				{% endif %}
+			</div>
 		{% endfor %}
 		<br />
 		<div class="row">
