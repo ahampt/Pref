@@ -6,3 +6,7 @@ body {
 .display-dropdown {
 	display: block;
 }
+
+form.navbar-search .btn {
+	margin-top: 0;
+}
