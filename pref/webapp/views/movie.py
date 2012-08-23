@@ -605,69 +605,62 @@ def search(request):
 			length = length if length <= 20 else 20
 			res_dict = movies_from_term(term, length)
 			if res_dict.get('success'):
-				new_movies = res_dict.get('movies')
-				old_movies = []
-				links = []
+				result_movies = res_dict.get('movies')
+				movies = []
 				i = 0
-				while i < len(new_movies):
-					movie = new_movies[i]
+				while i < len(result_movies):
+					movie = result_movies[i]
 					found = False
 					try:
 						if movie.ImdbId:
 							imdb_movie = Movies.objects.get(ImdbId=movie.ImdbId)
 							found = True
-							if (imdb_movie, False) not in old_movies and (imdb_movie, True) not in old_movies:
+							if (imdb_movie, False, False) not in movies and (imdb_movie, True, False) not in movies:
 								try:
 									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = imdb_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
-									old_movies.append((imdb_movie, True))
+									movies.append((imdb_movie, True, False))
 								except Exception:
-									old_movies.append((imdb_movie, False))
+									movies.append((imdb_movie, False, False))
 					except ObjectDoesNotExist:
 						pass
 					try:
 						if movie.NetflixId:
 							netflix_movie = Movies.objects.get(NetflixId=movie.NetflixId)
 							found = True
-							if (netflix_movie, False) not in old_movies and (netflix_movie, True) not in old_movies:
+							if (netflix_movie, False, False) not in movies and (netflix_movie, True, False) not in movies:
 								try:
 									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = netflix_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
-									old_movies.append((netflix_movie, True))
+									movies.append((netflix_movie, True, False))
 								except Exception:
-									old_movies.append((netflix_movie, False))
+									movies.append((netflix_movie, False, False))
 					except ObjectDoesNotExist:
 						pass
 					try:
 						if movie.RottenTomatoesId:
 							rt_movie = Movies.objects.get(RottenTomatoesId=movie.RottenTomatoesId)
 							found = True
-							if (rt_movie, False) not in old_movies and (rt_movie, True) not in old_movies:
+							if (rt_movie, False, False) not in movies and (rt_movie, True, False) not in movies:
 								try:
 									association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = rt_movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
-									old_movies.append((rt_movie, True))
+									movies.append((rt_movie, True, False))
 								except Exception:
-									old_movies.append((rt_movie, False))
+									movies.append((rt_movie, False, False))
 					except ObjectDoesNotExist:
 						pass
-					if found:
-						del new_movies[i]
-					else:
-						i += 1
-				i = 0
-				while i < len(new_movies):
-					if new_movies[i].ImdbId and new_movies[i].RottenTomatoesId and not new_movies[i].NetflixId:
-						res = netflix_movie_from_title(new_movies[i], True)
-						if res.get('id'):
-							new_movies[i].NetflixId = res.get('id')
-					elif new_movies[i].ImdbId and new_movies[i].NetflixId and not new_movies[i].RottenTomatoesId:
-						res = rottentomatoes_movie_from_title(new_movies[i], True)
-						if res.get('id'):
-							new_movies[i].RottenTomatoesId = res.get('id')
-					if new_movies[i].ImdbId and new_movies[i].RottenTomatoesId and new_movies[i].NetflixId:
-						new_movies[i].UrlTitle = imdb_link_for_movie(new_movies[i])
-						i += 1
-					else:
-						del new_movies[i]
-				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : True, 'term' : urllib.unquote(term), 'length' : length, 'new_movies' : new_movies, 'old_movies' : old_movies}, RequestContext(request))
+					if not found:
+						if result_movies[i].ImdbId and result_movies[i].RottenTomatoesId and not result_movies[i].NetflixId:
+							res = netflix_movie_from_title(result_movies[i], True)
+							if res.get('id'):
+								result_movies[i].NetflixId = res.get('id')
+						elif result_movies[i].ImdbId and result_movies[i].NetflixId and not result_movies[i].RottenTomatoesId:
+							res = rottentomatoes_movie_from_title(result_movies[i], True)
+							if res.get('id'):
+								result_movies[i].RottenTomatoesId = res.get('id')
+						if result_movies[i].ImdbId and result_movies[i].RottenTomatoesId and result_movies[i].NetflixId:
+							result_movies[i].UrlTitle = imdb_link_for_movie(result_movies[i])
+							movies.append((result_movies[i], False, True))
+					del result_movies[i]
+				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : True, 'term' : urllib.unquote(term), 'length' : length, 'movies' : movies}, RequestContext(request))
 			else:
 				site_logger.debug('Search Errors: ' + str(res_dict.get('error_list')))
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : False, 'term' : urllib.unquote(term), 'results' : {'Error' : 'No results found.'} }, RequestContext(request))
