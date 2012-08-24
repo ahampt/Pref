@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load webapp_extras %}
-{% include 'includes/head.html' with static='starbox' %}
+{% include 'includes/head.html' with starbox='True' %}
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
@@ -131,6 +131,6 @@
 			</div>
 		</div>
 	</form>
-	{% include 'includes/footer.html' with static='starbox' %}
+	{% include 'includes/footer.html' with starbox='True' %}
 </body>
 </html>

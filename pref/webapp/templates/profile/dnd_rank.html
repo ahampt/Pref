@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-{% include 'includes/head.html' with static='dnd' %}
+{% include 'includes/head.html' with dnd='True' %}
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
@@ -47,6 +47,6 @@
 		<big>No movies ranked. You should <a href="{{discovery_url}}">Find Movies</a> to populate this page.</big>
 	{% endif %}
 
-	{% include 'includes/footer.html' with static='dnd' %}
+	{% include 'includes/footer.html' with dnd='True' piecon='True' %}
 </body>
 </html>

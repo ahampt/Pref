@@ -16,8 +16,8 @@
 	</footer>
 	</div> <!-- /container -->
 	<!-- javascript -->
-	{% if static == 'dnd' %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/dragndrop.js"></script>{% endif %}
-	{% if static == 'dnd' or static == 't_rank' %}
+	{% if dnd %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/dragndrop.js"></script>{% endif %}
+	{% if piecon %}
 		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/piecon.min.js"></script>
 		<script language="javascript" type="text/javascript">
 			Piecon.setOptions({
@@ -28,9 +28,8 @@
 			});
 		</script>
 	{% endif %}
-	
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/std.js"></script>
-	{% if static == 'starbox' %}
+	{% if starbox %}
 		<script language="javascript" type="text/javascript" src="http://jsapi.netflix.com/us/api/js/api.js"></script>
 		<script language="javascript" type="text/javascript">
 			function starboxChangedText(event) {

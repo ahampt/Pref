@@ -6,23 +6,25 @@
 	{% include 'includes/header.html' %}
 	{% url webapp.views.site.disclaimers as disclaimers_url %}
 	{% url webapp.views.site.privacy as privacy_url %}
-	<p>Version 1.1.0</p>
+	<p>Version 1.1.1</p>
 	<p>This website was created (and currently operated) by <a href="http://www.andyhampton.com" target="_blank">me</a> as a way to supplement countless spreadsheets and individual programs to keep track of the things I love across many mediums. You can find more information about the site and contribute by going to <a href="https://github.com/ahampt/Pref" target="_blank">github</a>.</p>
 	<p>Please make comments and suggestions as you use the site by clicking the appropriate buttons on pages when you see them as I am building this site purely to suffice my own needs until people speak up. Thanks</p>
 	<p>Please read the <a href="{{disclaimers_url}}">disclaimers</a> and <a href="{{privacy_url}}">privacy policy</a> before using the site. Be aware that after 90 days of inactivity, user data is no longer safe and may be deleted or altered unintentionally.</p>
 	<p>Many open source and privately developed technologies made this site possible. Please check out the awesome projects below.</p>
 	<ul>
-		<li><a href="http://www.python.org/" target="_blank">Python 2.7.x</a> - Backend code to do almost all computations</li>
+		<li><a href="http://www.python.org/" target="_blank">Python</a> - Backend code to do almost all computations</li>
 		<li><a href="https://www.djangoproject.com/" target="_blank">Django</a> - Web framework to serve urls correctly, generate html, sync with the database, and much more</li>
 		<li><a href="http://www.mysql.com/" target="_blank">MySQL</a> - Database to store all persistent data</li>
 		<li><a href="http://code.daaku.org/python-oauth/" target="_blank">OAUTH</a> - Authentication plugin to communicate with Netflix</li>
 		<li><a href="http://twitter.github.com/bootstrap/" target="_blank">Bootstrap</a> - CSS library that makes this site a pleasure to use</a></li>
 		<li><a href="http://www.nickstakenburg.com/projects/starbox/" target="_blank">Starbox</a> - Star rating system that just works</li>
+		<li><a href="http://www.softcomplex.com/products/tigra_calendar/" target="_blank">Tigra Calender</a> - Date picker</li>
+		<li><a href="https://github.com/lipka/piecon" target="_blank">Piecon</a> - Dynamically generated progress pie charts in the favicon</li>
 		<li><a href="http://www.webfaction.com/" target="_blank">Webfaction</a> - Web hosting</li>
 		<li><a href="http://aws.amazon.com/" target="_blank">Amazon</a> - CDN</li>
 		<li><a href="http://www.dhtmlgoodies.com/index.html" target="_blank">DHTML Goodies</a> - Script for drag and drop tools
 		<li>Javascript libraries from <a href="http://jquery.com/" target="_blank">JQuery</a>, <a href="http://www.prototypejs.org/" target="_blank">Prototype</a>, and <a href="http://script.aculo.us/" target="_blank">Scriptaculous</a> for animations of any kind</li>
-		<li>API's from <a href="http://www.imdb.com/" target="_blank">IMDb</a> (API <a href="http://imdbapi.com/" target="_blank">here</a>), <a href="http://www.rottentomatoes.com/" target="_blank">Rotten Tomatoes</a>, and <a href="http://www.netflix.com/" target="_blank">Netflix</a> for all basic data gathering</li>
+		<li>API's from <a href="http://www.imdb.com/" target="_blank">IMDb</a> (API <a href="http://imdbapi.com/" target="_blank">here</a>), <a href="http://www.rottentomatoes.com/" target="_blank">Rotten Tomatoes</a>, <a href="http://www.netflix.com/" target="_blank">Netflix</a>, and <a href="http://en.wikipedia.org/" target="_blank">Wikipedia</a> for all basic data gathering</li>
 	</ul>
 	{% include 'includes/footer.html' %}
 </body>

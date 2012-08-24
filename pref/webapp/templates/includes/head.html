@@ -13,13 +13,10 @@
 	<!-- styles -->
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/std.css" />
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
-	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/datepicker.css" />
-	{% if static == 'dnd' %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dragndrop.css" />{% endif %}
-	{% if static == 'starbox' %}
-		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />
-		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/tcal.css" />
-	{% endif %}
-	{% if static == 'dnd' %}
+	{% if dnd %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dragndrop.css" />{% endif %}
+	{% if starbox %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />{% endif %}
+	{% if tcal %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/tcal.css" />{% endif %}
+	{% if dnd %}
 		<style>
 			#dhtmlgoodies_listOfItems ul{	/* Left column <ul> */	
 				height: {{size|multiply:25}}px;
@@ -41,14 +38,13 @@
 
 	<!-- javascript -->
 	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-	{% if static == 'starbox' %}
+	{% if starbox %}
 		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1/prototype.js"></script>
 		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
 		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>
-		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/tcal.js"></script>
 	{% endif %}
+	{% if tcal %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/tcal.js"></script>{% endif %}
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
-	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap-datepicker.js"></script>
 	{% if header.tracking_code %}
 		<script language="javascript" type="text/javascript">
 			var _gaq = _gaq || [];
