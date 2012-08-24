@@ -130,7 +130,7 @@ def login(request):
 	try:
 		if request.method == 'POST':
 			'''*****************************************************************************
-			Login to profile and redirect to home on success or back to login/access on failure
+			Login to profile and redirect to home (or previously attempted page) on success or back to login/access on failure
 			PATH: webapp.views.profile.login; METHOD: post; PARAMS: none; MISC: none;
 			*****************************************************************************'''
 			profile = Profiles.objects.get(Username = request.POST.get('username'))
@@ -143,7 +143,7 @@ def login(request):
 				profile.save()
 				profile_logger.info(profile.Username + ' Login Success')
 				set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 'success')
-				return redirect('webapp.views.site.home')
+				return redirect(request.GET.get('redirect')) if request.GET.get('redirect') else redirect('webapp.views.site.home')
 			# Redirect to login if currently logged in (as different profile) or to access otherwise
 			else:
 				profile_logger.info(profile.Username + ' Login Failure')

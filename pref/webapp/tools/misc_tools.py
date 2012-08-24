@@ -189,11 +189,15 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access = F
 	elif check_access:
 		if show_msg:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
-		return redirect('webapp.views.site.access')
+		response = redirect('webapp.views.site.access')
+		response['LOCATION'] += '?redirect=' + (request.GET.get('redirect') if request.GET.get('redirect') else request.path)
+		return response
 	else:
 		if show_msg:
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
-		return redirect('webapp.views.profile.login')
+		response = redirect('webapp.views.profile.login')
+		response['LOCATION'] += '?redirect=' + (request.GET.get('redirect') if request.GET.get('redirect') else request.path)
+		return response
 
 # Return true if property is associated with any movies
 def person_is_relevant(person):
