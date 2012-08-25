@@ -182,7 +182,7 @@ def person(request, urlname):
 			Remove property association with movie and redirect to home or edit page appropriately
 			PATH: webapp.views.property.person urlname; METHOD: none; PARAMS: get - remove; MISC: logged_in_profile.IsAdmin;
 			*****************************************************************************'''
-			re = True if request.GET.get('redirect') else False
+			re = True if request.GET.get('movie') else False
 			id = request.GET.get('i')
 			type = str(request.GET.get('t')) if request.GET.get('t') else None
 			movie = Movies.objects.get(UrlTitle=id)
@@ -370,7 +370,7 @@ def genre(request, description):
 			Remove property association with movie and redirect to home or edit page appropriately
 			PATH: webapp.views.property.genre descsription; METHOD: none; PARAMS: get - remove; MISC: logged_in_profile.IsAdmin;
 			*****************************************************************************'''
-			re = True if request.GET.get('redirect') else False
+			re = True if request.GET.get('movie') else False
 			id = request.GET.get('i')
 			movie = Movies.objects.get(UrlTitle=id)
 			prop = Properties.objects.get(ConsumeableId=movie, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyId=genre.id, PropertyTypeId=type_dict['PROPERTY_GENRE'])
