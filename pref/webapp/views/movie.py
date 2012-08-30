@@ -660,7 +660,7 @@ def search(request):
 							result_movies[i].UrlTitle = imdb_link_for_movie(result_movies[i])
 							movies.append((result_movies[i], False, True))
 					del result_movies[i]
-				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : True, 'term' : urllib.unquote(term), 'length' : length, 'movies' : movies}, RequestContext(request))
+				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : True, 'quoted_term' : term, 'term' : urllib.unquote(term), 'length' : length, 'movies' : movies}, RequestContext(request))
 			else:
 				site_logger.debug('Search Errors: ' + str(res_dict.get('error_list')))
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : False, 'term' : urllib.unquote(term), 'results' : {'Error' : 'No results found.'} }, RequestContext(request))
