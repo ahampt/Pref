@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include 'includes/head.html' %}
-<body onload="setFocus('username')">
+<body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
 	{% url webapp.views.profile.login as login_url %}
 	<form class="well span3 offset4" action="{{login_url}}?only_inherit_redirect=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}" method="post"> {% csrf_token %}
 		<div class="row">
-			<div class="span3"><input class="span3" type="text" name="username" id="username" placeholder="Username" /></div>
+			<div class="span3"><input class="span3" type="text" name="username" id="username" placeholder="Username" autofocus="autofocus" /></div>
 		</div>
 		<br />
 		<div class="row">
