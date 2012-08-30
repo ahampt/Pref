@@ -56,7 +56,8 @@
 		{% endfor %}
 		</table>
 		{% if length < 20 %}
-			<a href="{{request.get_full_path}}&length={{length|add:3}}">+ More Results</a>
+			{% url webapp.views.movie.search as search_url %}
+			<a href="{{search_url}}?t={{quoted_term}}&length={{length|add:3}}">+ More Results</a>
 		{% endif %}
 	{% else %}
 		{% for item in results.items %}
