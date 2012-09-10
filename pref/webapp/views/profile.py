@@ -1,4 +1,4 @@
-import logging, random, sys
+import logging, random, sys, urllib
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -143,7 +143,7 @@ def login(request):
 				profile.save()
 				profile_logger.info(profile.Username + ' Login Success')
 				set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 'success')
-				return redirect(request.GET.get('redirect')) if request.GET.get('redirect') else redirect('webapp.views.site.home')
+				return redirect(urllib.unquote(request.GET.get('redirect'))) if request.GET.get('redirect') else redirect('webapp.views.site.home')
 			# Redirect to login if currently logged in (as different profile) or to access otherwise
 			else:
 				profile_logger.info(profile.Username + ' Login Failure')
