@@ -1,4 +1,4 @@
-import logging
+import logging, urllib
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -193,7 +193,7 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access = F
 		if request.GET.get('redirect'):
 			response['LOCATION'] += '?redirect=' + request.GET.get('redirect')
 		elif not request.GET.get('only_inherit_redirect'):
-			response['LOCATION'] += '?redirect=' + request.path
+			response['LOCATION'] += '?redirect=' + urllib.quote(request.path, '')
 		return response
 	else:
 		if show_msg:
@@ -202,7 +202,7 @@ def check_and_get_session_info(request, logged_in_profile_info, check_access = F
 		if request.GET.get('redirect'):
 			response['LOCATION'] += '?redirect=' + request.GET.get('redirect')
 		elif not request.GET.get('only_inherit_redirect'):
-			response['LOCATION'] += '?redirect=' + request.path
+			response['LOCATION'] += '?redirect=' + urllib.quote(request.path, '')
 		return response
 
 # Return true if property is associated with any movies
