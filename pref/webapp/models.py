@@ -170,6 +170,10 @@ class Associations(models.Model):
 		data = self.Rating
 		if data and not (data >= 0 or data <= 100):
 			raise ValidationError("Rating must be an integer between 1 and 100 (inclusive).")
+		create_date = self.CreatedAt
+		update_date = self.UpdatedAt
+		if create_date and update_date and not (create_date <= update_date):
+			raise ValidationError("First viewed date must be before or same as last viewed date.")
 	
 	class Meta:
 		unique_together = ('ProfileId', 'ConsumeableId', 'ConsumeableTypeId')

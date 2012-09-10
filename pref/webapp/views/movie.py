@@ -267,7 +267,11 @@ def view(request, urltitle):
 								association.SourceId = new_source
 					association.Consumed = request.POST.get('watched') == 'Watched'
 					association.Accessible = request.POST.get('accessible') == 'Accessible'
-					association.save()
+					try:
+						association.full_clean()
+						association.save()
+					except ValidationError:
+						pass
 					# Delete old source if no longer relevant
 					if old_source and old_source != association.SourceId and not source_is_relevant(old_source):
 						old_source.delete()
