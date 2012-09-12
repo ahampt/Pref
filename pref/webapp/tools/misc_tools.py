@@ -141,7 +141,7 @@ def generate_header_dict(request, header_text):
 	movies_titles_years = Movies.objects.values_list('Title', 'Year').order_by('Title')
 	search_list = []
 	for title, year in movies_titles_years:
-		search_list.append(title + ' (' + str(year) + ')')
+		search_list.append(unicode(title) + unicode(' (') + unicode(year) + unicode(')'))
 	return {'msg_dict' : get_msg_dict(request), 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
 
 # Logout and return profile of user

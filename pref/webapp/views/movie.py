@@ -478,13 +478,13 @@ def view(request, urltitle):
 						error_msg = e.message_dict
 						for key in error_msg:
 							error_msg[key] = str(error_msg[key][0])
-					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'old_urltitle' : old_urltitle, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'old_urltitle' : old_urltitle, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : map(unicode, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(unicode, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display edit page
 				PATH: webapp.views.movie.view urltitle; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
-				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+				return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(unicode, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(unicode, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 		elif logged_in_profile_info['admin'] and request.GET.get('delete'):
 			'''*****************************************************************************
 			Delete movie and redirect to home
