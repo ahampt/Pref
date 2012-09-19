@@ -34,54 +34,58 @@ def view_list(request):
 			Add movie given imdb identifier (rotten tomatoes and netflix ids required as well) and redirect to movie page by way of association functions if success otherwise back to search with errors
 			PATH: webapp.views.movie.view_list; METHOD: none; PARAMS: get - add,i,r,n; MISC: none;
 			*****************************************************************************'''
-			res_dict = movie_from_imdb_input(request.GET.get('i'))
-			if res_dict.get('movie'):
-				try:
-					has_error = False
-					error_text = None
+			try:
+				has_error = False
+				error_text = None
+				# Start movie from imdb id
+				res_dict = movie_from_imdb_input(request.GET.get('i'))
+				if res_dict.get('movie'):
 					movie = res_dict.get('movie')
-					# Get wikipedia id if resolved
-					res = wikipedia_movie_from_title(movie)
-					if res.get('movie'):
-						movie.WikipediaId = res.get('movie').WikipediaId
-					# Set rotten tomatoes, netflix, and wikipedia id
-					movie.RottenTomatoesId = request.GET.get('r')
-					test = movie_from_rottentomatoes_input(movie.RottenTomatoesId)
-					if not test.get('movie'):
-						has_error = True
-						error_text = 'Rotten Tomatoes ID Validation: ' + test.get('error_msg')
-						raise ValidationError('')
-					movie.NetflixId = request.GET.get('n')
-					test = movie_from_netflix_input(movie.NetflixId)
-					if not test.get('movie'):
-						has_error = True
-						error_text = 'Netflix ID Validation: ' + test.get('error_msg')
-						raise ValidationError('')
-					movie.full_clean()
-					movie.save()
-					create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
-					movie_logger.info(movie.UrlTitle + ' Create Success by '  + logged_in_profile_info['username'])
-					# Redirect to 'add association' function and add option 'seen' if already present
-					res = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
-					res['Location'] += '?assoc=1&add=1'
-					if request.GET.get('seen'):
-						res['Location'] += '&seen=1'
-					return res
-				except ValidationError as e:
-					urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
-					movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
-					error_msg = None
-					if has_error:
-						error_msg = {'Error' : error_text}
-					else:
-						error_msg = e.message_dict
-						for key in error_msg:
-							error_msg[key] = str(error_msg[key][0])
-					return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : error_msg}, RequestContext(request))
-			else:
-				movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
-				res_dict['error_list'] = {'ImdbId' : res_dict['error_msg']}
-				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : res_dict.get('error_list')}, RequestContext(request))
+				else:
+					has_error = True
+					error_text = 'IMDb ID Validation: ' + res_dict.get('error_msg')
+					raise ValidationError('')
+				# Get wikipedia id if resolved
+				res = wikipedia_movie_from_title(movie)
+				if res.get('movie'):
+					movie.WikipediaId = res.get('movie').WikipediaId
+				# Set rotten tomatoes, netflix, and wikipedia id
+				movie.RottenTomatoesId = request.GET.get('r')
+				test = movie_from_rottentomatoes_input(movie.RottenTomatoesId)
+				if test.get('movie'):
+					# Use better cast list from rotten tomatoes
+					res_dict['actors'] = test.get('actors')
+				else:
+					has_error = True
+					error_text = 'Rotten Tomatoes ID Validation: ' + test.get('error_msg')
+					raise ValidationError('')
+				movie.NetflixId = request.GET.get('n')
+				test = movie_from_netflix_input(movie.NetflixId)
+				if not test.get('movie'):
+					has_error = True
+					error_text = 'Netflix ID Validation: ' + test.get('error_msg')
+					raise ValidationError('')
+				movie.full_clean()
+				movie.save()
+				create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
+				movie_logger.info(movie.UrlTitle + ' Create Success by '  + logged_in_profile_info['username'])
+				# Redirect to 'add association' function and add option 'seen' if already present
+				res = redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+				res['Location'] += '?assoc=1&add=1'
+				if request.GET.get('seen'):
+					res['Location'] += '&seen=1'
+				return res
+			except ValidationError as e:
+				urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
+				movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
+				error_msg = None
+				if has_error:
+					error_msg = {'Error' : error_text}
+				else:
+					error_msg = e.message_dict
+					for key in error_msg:
+						error_msg[key] = str(error_msg[key][0])
+				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : error_msg}, RequestContext(request))
 		elif logged_in_profile_info['admin'] and request.GET.get('add'):
 			if request.method == 'POST':
 				'''*****************************************************************************
@@ -511,6 +515,7 @@ def view(request, urltitle):
 						property_logger.info(genre.Description + ' Delete Success by ' + logged_in_profile_info['username'])
 			# Delete all profile associations (Update rankings afterwards)
 			for association in Associations.objects.select_related().filter(ConsumeableId=movie,ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE']):
+				source = None
 				if association.SourceId:
 					source = association.SourceId
 					association.SourceId = None
@@ -554,7 +559,7 @@ def view(request, urltitle):
 					actors.append(People.objects.get(id=property.PropertyId))
 				elif property.PropertyTypeId.Description == 'GENRE':
 					genres.append(Genres.objects.get(id=property.PropertyId))
-			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(str, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(str, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
+			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : map(unicode, People.objects.values_list('Name', flat=True).order_by('Name')), 'genres_list' : map(unicode, Genres.objects.values_list('Description', flat=True).order_by('Description'))}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display movie page
@@ -608,6 +613,8 @@ def search(request):
 			length = int(request.GET.get('length')) if request.GET.get('length') and request.GET.get('length').isdigit() else 2
 			length = length if length <= 20 else 20
 			res_dict = movies_from_term(term, length)
+			if res_dict.get('error_list'):
+				site_logger.debug('Search Errors: ' + str(res_dict.get('error_list')))
 			if res_dict.get('success'):
 				result_movies = res_dict.get('movies')
 				movies = []
@@ -666,7 +673,6 @@ def search(request):
 					del result_movies[i]
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : True, 'quoted_term' : term, 'term' : urllib.unquote(term), 'length' : length, 'movies' : movies}, RequestContext(request))
 			else:
-				site_logger.debug('Search Errors: ' + str(res_dict.get('error_list')))
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : False, 'term' : urllib.unquote(term), 'results' : {'Error' : 'No results found.'} }, RequestContext(request))
 		else:
 			'''*****************************************************************************

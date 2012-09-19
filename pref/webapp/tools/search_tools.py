@@ -1,4 +1,4 @@
-import json, urllib, urllib2
+import imdb, json, urllib, urllib2
 from django.conf import settings
 from id_tools import netflix_id_from_input
 from webapp.models import Movies
@@ -6,54 +6,41 @@ from oauth import OAuthRequest
 from oauth.signature_method.hmac_sha1 import OAuthSignatureMethod_HMAC_SHA1
 from xml.dom.minidom import parseString
 
+imdb_access = imdb.IMDb('http')
+
 # Return movie from imdb given title and year
 def imdb_movie_from_data(search_term, year):
 	try:
 		movie = Movies()
-		# Query imdbapi (not affiliated with imdb)
-		search_term = urllib.quote(search_term.encode('ascii', 'ignore'))
-		req = urllib2.Request('http://www.imdbapi.com/?t='+search_term+'&y='+str(year))
-		res = urllib2.urlopen(req)
-		if res.getcode() == 200:
-			# Parse json response
-			imdb_dict = json.loads(res.read())
-			if imdb_dict.get('Response') == 'True':
-				if imdb_dict.get('imdbID'):
-					movie.ImdbId = imdb_dict.get('imdbID')
-				if imdb_dict.get('Title'):
-					movie.Title = imdb_dict.get('Title')
-				if imdb_dict.get('Year'):
-					movie.Year = int(imdb_dict.get('Year'))
-				if imdb_dict.get('Runtime'):
-					runtime_str = imdb_dict.get('Runtime')
-					runtime = 0
-					num_hit, first = False, True
-					str_to_convert = ''
-					# Convert [/d+] h [/d+] m to minutes
-					for char in runtime_str:
-						# Add digits to temp string
-						if char.isdigit():
-							num_hit = True
-							str_to_convert += char
-							continue
-						# Convert temp string from hours to minutes and add to runtime
-						if char.isspace() and num_hit and first:
-							runtime += int(str_to_convert) * 60
-							first = False
-							num_hit = False
-							str_to_convert = ''
-							continue
-						# Add minutes from temp string to runtime
-						if char.isspace() and num_hit and not first:
-							runtime += int(str_to_convert)
-					movie.Runtime = str(runtime)
-			else:
-				return {'error' : 'Invalid IMDb Search'}
+		# Query IMDb using IMDbPY python package
+		res = imdb_access.search_movie(search_term)
+		if res:
+			i = 0
+			while i < len(res) and i < 5:
+				res_dict = res[i]
+				if res_dict.get('year') == year:
+					imdb_access.update(res_dict, info=('main'))
+					imdbID = imdb_access.get_imdbID(res_dict)
+					if imdbID:
+						movie.ImdbId = imdbID
+					if res_dict.get('title'):
+						movie.Title = res_dict.get('title')
+					if res_dict.get('year'):
+						movie.Year = res_dict.get('year')
+					if res_dict.get('runtime'):
+						movie.Runtime = str(filter(lambda x: x.isdigit(), res_dict.get('runtime')[0]))
+					break
+				else:
+					i = i + 1
 		else:
 			return {'error_msg' : 'IMDb API failed, please try again.'}
-		return {'movie' : movie}
+		return {'movie' : movie} if movie.ImdbId else {'error_msg' : 'No IMDb results found, please try again.'}
 	except:
 		return {'error_msg' : 'IMDb API failed, please try again.'}
+
+# Return list of movies from imdb given search term
+def imdb_movies_from_term(search_term, page_limit):
+	return None
 
 # Return list of movies from netflix given search term
 def netflix_movies_from_term(search_term, page_limit):
