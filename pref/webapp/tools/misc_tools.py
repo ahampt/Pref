@@ -26,7 +26,7 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			person = People.objects.get(Name=director)
 			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
 		# Create and associate new property
-		except:
+		except Exception:
 			person = People(Name=director)
 			person.full_clean()
 			person.save()
@@ -38,7 +38,7 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			person = People.objects.get(Name=writer)
 			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
 		# Create and associate new property
-		except:
+		except Exception:
 			person = People(Name=writer)
 			person.full_clean()
 			person.save()
@@ -50,7 +50,7 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			person = People.objects.get(Name=actor)
 			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
 		# Create and associate new property
-		except:
+		except Exception:
 			person = People(Name=actor)
 			person.full_clean()
 			person.save()
@@ -60,9 +60,9 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 		# Associate old property
 		try:
 			g = Genres.objects.get(Description=genre)
-			create_movie_property(movie, g.id, person.UrlName, 'GENRE', logged_in_profile_username)
+			create_movie_property(movie, g.id, g.Description, 'GENRE', logged_in_profile_username)
 		# Create and associate new property
-		except:
+		except Exception:
 			g = Genres(Description=genre)
 			g.save()
 			property_logger.info(g.Description + ' Create Success by ' + logged_in_profile_username)

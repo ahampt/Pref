@@ -1,9 +1,11 @@
-import json, urllib, urllib2
+import imdb, json, urllib, urllib2
 from django.conf import settings
 from webapp.models import Movies, People, Genres
 from oauth import OAuthRequest
 from oauth.signature_method.hmac_sha1 import OAuthSignatureMethod_HMAC_SHA1
 from xml.dom.minidom import parseString
+
+imdb_access = imdb.IMDb('http')
 
 # Return wikipedia identifier (text) given url or id
 def wikipedia_id_from_input(wikipedia_input):
@@ -121,12 +123,11 @@ def imdb_id_from_input(imdb_input):
 # Return dictionary of imdb data for specified imdb id
 def get_imdb_dict(imdb_id):
 	try:
-		# Query imdbapi (not affiliated with imdb)
-		req = urllib2.Request('http://www.imdbapi.com/?i='+imdb_id)
-		res = urllib2.urlopen(req)
-		if res.getcode() == 200:
-			# Parse json response
-			return json.loads(res.read())
+		# Query IMDb using IMDbPY python package
+		res = imdb_access.get_movie(imdb_id[2:])
+		if res:
+			imdb_access.update(res, info=('main'))
+			return res
 		else:
 			return {'Response' : False}
 	except Exception:
@@ -139,54 +140,39 @@ def movie_from_imdb_input(imdb_input):
 	if imdb_id:
 		try:
 			imdb_dict = get_imdb_dict(imdb_id)
-			if imdb_dict.get('Response') == 'True':
-				movie.ImdbId = imdb_id
-				if imdb_dict.get('Title'):
-					movie.Title = imdb_dict.get('Title')
-				if imdb_dict.get('Year'):
-					movie.Year = int(imdb_dict.get('Year'))
-				if imdb_dict.get('Runtime'):
-					runtime_str = imdb_dict.get('Runtime')
-					runtime = 0
-					num_hit, first = False, True
-					str_to_convert = ''
-					# Convert [/d+] h [/d+] m to minutes
-					for char in runtime_str:
-						# Add digits to temp string
-						if char.isdigit():
-							num_hit = True
-							str_to_convert += char
-							continue
-						# Convert temp string from hours to minutes and add to runtime
-						if char.isspace() and num_hit and first:
-							runtime += int(str_to_convert) * 60
-							first = False
-							num_hit = False
-							str_to_convert = ''
-							continue
-						# Add minutes from temp string to runtime
-						if char.isspace() and num_hit and not first:
-							runtime += int(str_to_convert)
-					movie.Runtime = str(runtime)
-				directors, writers, actors, genres = [], [], [], []
-				if imdb_dict.get('Director'):
-					directors = imdb_dict.get('Director').split(', ')
-					for i in range(len(directors)):
-						directors[i] = directors[i]
-				if imdb_dict.get('Writer'):
-					writers = imdb_dict.get('Writer').split(', ')
-					for i in range(len(writers)):
-						writers[i] = writers[i]
-				if imdb_dict.get('Actors'):
-					actors = imdb_dict.get('Actors').split(', ')
-					for i in range(len(actors)):
-						actors[i] = actors[i]
-				if imdb_dict.get('Genre'):
-					genres = imdb_dict.get('Genre').split(', ')
-					for i in range(len(genres)):
-						genres[i] = genres[i]
-			else:
-				return {'error_msg' : 'Invalid'}
+			try:
+				if imdb_dict.get('Response') == False:
+					return {'error_msg' : 'Invalid'}
+			except Exception:
+				pass
+			movie.ImdbId = imdb_id
+			if imdb_dict.get('title'):
+				movie.Title = imdb_dict.get('title')
+			if imdb_dict.get('year'):
+				movie.Year = imdb_dict.get('year')
+			if imdb_dict.get('runtime'):
+				movie.Runtime = str(filter(lambda x: x.isdigit(), imdb_dict.get('runtime')[0]))
+			directors, writers, actors, genres = [], [], [], []
+			if imdb_dict.get('director'):
+				res_directors = imdb_dict.get('director')
+				for i in range(len(res_directors)):
+					directors.append(res_directors[i].get('name'))
+			if imdb_dict.get('writer'):
+				res_writers = imdb_dict.get('writer')
+				i = 0
+				while i < len(res_writers) and i < 2:
+					writers.append(res_writers[i].get('name'))
+					i = i + 1
+			if imdb_dict.get('cast'):
+				res_actors = imdb_dict.get('cast')
+				i = 0
+				while i < len(res_actors) and i < 6:
+					actors.append(res_actors[i].get('name'))
+					i = i + 1
+			if imdb_dict.get('genres'):
+				genres = imdb_dict.get('genres')
+				for i in range(len(genres)):
+					genres.append(genres[i])
 		except Exception:
 			return {'error_msg' : 'IMDb API failed, please try again.'}
 	else:
@@ -520,6 +506,8 @@ def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input, wikipedia
 		if rottentomatoes_res.get('movie'):
 			rottentomatoes_movie = rottentomatoes_res.get('movie')
 			movie.RottenTomatoesId = rottentomatoes_movie.RottenTomatoesId
+			# Use better cast list from rotten tomatoes
+			actors = rottentomatoes_res.get('actors')
 		else:
 			error_list['RottenTomatoesId'] = rottentomatoes_res.get('error_msg')
 			success = False
@@ -529,6 +517,8 @@ def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input, wikipedia
 		if rottentomatoes_res.get('movie'):
 			rottentomatoes_movie = rottentomatoes_res.get('movie')
 			movie.RottenTomatoesId = rottentomatoes_movie.RottenTomatoesId
+			# Use better cast list from rotten tomatoes
+			actors = rottentomatoes_res.get('actors')
 	# Use given wikipedia input with no validation, maybe include in future
 	if wikipedia_input and len(wikipedia_input) > 0:
 		wikipedia_res = movie_from_wikipedia_input(wikipedia_input)
