@@ -22,7 +22,7 @@ def imdb_movie_from_data(search_term, year):
 					imdb_access.update(res_dict, info=('main'))
 					imdbID = imdb_access.get_imdbID(res_dict)
 					if imdbID:
-						movie.ImdbId = imdbID
+						movie.ImdbId = 'tt' + imdbID
 					if res_dict.get('title'):
 						movie.Title = res_dict.get('title')
 					if res_dict.get('year'):
