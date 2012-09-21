@@ -13,6 +13,7 @@
 				<a class="brand" href="{{access_url}}">Pref</a>
 				<div class="nav-collapse collapse" style="height: 0px;">
 					{% if request.session.admin %}
+						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
 							{% url webapp.views.profile.view_list as profiles_url %}
 							<li><a href="{{profiles_url}}">Profiles</a></li>
@@ -24,6 +25,7 @@
 							<li><a href="{{genres_url}}">Genres</a></li>
 						</ul>
 					{% elif request.session.auth_profile_username %}
+						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
 							{% url webapp.views.site.discovery as discovery_url %}
 							<li><a href="{{discovery_url}}">Find Movies</a></li>
@@ -46,7 +48,6 @@
 					{% if request.session.auth_profile_username or request.session.auth_access %}
 						<div class="btn-group pull-right">
 							{% if request.session.auth_profile_username %}
-								{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
 								<a class="btn" href="{{profile_url}}">
 									<i class="icon-user"></i> {{request.session.auth_profile_username}}
 								</a>
@@ -61,7 +62,6 @@
 							</button>
 							<ul class="dropdown-menu">
 								{% if request.session.auth_profile_username %}
-									{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
 									<li><a href="{{profile_url}}">Profile</a></li>
 									<li><a href="{{profile_url}}?edit=1">Settings</a></li>
 									<li class="divider"></li>
