@@ -8,7 +8,7 @@ Access password is "D8sJ#Wo4r@Gs0r^qzx" if you want to use the site. I have it l
 
 ## Installation
 
-Install Pref yourself to contrubute to the site and use it for your own organizational needs. There's plenty to add and fix.
+Install Pref yourself to contribute to the site and use it for your own organizational needs. There's plenty to add and fix.
 
 ### Dependencies
 
