@@ -2,6 +2,8 @@
 import os
 relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x)
 
+ENVIRONMENT = 'DEVELOPMENT'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -66,7 +68,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	'django.core.context_processors.i18n',
 	'django.core.context_processors.media',
 	'django.core.context_processors.static',
-	"django.core.context_processors.tz",
+	'django.core.context_processors.tz',
+	'pref.webapp.context_processors.environment',
 )
 
 MIDDLEWARE_CLASSES = (
