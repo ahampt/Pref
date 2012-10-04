@@ -2,10 +2,6 @@
 
 Rate, rank, and keep track of media consumed or desired to be consumed. This site will serve as the one stop spot for any and all things related to personalized preferences data. This project will use Rotten Tomatoes, IMDb, Netflix, and Wikipedia API's for data gathering including more in the future.
 
-## Access
-
-Access password is "D8sJ#Wo4r@Gs0r^qzx" if you want to use the site. I have it locked to prevent spammers and unwanted access for now.
-
 ## Installation
 
 Install Pref yourself to contribute to the site and use it for your own organizational needs. There's plenty to add and fix.
