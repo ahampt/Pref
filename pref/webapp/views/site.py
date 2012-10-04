@@ -36,11 +36,13 @@ def access(request):
 			Display access page
 			PATH: webapp.views.site.access; METHOD: not post; PARAMS: none; MISC: none;
 			*****************************************************************************'''
-			# Mandatory check in every function that checks if user is logged in (or has access for a few pages like this one)
-			logged_in_profile_info = { }
-			permission_response = check_and_get_session_info(request, logged_in_profile_info, True, False)
-			if permission_response != True:
-				return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
+			# Mandatory check in every function (in development/limited access mode) that checks if user is logged in (or has access for a few pages like this one)
+			if settings.ENVIRONMENT == 'DEVELOPMENT':
+				
+				logged_in_profile_info = { }
+				permission_response = check_and_get_session_info(request, logged_in_profile_info, True, False)
+				if permission_response != True:
+					return render_to_response('site/access.html', {'header' : generate_header_dict(request, 'Access')}, RequestContext(request))
 			return redirect('webapp.views.site.home')
 
 	except Exception:
@@ -50,10 +52,11 @@ def access(request):
 # Landing page after login or profile creation
 def home(request):
 	try:
-		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
-		if permission_response != True:
-			return permission_response
+		if settings.ENVIRONMENT == 'DEVELOPMENT':
+			logged_in_profile_info = { }
+			permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
+			if permission_response != True:
+				return permission_response
 		if request.GET.get('error') and request.method == 'POST':
 			'''*****************************************************************************
 			Error page will submit user email here (could be delegated to an error function)
