@@ -312,13 +312,16 @@ def view(request, urltitle):
 		elif request.GET.get('rank'):
 			try:
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-				association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed=True)
+				association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed=True, Rank__isnull=True)
 				associations = Associations.objects.filter(ProfileId=profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], Consumed=True).exclude(Rank__isnull=True).order_by('Rank')
 				if request.method == 'POST':
 					'''*****************************************************************************
 					Tree ranker substep consisting of providing new comparison if not done ranking or redirecting to movie page if done ranking
 					PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - rank; MISC: none;
 					*****************************************************************************'''
+					# Check if currently ranking movie before proceeding
+					if not request.session.get('currently_ranking') and not request.session.get('currently_ranking') == movie.Id:
+						raise Exception('Not currently ranking movie.')
 					# Min and max limits (done when max < min)
 					min = int(request.POST.get('hiddenMin')) if request.POST.get('hiddenMin') and request.POST.get('hiddenMin').isdigit() else 0
 					max = int(request.POST.get('hiddenMax')) if request.POST.get('hiddenMax') and request.POST.get('hiddenMax').isdigit() else -1
@@ -341,6 +344,8 @@ def view(request, urltitle):
 								assoc.Rank += 1
 								assoc.save()
 						association.save()
+						# Delete currently_ranking variable
+						del request.session['currently_ranking']
 						associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Rank: ' + str(association.Rank) + ' Success')
 						set_msg(request, 'Movie Ranked!', movie.Title + ' is ranked number ' + str(association.Rank) + ' out of ' + str(associations.count() + 1) + '.', 'success')
 						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
@@ -373,6 +378,8 @@ def view(request, urltitle):
 					Tree ranker start displaying first comparison or redirecting to movie page if first ranking
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - rank; MISC: none;
 					*****************************************************************************'''
+					# Set currently ranking variable
+					request.session['currently_ranking'] = movie.id
 					if associations.count() == 0:
 						association.Rank = 1
 						association.save()
