@@ -5,7 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta name="description" content="Organize and keep track of all the movies in your life with useful rating and reviewing tools on Pref." />
 	<meta name="author" content="Andy Hampton" />
-	<meta name="robots" content="index, follow" />
+	{% if ENVIRONMENT == 'PRODUCTION' %}<meta name="robots" content="index, follow" />
+	{% elif ENVIRONMENT == 'DEVELOPMENT' %}<meta name="robots" content="noindex, nofollow" />{% endif %}
 	<meta name="copyright" content="Andy Hampton" />
 	<meta name="language" content="English" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
