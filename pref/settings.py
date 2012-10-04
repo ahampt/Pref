@@ -2,6 +2,8 @@
 import os
 relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x)
 
+VERSION = '1.1.3'
+
 ENVIRONMENT = 'DEVELOPMENT'
 
 DEBUG = True
@@ -70,6 +72,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	'django.core.context_processors.static',
 	'django.core.context_processors.tz',
 	'pref.webapp.context_processors.environment',
+	'pref.webapp.context_processors.version',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -99,7 +102,7 @@ LOGGING = {
 	'disable_existing_loggers': False,
 	'formatters': {
 		'verbose': {
-			'format': '%(levelname)s %(asctime)s: %(message)s'
+			'format': '%(levelname)s ' + 'v' + VERSION + ' %(asctime)s: %(message)s'
 		}
 	},
 	'handlers': {
