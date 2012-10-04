@@ -278,6 +278,7 @@
 						{% if association.Accessible %}
 							{% if association.SourceId %}
 								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" value="{{association.SourceId.Description}}" />
+								<input type="checkbox" name="update_all_sources" id="update_all_sources" value="Update_All" /> Update All
 							{% else %}
 								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" placeholder="Source" />
 							{% endif %}

@@ -258,17 +258,24 @@ def view(request, urltitle):
 						old_source = association.SourceId
 					if association.Accessible and not request.POST.get('accessible') == 'Accessible':
 						association.SourceId = None
-					else:
+					elif association.Accessible:
 						source_text = request.POST.get('source')
 						if source_text:
 							try:
 								existing_source = Sources.objects.get(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Description = source_text)
 								association.SourceId = existing_source
 							except ObjectDoesNotExist:
-								new_source = Sources(ProfileId=profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], Description=source_text)
-								new_source.save()
-								source_logger.info(new_source.Description + ' Create Success by ' + profile.Username)
-								association.SourceId = new_source
+								if request.POST.get('update_all_sources') == 'Update_All' and old_source:
+									old_source.Description = source_text
+									old_source.save()
+									source_logger.info(old_source.Description + ' Update Success by ' + profile.Username)
+								else:
+									new_source = Sources(ProfileId=profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], Description=source_text)
+									new_source.save()
+									source_logger.info(new_source.Description + ' Create Success by ' + profile.Username)
+									association.SourceId = new_source
+						elif old_source:
+							association.SourceId = None
 					association.Consumed = request.POST.get('watched') == 'Watched'
 					association.Accessible = request.POST.get('accessible') == 'Accessible'
 					try:
@@ -277,7 +284,12 @@ def view(request, urltitle):
 					except ValidationError:
 						pass
 					# Delete old source if no longer relevant
-					if old_source and old_source != association.SourceId and not source_is_relevant(old_source):
+					if old_source and ((old_source != association.SourceId and not source_is_relevant(old_source)) or (request.POST.get('update_all_sources') == 'Update_All' and association.SourceId == None)):
+						if source_is_relevant(old_source):
+							for source_association in Associations.objects.filter(ProfileId = profile, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], SourceId = old_source):
+								source_association.SourceId = None
+								source_association.save()
+								associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + source_association.movieId.UrlTitle + ' Update Success')
 						old_source.delete()
 						source_logger.info(old_source.Description + ' Delete Success by ' + profile.Username)
 					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
