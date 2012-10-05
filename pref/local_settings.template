@@ -1,4 +1,4 @@
-import os
+import settings, os
 relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x)
 
 # Required
@@ -84,7 +84,7 @@ EMAIL_PORT = 25
 #	'disable_existing_loggers': False,
 #	'formatters': {
 #		'verbose': {
-#			'format': '%(levelname)s %(asctime)s: %(message)s'
+#			'format': '%(levelname)s ' + 'v' + VERSION + ' %(asctime)s: %(message)s'
 #		}
 #	},
 #	'handlers': {
