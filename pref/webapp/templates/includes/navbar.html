@@ -23,6 +23,7 @@
 							<li><a href="{{people_url}}">People</a></li>
 							{% url webapp.views.property.genres as genres_url %}
 							<li><a href="{{genres_url}}">Genres</a></li>
+							<li><a href="{{movies_url}}?add=1">Add</a></li>
 						</ul>
 					{% elif request.session.auth_profile_username %}
 						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
