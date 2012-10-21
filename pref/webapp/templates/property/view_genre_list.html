@@ -18,7 +18,7 @@
 		<ul>
 			<li {% if not genres.has_previous %} class="disabled" {% endif %}}><a href="{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{genres_url}}?page={{genres.number}}&length={{genres.paginator.per_page}}">{{genres.number}}</a></li>
-			<li{% if not genres.has_next %} class="disabled" {% endif %}}><a href="{{genres_url}}?page={{genres.next_page_number}}&length={{genres.paginator.per_page}}">&gt;&gt;</a></li>
+			<li {% if not genres.has_next %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.next_page_number}}&length={{genres.paginator.per_page}}">&gt;&gt;</a></li>
 		</ul>
 	</div>
 	{% include 'includes/footer.html' %}

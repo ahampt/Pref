@@ -18,7 +18,7 @@
 		<ul>
 			<li {% if not people.has_previous %} class="disabled" {% endif %}}><a href="{{people_url}}?page={{people.previous_page_number}}&length={{people.paginator.per_page}}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{people_url}}?page={{people.number}}&length={{people.paginator.per_page}}">{{people.number}}</a></li>
-			<li{% if not people.has_next %} class="disabled" {% endif %}}><a href="{{people_url}}?page={{people.next_page_number}}&length={{people.paginator.per_page}}">&gt;&gt;</a></li>
+			<li {% if not people.has_next %} class="disabled" {% endif %}><a href="{{people_url}}?page={{people.next_page_number}}&length={{people.paginator.per_page}}">&gt;&gt;</a></li>
 		</ul>
 	</div>
 	{% include 'includes/footer.html' %}
