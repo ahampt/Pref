@@ -16,7 +16,7 @@ def wikipedia_id_from_input(wikipedia_input):
 def get_wikipedia_dict(wikipedia_id):
 	try:
 		# Query wikipedia
-		req = urllib2.Request('http://en.wikipedia.org/w/api.php?format=xml&action=query&titles='+urllib.quote(wikipedia_id))
+		req = urllib2.Request('http://en.wikipedia.org/w/api.php?format=xml&action=query&titles='+urllib.quote(wikipedia_id.encode('utf8')))
 		res = urllib2.urlopen(req)
 		if res.getcode() == 200:
 			# Parse xml response
