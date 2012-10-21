@@ -633,7 +633,7 @@ def search(request):
 			length = length if length <= 20 else 20
 			res_dict = movies_from_term(term, length)
 			if res_dict.get('error_list'):
-				site_logger.debug('Search Errors: ' + str(res_dict.get('error_list')))
+				site_logger.debug('Search Failed - Text: '+term+' Errors: ' + str(res_dict.get('error_list')))
 			if res_dict.get('success'):
 				result_movies = res_dict.get('movies')
 				movies = []
