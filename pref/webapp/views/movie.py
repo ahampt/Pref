@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.id_tools import wikipedia_movie_from_title, movie_from_inputs, movie_from_imdb_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
+from webapp.tools.id_tools import wikipedia_id_from_input, wikipedia_movie_from_title, movie_from_inputs, imdb_id_from_input, movie_from_imdb_input, netflix_id_from_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_id_from_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
 from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
 from webapp.tools.search_tools import movies_from_term
 from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
@@ -475,10 +475,10 @@ def view(request, urltitle):
 					movie.Title = request.POST.get('title')
 					movie.Year = request.POST.get('year')
 					movie.Runtime = request.POST.get('runtime')
-					movie.ImdbId = request.POST.get('imdb')
-					movie.RottenTomatoesId = request.POST.get('rottentomatoes')
-					movie.NetflixId = request.POST.get('netflix')
-					movie.WikipediaId = request.POST.get('wikipedia')
+					movie.ImdbId = imdb_id_from_input(request.POST.get('imdb'))
+					movie.RottenTomatoesId = rottentomatoes_id_from_input(request.POST.get('rottentomatoes'))
+					movie.NetflixId = netflix_id_from_input(request.POST.get('netflix'))
+					movie.WikipediaId = wikipedia_id_from_input(request.POST.get('wikipedia'))
 					old_urltitle = movie.UrlTitle
 					validation_dict = movie_from_inputs(movie.ImdbId, movie.NetflixId, movie.RottenTomatoesId, movie.WikipediaId)
 					if validation_dict.get('success'):

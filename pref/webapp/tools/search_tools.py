@@ -35,7 +35,7 @@ def imdb_movie_from_data(search_term, year):
 		else:
 			return {'error_msg' : 'IMDb API failed, please try again.'}
 		return {'movie' : movie} if movie.ImdbId else {'error_msg' : 'No IMDb results found, please try again.'}
-	except:
+	except Exception:
 		return {'error_msg' : 'IMDb API failed, please try again.'}
 
 # Return list of movies from imdb given search term
@@ -88,7 +88,7 @@ def netflix_movies_from_term(search_term, page_limit):
 						return {'error_msg' : 'Invalid Netflix Search'}
 			else:
 				return {'error_msg' : 'Invalid Netflix Search'}
-		except:
+		except Exception:
 			return {'error_msg' : 'Netflix API failed, please try again'}
 	else:
 		return {'error_msg' : 'No term to search from.'}
@@ -132,7 +132,7 @@ def rottentomatoes_movies_from_term(search_term, page_limit):
 					return {'error_msg' : 'Invalid Rotten Tomatoes Search'}
 			else:
 				return {'error_msg' : 'Rotten Tomatoes API failed, please try again.'}
-		except:
+		except Exception:
 			return {'error_msg' : 'Rotten Tomatoes API failed, please try again.'}
 	else:
 		return {'error_msg' : 'No term to search from.'}
