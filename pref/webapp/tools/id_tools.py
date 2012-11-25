@@ -238,7 +238,7 @@ def get_netflix_dom(netflix_id, href = None):
 def get_netflix_availability_dict(movie):
 	if movie.NetflixId:
 		availability_dict = {'BLU_RAY' : False, 'DVD' : False, 'INSTANT' : False}
-		dom = get_netflix_dom(None, 'http://api.netflix.com/catalog/titles/movies/' + movie.NetflixId + '/format_availability')
+		dom = get_netflix_dom(None, 'http://api-public.netflix.com/catalog/titles/movies/' + movie.NetflixId + '/format_availability')
 		try:
 			if dom.get('Response') == False:
 				return {'error_msg' : 'Invalid'}
