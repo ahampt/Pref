@@ -2,7 +2,7 @@
 import os
 relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x)
 
-VERSION = '1.1.4'
+VERSION = '1.1.5'
 
 ENVIRONMENT = 'DEVELOPMENT'
 
