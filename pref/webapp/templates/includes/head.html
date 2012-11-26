@@ -16,7 +16,7 @@
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
 	{% if dnd %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dragndrop.css" />{% endif %}
 	{% if starbox %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />{% endif %}
-	{% if tcal %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/tcal.css" />{% endif %}
+	{% if datepicker %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/pikaday.css" />{% endif %}
 	{% if dnd %}
 		<style>
 			#dhtmlgoodies_listOfItems ul{	/* Left column <ul> */	
@@ -44,7 +44,6 @@
 		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
 		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>
 	{% endif %}
-	{% if tcal %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/tcal.js"></script>{% endif %}
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
 	{% if header.tracking_code %}
 		<script language="javascript" type="text/javascript">

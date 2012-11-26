@@ -59,3 +59,17 @@
 			});
 		</script>
 	{% endif %}
+	{% if datepicker %}
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/moment.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/pikaday.jquery.min.js"></script>
+		<script language="javascript" type="text/javascript">
+			jQuery(document).ready(function() {
+				jQuery('.datepicker').each(function(index) {
+					var picker = new Pikaday({ 
+						field: jQuery('.datepicker')[index],
+						format: 'MM/DD/YYYY'
+					});
+				});
+			});
+		</script>
+	{% endif %}

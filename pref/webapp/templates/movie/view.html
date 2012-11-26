@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load webapp_extras %}
-{% include 'includes/head.html' with starbox='True' tcal='True' %}
+{% include 'includes/head.html' with starbox='True' datepicker='True' %}
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
@@ -252,10 +252,10 @@
 					{% if association.Consumed %}
 						<div class="row">
 							<div class="span3">
-								First Viewed On: <input type="text" class="input-small tcal" name="first_viewed" id="first_viewed" value="{{association.CreatedAt.month}}/{{association.CreatedAt.day}}/{{association.CreatedAt.year}}" />
+								First Viewed On: <input type="text" class="input-small datepicker" name="first_viewed" id="first_viewed" value="{{association.CreatedAt.month}}/{{association.CreatedAt.day}}/{{association.CreatedAt.year}}" />
 							</div>
 							<div class="span3">
-								Last Viewed On: <input type="text" class="input-small tcal" name="last_viewed" id="last_viewed" value="{{association.UpdatedAt.month}}/{{association.UpdatedAt.day}}/{{association.UpdatedAt.year}}" />
+								Last Viewed On: <input type="text" class="input-small datepicker" name="last_viewed" id="last_viewed" value="{{association.UpdatedAt.month}}/{{association.UpdatedAt.day}}/{{association.UpdatedAt.year}}" />
 							</div>
 						</div>
 						<br />
@@ -326,6 +326,6 @@
 			<h1>invalid movie</h1>
 		</div>
 	{% endif %}
-	{% include 'includes/footer.html' with starbox='True' %}
+	{% include 'includes/footer.html' with starbox='True' datepicker='True' %}
 </body>
 </html>
