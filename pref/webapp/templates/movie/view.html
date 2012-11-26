@@ -228,19 +228,19 @@
 						<h2>Thoughts</h2>
 					</div>
 					<div class="span1">
-						<a class="btn btn-danger" href="{{movie_url}}?assoc=1&remove=1">Remove</a>
+						<a class="btn btn-block btn-danger" href="{{movie_url}}?assoc=1&remove=1">Remove</a>
 					</div>
-					<div class="span3">
-						<a class="btn btn-success" href="{{movie_url}}?assoc=1&recent=1">Watched Today</a>
+					<div class="span2">
+						<a class="btn btn-block btn-success" href="{{movie_url}}?assoc=1&recent=1">Watched Today</a>
 					</div>
-					<div class="span1">
+					<div class="span1 offset1">
 						{% if association.Consumed and association.Rank %}
-							<a id="rerank_btn" class="btn btn-large btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')">{{association.Rank}}</a>
+							<a id="rerank_btn" class="btn btn-large btn-block btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')">{{association.Rank}}</a>
 							<script type="text/javascript">
 								jQuery("#rerank_btn").popover({placement: 'top', trigger: 'hover', title: 'RERANK', content: 'Rethink movie\'s position in your rankings.'});
 							</script>
 						{% elif association.Consumed %}
-							<a id="rank_btn" class="btn btn-large btn-primary" href="{{movie_url}}?rank=1">-</a>
+							<a id="rank_btn" class="btn btn-large btn-block btn-primary" href="{{movie_url}}?rank=1">-</a>
 							<script type="text/javascript">
 								jQuery("#rank_btn").popover({placement: 'top', trigger: 'hover', title: 'RANK', content: 'View movie in the context of others that you have watched.'});
 							</script>
@@ -310,7 +310,7 @@
 					{% endif %}
 					<div class="row">
 						<div class="span1 offset6">
-							<input type="submit" class="btn btn-large btn-success" name="save" id="save" value="Save" />
+							<input type="submit" class="btn btn-large btn-block btn-success" name="save" id="save" value="Save" />
 						</div>
 					</div>
 				</form>

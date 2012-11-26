@@ -41,13 +41,13 @@
 			{% url webapp.views.property.profile username=profile.Username as profile_url %}
 			{% if admin_rights %}
 				<div class="span2 offset2">
-					<a class="btn btn-large" href="{{profile_url}}?edit=1"><i class="icon-cog"></i> Settings</a>
+					<a class="btn btn-large btn-block" href="{{profile_url}}?edit=1"><i class="icon-cog"></i> Settings</a>
 				</div>
 				<div class="span2">
 			{% else %}
 				<div class="span2 offset2">
 			{% endif %}
-				<a class="btn btn-large" href="{{profile_url}}?movies=1"><i class="icon-film"></i> Movies</a>
+				<a class="btn btn-large btn-block" href="{{profile_url}}?movies=1"><i class="icon-film"></i> Movies</a>
 			</div>
 		</div>
 		<br />

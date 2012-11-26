@@ -14,7 +14,7 @@
 				<li><a href="{{person_url}}?edit=1">Edit</a></li>
 			</ul>
 		{% endif %}
-		<table class="table table-striped table-bordered">
+		<table class="table table-striped table-hover table-bordered">
 			{% if directed_movies|length > 0 %}
 				<tr><th class="span5">Director ({{directed_movies|length}} titles)</th><th class="span1"></th><th class="span2"></th></tr>
 				{% for movie, bool in directed_movies %}

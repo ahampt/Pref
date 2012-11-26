@@ -21,20 +21,20 @@
 		{% endif %}
 		<form class="well" action="{{person_url}}?edit=1" method="post"> {% csrf_token %}
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="name">Title: </label>
-					<input type="text" name="name" id="name" value="{{person.Name}}" />
+					<input class="input-block-level" type="text" name="name" id="name" value="{{person.Name}}" />
 				</div>
-				<div class="span1">
-					<a class="btn btn-medium btn-danger" href="{{person_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a>
+				<div class="span1 offset1">
+					<a class="btn btn-medium btn-block btn-danger" href="{{person_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a>
 				</div>
 			</div>
 			<div class="row">
 				<div class="span1 offset2">
-					<input class="btn btn-large btn-success" type="submit" value="Save" />
+					<input class="btn btn-large btn-block btn-success" type="submit" value="Save" />
 				</div>
 				<div class="span1 offset1">
-					<a class="btn btn-large btn-danger" href="{{person_url}}">Cancel</a>
+					<a class="btn btn-large btn-block btn-danger" href="{{person_url}}">Cancel</a>
 				</div>
 			</div>
 		</form>
@@ -49,7 +49,7 @@
 		<form action="{{person_url}}?add=1&t=DIRECTOR" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
-				<input type="submit" value="Add" />
+				<input class="btn" type="submit" value="Add" />
 			</li>
 		</form>
 		</ul>
@@ -64,7 +64,7 @@
 		<form action="{{person_url}}?add=1&t=WRITER" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
-				<input type="submit" value="Add" />
+				<input class="btn" type="submit" value="Add" />
 			</li>
 		</form>
 		</ul>
@@ -79,7 +79,7 @@
 		<form action="{{person_url}}?add=1&t=ACTOR" method="POST"> {% csrf_token %}
 			<li class="field">
 				<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{header.search_list|join:'","'}}"]' name="add" id="add" />
-				<input type="submit" value="Add" />
+				<input class="btn" type="submit" value="Add" />
 			</li>
 		</form>
 		</ul>

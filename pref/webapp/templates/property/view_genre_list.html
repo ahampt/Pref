@@ -4,7 +4,7 @@
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
-	<table class="table table-striped">
+	<table class="table table-striped table-hover">
 		<tr><th class="span8">#{{genres.start_index}}{% if not genres.start_index == genres.end_index %}-{{genres.end_index}}{%endif%} (of {{genres.paginator.count}}) genres</th></tr>
 		{% for genre in genres %}
 			<tr>
@@ -16,7 +16,7 @@
 	{% url webapp.views.property.genres as genres_url %}
 	<div class="pagination">
 		<ul>
-			<li {% if not genres.has_previous %} class="disabled" {% endif %}}><a href="{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}">&lt;&lt;</a></li>
+			<li {% if not genres.has_previous %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{genres_url}}?page={{genres.number}}&length={{genres.paginator.per_page}}">{{genres.number}}</a></li>
 			<li {% if not genres.has_next %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.next_page_number}}&length={{genres.paginator.per_page}}">&gt;&gt;</a></li>
 		</ul>

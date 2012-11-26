@@ -23,57 +23,57 @@
 		{% endif %}
 		<form class="well" action="{{movie_url}}?edit=1" method="post"> {% csrf_token %}
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="title">Title: </label>
-					<input type="text" name="title" id="title" value="{{movie.Title}}" />
+					<input class="input-block-level" type="text" name="title" id="title" value="{{movie.Title}}" />
 				</div>
-				<div class="span1">
+				<div class="span1 offset1">
 					<a class="btn btn-medium btn-danger" href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Movie?')">Delete</a>
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="year">Year: </label>
-					<input type="text" name="year" id="year" value="{{movie.Year}}" />
+					<input class="input-block-level" type="text" name="year" id="year" value="{{movie.Year}}" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="runtime">Runtime: </label>
-					<input type="text" name="runtime" id="runtime" value="{{movie.Runtime}}" />
+					<input class="input-block-level" type="text" name="runtime" id="runtime" value="{{movie.Runtime}}" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="imdb"><a href="{{links.imdb}}" target="_blank">IMDb: </a></label>
-					<input type="text" name="imdb" id="imdb" value="{{movie.ImdbId}}" />
+					<input class="input-block-level" type="text" name="imdb" id="imdb" value="{{movie.ImdbId}}" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="rottentomatoes"><a href="{{links.rt}}" target="_blank">Rotten Tomatoes: </a></label>
-					<input type="text" name="rottentomatoes" id="rottentomatoes" value="{{movie.RottenTomatoesId}}" />
+					<input class="input-block-level" type="text" name="rottentomatoes" id="rottentomatoes" value="{{movie.RottenTomatoesId}}" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="netflix"><a href="{{links.netflix}}" target="_blank">Netflix: </a></label>
-					<input type="text" name="netflix" id="netflix" value="{{movie.NetflixId}}" />
+					<input class="input-block-level" type="text" name="netflix" id="netflix" value="{{movie.NetflixId}}" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4 offset2">
+				<div class="span3 offset2">
 					<label for="wikipedia"><a href="{{links.wikipedia}}" target="_blank">Wikipedia: </a></label>
-					<input type="text" name="wikipedia" id="wikipedia" value="{{movie.WikipediaId}}" />
+					<input class="input-block-level" type="text" name="wikipedia" id="wikipedia" value="{{movie.WikipediaId}}" />
 				</div>
 			</div>
 			<br />
 			<div class="row">
 				<div class="span1 offset2">
-					<input class="btn btn-large btn-success" type="submit" value="Save" />
+					<input class="btn btn-large btn-block btn-success" type="submit" value="Save" />
 				</div>
 				<div class="span1 offset1">
-					<a class="btn btn-large btn-danger" href="{{movie_url}}">Cancel</a>
+					<a class="btn btn-large btn-block btn-danger" href="{{movie_url}}">Cancel</a>
 				</div>
 			</div>
 		</form>
@@ -88,7 +88,7 @@
 			<form action="{{movie_url}}?add=1&t=DIRECTOR" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
-					<input type="submit" value="Add" />
+					<input class="btn" type="submit" value="Add" />
 				</li>
 			</form>
 		</ul>
@@ -103,7 +103,7 @@
 			<form action="{{movie_url}}?add=1&t=WRITER" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
-					<input type="submit" value="Add" />
+					<input class="btn" type="submit" value="Add" />
 				</li>
 			</form>
 		</ul>
@@ -118,7 +118,7 @@
 			<form action="{{movie_url}}?add=1&t=ACTOR" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{people_list|join:'","'}}"]' name="add" id="add" />
-					<input type="submit" value="Add" />
+					<input class="btn" type="submit" value="Add" />
 				</li>
 			</form>
 		</ul>
@@ -133,7 +133,7 @@
 			<form action="{{movie_url}}?add=1&t=GENRE" method="POST"> {% csrf_token %}
 				<li class="field">
 					<input type="text" autocomplete="off" data-provide="typeahead" data-items="4" data-source='["{{genres_list|join:'","'}}"]' name="add" id="add" />
-					<input type="submit" value="Add" />
+					<input class="btn" type="submit" value="Add" />
 				</li>
 			</form>
 		</ul>

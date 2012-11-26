@@ -32,14 +32,14 @@
 		</div>
 		<div class="row">
 			<div class="span1 offset1">
-				<a class="btn btn-large btn-success" href="#" onclick="saveArrangableNodes();return false">Save</a>
+				<a class="btn btn-large btn-block btn-success" href="#" onclick="saveArrangableNodes();return false">Save</a>
 				{% url webapp.views.profile.view username=profile.Username as profile_url %}
 				<form id="rankForm" action="{{profile_url}}?rank=1" method="post"> {% csrf_token %}
 					<input type="hidden" id="hiddenMovieIds" name="hiddenMovieIds">
 				</form>
 			</div>
 			<div class="span2">
-				<a class="btn btn-large btn-success" href="{{profile_url}}?movies=1">Full Listings</a>
+				<a class="btn btn-large btn-block btn-success" href="{{profile_url}}?movies=1">Full Listings</a>
 			</div>
 		</div>
 	{% else %}

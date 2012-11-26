@@ -25,7 +25,7 @@
 				</div>
 			</div>
 			<div class="span1">
-				<a class="btn btn-medium btn-danger" href="{{profile_url}}?delete=1" onclick="return confirmAction('Delete Profile?')">Delete</a>
+				<a class="btn btn-medium btn-block btn-danger" href="{{profile_url}}?delete=1" onclick="return confirmAction('Delete Profile?')">Delete</a>
 			</div>
 		</div>
 		<div class="row">
@@ -112,22 +112,22 @@
 					</script>
 				</div>
 				<div class="span2">
-					<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number_one}}" id="indicator_{{star_number}}_{{sub_number_one}}" value="{{index|get_item:indicators}}" />
+					<input class="input-block-level" type="text" name="indicator_{{star_number}}_{{sub_number_one}}" id="indicator_{{star_number}}_{{sub_number_one}}" value="{{index|get_item:indicators}}" />
 				</div>
 				{% if profile.SubStars != 1 %}
 					<div class="span2">
-						<input class="input-small" type="text" name="indicator_{{star_number}}_{{sub_number_two}}" id="indicator_{{star_number}}_{{sub_number_two}}" value="{{index|add:1|get_item:indicators}}" />
+						<input class="input-block-level" type="text" name="indicator_{{star_number}}_{{sub_number_two}}" id="indicator_{{star_number}}_{{sub_number_two}}" value="{{index|add:1|get_item:indicators}}" />
 					</div>
 				{% endif %}
 			</div>
 		{% endfor %}
 		<br />
 		<div class="row">
-			<div class="span1 offset2">
-				<input class="btn btn-large btn-success" type="submit" value="Save" />
+			<div class="span2 offset2">
+				<input class="btn btn-large btn-block btn-success" type="submit" value="Save" />
 			</div>
-			<div class="span1 offset1">
-				<a class="btn btn-large btn-danger" href="{{profile_url}}">Cancel</a>
+			<div class="span2">
+				<a class="btn btn-large btn-block btn-danger" href="{{profile_url}}">Cancel</a>
 			</div>
 		</div>
 	</form>
