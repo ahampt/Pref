@@ -307,7 +307,7 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
 			movies, unranked_movies, unseen_movies = [], [], []
-			associations = Associations.objects.select_related().filter(ProfileId = logged_in_profile_info['id'], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
+			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 			for assoc in associations:
 				if assoc.Rank:
 					movies.append(assoc.ConsumeableId)
