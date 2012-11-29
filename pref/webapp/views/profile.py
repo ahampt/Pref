@@ -346,13 +346,13 @@ def view(request, username):
 				*****************************************************************************'''
 				has_error = False
 				error_text = None
+				old_num = profile.NumberOfStars
+				old_sub = profile.SubStars
 				try:
 					profile = Profiles.objects.get(Username=username)
 					profile.Username = request.POST.get('username')
 					profile.Email = request.POST.get('email')
-					old_num = profile.NumberOfStars
 					profile.NumberOfStars = request.POST.get('star_numbers')
-					old_sub = profile.SubStars
 					profile.SubStars = request.POST.get('substars')
 					profile.StarImage = request.POST.get('stars')
 					profile.full_clean()
@@ -420,7 +420,7 @@ def view(request, username):
 					return redirect('webapp.views.profile.view', username=profile.Username)
 				except ValidationError as e:
 					username = profile.Username if profile.Username and profile.Username.encode('ascii', 'replace').isalnum() else 'Anonymous'
-					profile_logger.info(username + ' Register Failure')
+					profile_logger.info(username + ' Update Failure')
 					error_msg = None
 					if has_error:
 						error_msg = {'Password' : error_text}
@@ -430,6 +430,9 @@ def view(request, username):
 							error_msg['Password'][0] = 'The passwords do not match.'
 						for key in error_msg:
 							error_msg[key] = str(error_msg[key][0])
+					# Reset number of stars and substars to old values for security purposes
+					profile.NumberOfStars = old_num
+					profile.SubStars = old_sub
 					# Used in displaying default rating in starbox (see template)
 					rate_range, index_list, lookup_list = [], [], []
 					for i in range(profile.NumberOfStars):
