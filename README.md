@@ -14,9 +14,9 @@ Install Pref yourself to contribute to the site and use it for your own organiza
 
 3. Install Apache Stack for [Linux](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/), [Windows](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
 
-4. Install [Django](https://www.djangoproject.com/download/) 1.4
+4. Install [Django](https://www.djangoproject.com/download/) 1.4.3
 
-### Website
+### Configuration
 
 1. Download the project code from master or fork if you plan on possibly contributing later.
 
