@@ -447,7 +447,7 @@ def view(request, urltitle):
 				*****************************************************************************'''
 				profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 				email_from = settings.DEFAULT_FROM_EMAIL
-				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' ConsumeableId: ' + str(movie.id)
+				email_subject = 'Profile: ' + str(profile.Username) + ' Id: ' + str(profile.id) + ' MovieId: ' + str(movie.id)
 				email_message = request.POST.get('message') if request.POST.get('message') else None
 				set_msg(request, 'Thank you for your feedback!', 'We have recieved your suggestion/comment/correction and will react to it appropriately.', 'success')
 				if email_message:
