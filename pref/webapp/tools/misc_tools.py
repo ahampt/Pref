@@ -15,7 +15,7 @@ def create_movie_property(movie, property_id, property_name, property_type, logg
 		property = Properties(ConsumeableId = movie, ConsumeableTypeId = ConsumeableTypes.objects.get(Description='MOVIE'), PropertyId = property_id, PropertyTypeId = PropertyTypes.objects.get(Description=property_type))
 		property.save()
 		associate_logger.info(movie.UrlTitle + ' Associated ' + property_name + ' Success by ' + logged_in_profile_username)
-	except:
+	except Exception:
 		pass
 
 # Create and save properties given movie and properties

@@ -27,26 +27,13 @@ def imdb_movie_from_data(search_term, year):
 				if imdb_dict.get('Runtime'):
 					runtime_str = imdb_dict.get('Runtime')
 					runtime = 0
-					num_hit, first = False, True
-					str_to_convert = ''
 					# Convert [/d+] h [/d+] m to minutes
-					for char in runtime_str:
-						 # Add digits to temp string
-						if char.isdigit():
-							num_hit = True
-							str_to_convert += char
-							continue
-						# Convert temp string from hours to minutes and add to runtime
-						if char.isspace() and num_hit and first:
-							runtime += int(str_to_convert) * 60
-							first = False
-							num_hit = False
-							str_to_convert = ''
-							continue
-						# Add minutes from temp string to runtime
-						if char.isspace() and num_hit and not first:
-							runtime += int(str_to_convert)
-							movie.Runtime = str(runtime)
+					runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+					if runtimes[0]:
+						runtime += runtimes[0]*60
+					if runtimes[1]:
+						runtime += runtimes[1]
+					movie.Runtime = str(runtime)
 			else:
 				return {'error' : 'No IMDb results found, please try again.'}
 		else:

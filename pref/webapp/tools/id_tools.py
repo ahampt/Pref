@@ -148,43 +148,30 @@ def movie_from_imdb_input(imdb_input):
 				if imdb_dict.get('Runtime'):
 					runtime_str = imdb_dict.get('Runtime')
 					runtime = 0
-					num_hit, first = False, True
-					str_to_convert = ''
 					# Convert [/d+] h [/d+] m to minutes
-					for char in runtime_str:
-						# Add digits to temp string
-						if char.isdigit():
-							num_hit = True
-							str_to_convert += char
-							continue
-						# Convert temp string from hours to minutes and add to runtime
-						if char.isspace() and num_hit and first:
-							runtime += int(str_to_convert) * 60
-							first = False
-							num_hit = False
-							str_to_convert = ''
-							continue
-						# Add minutes from temp string to runtime
-						if char.isspace() and num_hit and not first:
-							runtime += int(str_to_convert)
-							movie.Runtime = str(runtime)
-					directors, writers, actors, genres = [], [], [], []
-					if imdb_dict.get('Director'):
-						directors = imdb_dict.get('Director').split(', ')
-						for i in range(len(directors)):
-							directors[i] = directors[i]
-					if imdb_dict.get('Writer'):
-						writers = imdb_dict.get('Writer').split(', ')
-						for i in range(len(writers)):
-							writers[i] = writers[i]
-					if imdb_dict.get('Actors'):
-						actors = imdb_dict.get('Actors').split(', ')
-						for i in range(len(actors)):
-							actors[i] = actors[i]
-					if imdb_dict.get('Genre'):
-						genres = imdb_dict.get('Genre').split(', ')
-						for i in range(len(genres)):
-							genres[i] = genres[i]
+					runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+					if runtimes[0]:
+						runtime += runtimes[0]*60
+					if runtimes[1]:
+						runtime += runtimes[1]
+					movie.Runtime = str(runtime)
+				directors, writers, actors, genres = [], [], [], []
+				if imdb_dict.get('Director'):
+					directors = imdb_dict.get('Director').split(', ')
+					for i in range(len(directors)):
+						directors[i] = directors[i]
+				if imdb_dict.get('Writer'):
+					writers = imdb_dict.get('Writer').split(', ')
+					for i in range(len(writers)):
+						writers[i] = writers[i]
+				if imdb_dict.get('Actors'):
+					actors = imdb_dict.get('Actors').split(', ')
+					for i in range(len(actors)):
+						actors[i] = actors[i]
+				if imdb_dict.get('Genre'):
+					genres = imdb_dict.get('Genre').split(', ')
+					for i in range(len(genres)):
+						genres[i] = genres[i]
 			else:
 				return {'error_msg' : 'Invalid'}
 		except Exception:
