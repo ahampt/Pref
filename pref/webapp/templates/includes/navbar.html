@@ -29,7 +29,24 @@
 						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
 							{% url webapp.views.site.discovery as discovery_url %}
-							<li><a href="{{discovery_url}}">Find Movies</a></li>
+							<li class="dropdown">
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									Find Movies
+									 <b class="caret"></b>
+								</a>
+								<ul class="dropdown-menu">
+									<li><a href="{{discovery_url}}">Discovery</a></li>
+									<li class="nav-header">By ...</li>
+									{% url webapp.views.profile.view_list as profiles_url %}
+									<li><a href="{{profiles_url}}">Profile</a></li>
+									{% url webapp.views.movie.view_list as movies_url %}
+									<li><a href="{{movies_url}}">Movie</a></li>
+									{% url webapp.views.property.people as people_url %}
+									<li><a href="{{people_url}}">Person</a></li>
+									{% url webapp.views.property.genres as genres_url %}
+									<li><a href="{{genres_url}}">Genre</a></li>
+								</ul>
+							</li>
 							<li><a href="{{profile_url}}?movies=1">My Movies</a></li>
 						</ul>
 					{% endif %}
