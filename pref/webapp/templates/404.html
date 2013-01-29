@@ -47,7 +47,7 @@
 	<script type='text/javascript' src="{{STATIC_URL}}js/bootstrap-typeahead.js"></script>
 </head>
 <body>
-	{% include 'navbar.html' %}
+	{% include 'includes/navbar.html' %}
 	<div class="container">
 		<div class="page-header">
 			<h1>404</h1>
@@ -58,6 +58,6 @@
 				<p>Where there would normally be a page there is not so you should <a href="{{home_url}}">leave</a> quickly.</p>
 				{% url webapp.views.site.about as about_url %}
 				<p>If the problem persists, please <a href="{{about_url}}?suggestion=1">contact us</a>.</p>
-	{% include 'footer.html' %}
+	{% include 'includes/footer.html' %}
 </body>
 </html>

@@ -84,7 +84,7 @@ EMAIL_PORT = 25
 #	'disable_existing_loggers': False,
 #	'formatters': {
 #		'verbose': {
-#			'format': '%(levelname)s ' + 'v' + VERSION + ' %(asctime)s: %(message)s'
+#			'format': '%(levelname)s ' + 'v' + settings.VERSION + ' %(asctime)s: %(message)s'
 #		}
 #	},
 #	'handlers': {
