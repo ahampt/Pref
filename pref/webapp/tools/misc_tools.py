@@ -1,6 +1,7 @@
 import logging, urllib
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from webapp.models import Profiles, Movies, ConsumeableTypes, People, Genres, Properties, PropertyTypes, Associations
 
@@ -27,11 +28,14 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
 		# Create and associate new property
 		except Exception:
-			person = People(Name=director)
-			person.full_clean()
-			person.save()
-			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
+			try:
+				person = People(Name=director)
+				person.full_clean()
+				person.save()
+				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
+				create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
+			except ValidationError:
+				property_logger.info(director + ' Create Failure by ' + logged_in_profile_username)
 	for writer in writers:
 		# Associate old property
 		try:
@@ -39,11 +43,14 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
 		# Create and associate new property
 		except Exception:
-			person = People(Name=writer)
-			person.full_clean()
-			person.save()
-			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
+			try:
+				person = People(Name=writer)
+				person.full_clean()
+				person.save()
+				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
+				create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
+			except ValidationError:
+				property_logger.info(writer + ' Create Failure by ' + logged_in_profile_username)
 	for actor in actors:
 		# Associate old property
 		try:
@@ -51,11 +58,14 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
 		# Create and associate new property
 		except Exception:
-			person = People(Name=actor)
-			person.full_clean()
-			person.save()
-			property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
+			try:
+				person = People(Name=actor)
+				person.full_clean()
+				person.save()
+				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
+				create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
+			except ValidationError:
+				property_logger.info(actor + ' Create Failure by ' + logged_in_profile_username)
 	for genre in genres:
 		# Associate old property
 		try:
@@ -63,10 +73,13 @@ def create_properties(movie, directors, writers, actors, genres, logged_in_profi
 			create_movie_property(movie, g.id, g.Description, 'GENRE', logged_in_profile_username)
 		# Create and associate new property
 		except Exception:
-			g = Genres(Description=genre)
-			g.save()
-			property_logger.info(g.Description + ' Create Success by ' + logged_in_profile_username)
-			create_movie_property(movie, g.id, g.Description, 'GENRE', logged_in_profile_username)
+			try:
+				g = Genres(Description=genre)
+				g.save()
+				property_logger.info(g.Description + ' Create Success by ' + logged_in_profile_username)
+				create_movie_property(movie, g.id, g.Description, 'GENRE', logged_in_profile_username)
+			except ValidationError:
+				property_logger.info(genre + ' Create Failure by ' + logged_in_profile_username)
 
 # Return imdb url given movie
 def imdb_link_for_movie(movie):

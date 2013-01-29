@@ -54,6 +54,8 @@ class People(models.Model):
 	UpdatedAt = models.DateTimeField(auto_now=True)
 	
 	def clean(self):
+		if self.Name == 'N/A':
+			raise ValidationError("Name cannot be \"N/A\".")
 		urlname = ''
 		hasAlNum = False
 		# Form UrlName and check basic requirements
