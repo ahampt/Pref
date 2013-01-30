@@ -26,3 +26,20 @@ jQuery('div.navbar div.btn-group.pull-right ul.dropdown-menu').hover(
 		jQuery('div.navbar div.btn-group.pull-right ul.dropdown-menu').removeClass('display-dropdown');
 	}
 );
+
+jQuery(document).ready(function() {
+	if(jQuery("input[name='imdb_possibilities']").length > 0) {
+		jQuery("input[name='imdb_possibilities']").click(function() {
+			jQuery('#imdb_url').val(jQuery(this).attr('value'));
+		});
+		jQuery("input[name='netflix_possibilities']").click(function() {
+			jQuery('#netflix_url').val(jQuery(this).attr('value'));
+		});
+		jQuery("input[name='rottentomatoes_possibilities']").click(function() {
+			jQuery('#rottentomatoes_id').val(jQuery(this).attr('value'));
+		});
+		jQuery("input[name='wikipedia_possibilities']").click(function() {
+			jQuery('#wikipedia_id').val(jQuery(this).attr('value'));
+		});
+	}
+});

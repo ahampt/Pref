@@ -8,8 +8,8 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from webapp.tools.id_tools import wikipedia_id_from_input, wikipedia_movie_from_title, movie_from_inputs, imdb_id_from_input, movie_from_imdb_input, netflix_id_from_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_id_from_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
-from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
-from webapp.tools.search_tools import movies_from_term
+from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, netflix_link_for_movie, rottentomatoes_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
+from webapp.tools.search_tools import movies_from_term, movies_from_apis_term
 from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
 
 site_logger = logging.getLogger('log.site')
@@ -88,29 +88,50 @@ def view_list(request):
 				return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search'), 'success' : False, 'results' : error_msg}, RequestContext(request))
 		elif logged_in_profile_info['admin'] and request.GET.get('add'):
 			if request.method == 'POST':
-				'''*****************************************************************************
-				Add movie given user input of imdb, netflix, and rottentomatoes urls or ids and redirect to movie page
-				PATH: webapp.views.movie.view_list; METHOD: post; PARAMS: get - add; MISC: logged_in_profile.IsAdmin;
-				*****************************************************************************'''
-				res_dict = movie_from_inputs(request.POST.get('imdb_url'), request.POST.get('netflix_url'), request.POST.get('rottentomatoes_id'), request.POST.get('wikipedia_id'))
-				if res_dict.get('success'):
-					try:
-						movie = res_dict.get('movie')
-						movie.full_clean()
-						movie.save()
-						create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
-						movie_logger.info(movie.UrlTitle + ' Create Success by ' + logged_in_profile_info['username'])
-						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
-					except ValidationError as e:
-						urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
-						movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
-						error_msg = e.message_dict
-						for key in error_msg:
-							error_msg[key] = str(error_msg[key][0])
-						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'links' : generate_links_dict(movie)}, RequestContext(request))
+				if request.POST.get('api_search_term'):
+					'''*****************************************************************************
+					Return results from imdb, netflix, rottentomatoes, and wikipedia searches as options to add movie
+					PATH: webapp.views.movie.view_list; METHOD: post; PARAMS: get - add, post - api_search_term; MISC: logged_in_profile.IsAdmin;
+					*****************************************************************************'''
+					api_search_term = request.POST.get('api_search_term')
+					res_dict = movies_from_apis_term(api_search_term, 5)
+					imdb_possibilities = res_dict.get('imdb_movies')
+					for movie in imdb_possibilities:
+						movie.UrlTitle = imdb_link_for_movie(movie)
+					netflix_possibilities = res_dict.get('netflix_movies')
+					for movie in netflix_possibilities:
+						movie.UrlTitle = netflix_link_for_movie(movie)
+					rottentomatoes_possibilities = res_dict.get('rottentomatoes_movies')
+					for movie in rottentomatoes_possibilities:
+						movie.UrlTitle = rottentomatoes_link_for_movie(movie)
+					wikipedia_possibilities = res_dict.get('wikipedia_movies')
+					for movie in wikipedia_possibilities:
+						movie.UrlTitle = wikipedia_link_for_movie(movie)
+					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'api_search_term' : api_search_term, 'imdb_possibilities' : imdb_possibilities, 'netflix_possibilities' : netflix_possibilities, 'rottentomatoes_possibilities' : rottentomatoes_possibilities, 'wikipedia_possibilities' : wikipedia_possibilities}, RequestContext(request))
 				else:
-					movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
-					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'links' : generate_links_dict(res_dict.get('movie'))}, RequestContext(request))
+					'''*****************************************************************************
+					Add movie given user input of imdb, netflix, rottentomatoes, and wikipedia urls or ids and redirect to movie page
+					PATH: webapp.views.movie.view_list; METHOD: post; PARAMS: get - add; MISC: logged_in_profile.IsAdmin;
+					*****************************************************************************'''
+					res_dict = movie_from_inputs(request.POST.get('imdb_url'), request.POST.get('netflix_url'), request.POST.get('rottentomatoes_id'), request.POST.get('wikipedia_id'))
+					if res_dict.get('success'):
+						try:
+							movie = res_dict.get('movie')
+							movie.full_clean()
+							movie.save()
+							create_properties(movie, res_dict.get('directors'), res_dict.get('writers'), res_dict.get('actors'), res_dict.get('genres'), logged_in_profile_info['username'])
+							movie_logger.info(movie.UrlTitle + ' Create Success by ' + logged_in_profile_info['username'])
+							return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
+						except ValidationError as e:
+							urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
+							movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
+							error_msg = e.message_dict
+							for key in error_msg:
+								error_msg[key] = str(error_msg[key][0])
+							return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'links' : generate_links_dict(movie)}, RequestContext(request))
+					else:
+						movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
+						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'links' : generate_links_dict(res_dict.get('movie'))}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display admin add movie page

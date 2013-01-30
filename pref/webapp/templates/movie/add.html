@@ -11,57 +11,121 @@
 			</div>
 		{% endfor %}
 	{% endif %}
-	{% url webapp.views.movie.view_list as movies_url %}
-	<form class="well" action="{{movies_url}}?add=1" method="post"> {% csrf_token %}
-		<div class="row">
-			<div class="span4 offset2">
-				<label for="imdb_url">IMDb URL or ID*: </label>
-				{% if movie and movie.ImdbId %}
-					<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" value="{{links.imdb}}" />
-				{% else %}
-					<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" />
-				{% endif %}
+	<div class="well">
+		{% url webapp.views.movie.view_list as movies_url %}
+		<form action="{{movies_url}}?add=1" method="post"> {% csrf_token %}
+			<div class="row">
+				<div class="span4 offset2">
+					<div class="input-append">
+					{% if api_search_term %}
+						<input class="span2" type="text" name="api_search_term" id="api_search_term" value="{{api_search_term}}" />
+					{% else %}
+						<input class="span2" type="text" name="api_search_term" id="api_search_term" placeholder="Optional Search Term" />
+					{% endif %}
+						<button class="btn" type="submit">Search APIs</button>
+					</div>
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="span4 offset2">
-				<label for="netflix_url">Netflix URL or ID: </label>
-				{% if movie and movie.NetflixId %}
-					<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" value="{{links.netflix}}" />
-				{% else %}
-					<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" />
-				{% endif %}
+		</form>
+		<form action="{{movies_url}}?add=1" method="post"> {% csrf_token %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="imdb_url">IMDb URL or ID*: </label>
+					{% if movie and movie.ImdbId %}
+						<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" value="{{links.imdb}}" />
+					{% else %}
+						<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" />
+					{% endif %}
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="span4 offset2">
-				<label for="rottentomatoes_id">Rotten Tomatoes ID: </label>
-				{% if movie and movie.RottentomatoesId %}
-					<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
-				{% else %}
-					<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
-				{% endif %}
+			{% if imdb_possibilities %}
+				<div class="row">
+					<table class="table table-striped span4 offset2">
+						{% for movie in imdb_possibilities %}
+							<tr>
+								<td style="text-align: center"><input type="radio" name="imdb_possibilities" value="{{movie.ImdbId}}" /></td>
+								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="netflix_url">Netflix URL or ID: </label>
+					{% if movie and movie.NetflixId %}
+						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" value="{{links.netflix}}" />
+					{% else %}
+						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" />
+					{% endif %}
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="span4 offset2">
-				<label for="wikipedia_id">Wikipedia URL or ID: </label>
-				{% if movie and movie.WikipediaId %}
-					<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" value="{{links.wikipedia}}" />
-				{% else %}
-					<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" />
-				{% endif %}
+			{% if netflix_possibilities %}
+				<div class="row">
+					<table class="table table-striped span4 offset2">
+						{% for movie in netflix_possibilities %}
+							<tr>
+								<td style="text-align: center"><input type="radio" name="netflix_possibilities" value="{{movie.NetflixId}}" /></td>
+								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="rottentomatoes_id">Rotten Tomatoes ID: </label>
+					{% if movie and movie.RottentomatoesId %}
+						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
+					{% else %}
+						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
+					{% endif %}
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="span1 offset2">
-				<input class="btn btn-large btn-block btn-success" type="submit" value="Submit" />
+			{% if rottentomatoes_possibilities %}
+				<div class="row">
+					<table class="table table-striped span4 offset2">
+						{% for movie in rottentomatoes_possibilities %}
+							<tr>
+								<td style="text-align: center"><input type="radio" name="rottentomatoes_possibilities" value="{{movie.RottenTomatoesId}}" /></td>
+								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+			<div class="row">
+				<div class="span4 offset2">
+					<label for="wikipedia_id">Wikipedia URL or ID: </label>
+					{% if movie and movie.WikipediaId %}
+						<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" value="{{links.wikipedia}}" />
+					{% else %}
+						<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" />
+					{% endif %}
+				</div>
 			</div>
-			<div class="span1 offset2">
-				<a class="btn btn-large btn-block btn-danger" href="/">Cancel</a>
+			{% if wikipedia_possibilities %}
+				<div class="row">
+					<table class="table table-striped span4 offset2">
+						{% for movie in wikipedia_possibilities %}
+							<tr>
+								<td style="text-align: center"><input type="radio" name="wikipedia_possibilities" value="{{movie.WikipediaId}}" /></td>
+								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.WikipediaId}}</a></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+			<div class="row">
+				<div class="span1 offset2">
+					<input class="btn btn-large btn-block btn-success" type="submit" value="Submit" />
+				</div>
+				<div class="span1 offset2">
+					<a class="btn btn-large btn-block btn-danger" href="/">Cancel</a>
+				</div>
 			</div>
-		</div>
-	</form>
+		</form>
+	</div>
 	{% include 'includes/footer.html' %}
 </body>
 </html>
