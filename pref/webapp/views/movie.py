@@ -94,7 +94,9 @@ def view_list(request):
 					PATH: webapp.views.movie.view_list; METHOD: post; PARAMS: get - add, post - api_search_term; MISC: logged_in_profile.IsAdmin;
 					*****************************************************************************'''
 					api_search_term = request.POST.get('api_search_term')
-					res_dict = movies_from_apis_term(api_search_term, 5)
+					api_search_length = int(request.POST.get('api_search_length')) if request.POST.get('api_search_length') and request.POST.get('api_search_length').isdigit() else 5
+					api_search_length = api_search_length if api_search_length > 0 and api_search_length <= 25 else 5
+					res_dict = movies_from_apis_term(api_search_term, api_search_length)
 					imdb_possibilities = res_dict.get('imdb_movies')
 					for movie in imdb_possibilities:
 						movie.UrlTitle = imdb_link_for_movie(movie)
@@ -107,7 +109,7 @@ def view_list(request):
 					wikipedia_possibilities = res_dict.get('wikipedia_movies')
 					for movie in wikipedia_possibilities:
 						movie.UrlTitle = wikipedia_link_for_movie(movie)
-					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'api_search_term' : api_search_term, 'imdb_possibilities' : imdb_possibilities, 'netflix_possibilities' : netflix_possibilities, 'rottentomatoes_possibilities' : rottentomatoes_possibilities, 'wikipedia_possibilities' : wikipedia_possibilities}, RequestContext(request))
+					return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'api_search_term' : api_search_term, 'api_search_length' : api_search_length, 'imdb_possibilities' : imdb_possibilities, 'netflix_possibilities' : netflix_possibilities, 'rottentomatoes_possibilities' : rottentomatoes_possibilities, 'wikipedia_possibilities' : wikipedia_possibilities}, RequestContext(request))
 				else:
 					'''*****************************************************************************
 					Add movie given user input of imdb, netflix, rottentomatoes, and wikipedia urls or ids and redirect to movie page

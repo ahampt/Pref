@@ -16,14 +16,21 @@
 		<form action="{{movies_url}}?add=1" method="post"> {% csrf_token %}
 			<div class="row">
 				<div class="span4 offset2">
-					<div class="input-append">
 					{% if api_search_term %}
-						<input class="span2" type="text" name="api_search_term" id="api_search_term" value="{{api_search_term}}" />
+						<input class="span3" type="text" name="api_search_term" id="api_search_term" value="{{api_search_term}}" />
 					{% else %}
-						<input class="span2" type="text" name="api_search_term" id="api_search_term" placeholder="Optional Search Term" />
+						<input class="span3" type="text" name="api_search_term" id="api_search_term" placeholder="Search Term" />
 					{% endif %}
-						<button class="btn" type="submit">Search APIs</button>
-					</div>
+					<select class="span1" name="api_search_length" id="api_search_length">
+						<option value="5">5</option>
+						<option value="10" {% if api_search_length == 10 %}selected="selected"{%endif%}>10</option>
+						<option value="15" {% if api_search_length == 15 %}selected="selected"{%endif%}>15</option>
+					</select>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4 offset4">
+					<input class="span2 btn input-block-level" type="submit" value="Search APIs" />
 				</div>
 			</div>
 		</form>
