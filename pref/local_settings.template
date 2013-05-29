@@ -23,6 +23,10 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 EMAIL_PORT = 25
 
+ALLOWED_HOSTS = (
+	*,
+)
+
 # Optional
 #
 # Uncomment ENVIRONMENT for production environment to disable the limited access feature
