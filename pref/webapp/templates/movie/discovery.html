@@ -8,6 +8,7 @@
 	<h2>Associate movies to your profile by:</h2>
 	<br />
 	<ol>
+		<li>Cycling through random movies in Pref by using the random button under the "Find Movies" button on the top of the page (For quick randomization create a new bookmark with the method as random and keep clicking it. i.e. www.google.com/random replacing www.google.com with the domain of the current site).</li><br />
 		<li>Searching for movies using the search bar at the top of this page.</li><br />
 		{% url "webapp.views.movie.view_list" as movies_url %}
 		<li>Looking through all of the movies currently in the system <a href="{{movies_url}}">here</a>.</li><br />

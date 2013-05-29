@@ -36,6 +36,8 @@
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="{{discovery_url}}">Discovery</a></li>
+									{% url "webapp.views.movie.random" as random_url %}
+									<li><a href="{{random_url}}">Random</a></li>
 									<li class="nav-header">By ...</li>
 									{% url "webapp.views.profile.view_list" as profiles_url %}
 									<li><a href="{{profiles_url}}">Profile</a></li>

@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
+from random import randint
 from webapp.tools.id_tools import wikipedia_id_from_input, wikipedia_movie_from_title, movie_from_inputs, imdb_id_from_input, movie_from_imdb_input, netflix_id_from_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_id_from_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
 from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, netflix_link_for_movie, rottentomatoes_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
 from webapp.tools.search_tools import movies_from_term, movies_from_apis_term
@@ -722,6 +723,23 @@ def search(request):
 			PATH: webapp.views.movie.search; METHOD: none; PARAMS: none; MISC: none;
 			*****************************************************************************'''
 			return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : False, 'results' : {'Error' : 'No results, did not search for anything.'}}, RequestContext(request))
+	except Exception:
+		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+
+# Show a random movie
+def random(request):
+	try:
+		logged_in_profile_info = { }
+		permission_response = check_and_get_session_info(request, logged_in_profile_info)
+		if permission_response != True:
+			return permission_response
+		'''*****************************************************************************
+		Display random movie page
+		PATH: webapp.views.movie.random; METHOD: none; PARAMS: none; MISC: none;
+		*****************************************************************************'''
+		movie = Movies.objects.all()[randint(0, Movies.objects.count()-1)]
+		return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
