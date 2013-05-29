@@ -94,7 +94,7 @@ def register(request):
 				profile.save()
 				profile_logger.info(profile.Username + ' Register Success')
 				# Login the new profile
-				login_command(request, profile)
+				login_command(request, profile, request.POST.get('remember_me') == 'remember_me')
 				profile_logger.info(profile.Username + ' Login Success')
 				set_msg(request, 'Welcome ' + profile.Username + '!', 'Your profile has successfully been created.', 'success')
 				return render_to_response('movie/discovery.html', {'header' : generate_header_dict(request, 'Now What?')}, RequestContext(request))
@@ -139,7 +139,7 @@ def login(request):
 			text_password = request.POST.get('password')
 			# Use check_password to compare hashed password correctly
 			if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS and len(text_password) < 1000 and check_password(text_password, profile.Password):
-				login_command(request, profile)
+				login_command(request, profile, request.POST.get('remember_me') == 'remember_me')
 				profile.FailedLoginAttempts = 0
 				profile.save()
 				profile_logger.info(profile.Username + ' Login Success')

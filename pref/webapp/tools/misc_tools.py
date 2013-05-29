@@ -1,4 +1,5 @@
 import logging, urllib
+from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -143,13 +144,6 @@ def get_msg_dict(request):
 
 # Return dictionary for use in the header template (called in every response)
 def generate_header_dict(request, header_text):
-	tracking_code = None
-	try:
-		# Expand session for another hour
-		request.session.set_expiry(3600)
-	# Ignore otherwise
-	except Exception:
-		pass
 	# Form list of strings for all movies [title (year),] for typeahead search
 	movies_titles_years = Movies.objects.values_list('Title', 'Year').order_by('Title')
 	search_list = []
@@ -178,14 +172,18 @@ def logout_command(request):
 		return profile
 
 # Login and return profile of user
-def login_command(request, profile):
+def login_command(request, profile, remember_me = False):
 	# Logout others first
 	logout_command(request)
 	request.session['auth_profile_id'] = profile.id
 	request.session['auth_profile_username'] = profile.Username.encode('ascii', 'replace')
 	request.session['admin'] = profile.IsAdmin
-	# Give hour of logged in access
-	request.session.set_expiry(3600)
+	if remember_me:
+		# Remain logged in for approximately 20 years which is near infinite for a single computer
+		request.session.set_expiry(timedelta(days=7300))
+	else:
+		# Remain logged in until the browser is closed
+		request.session.set_expiry(0)
 	# No longer need access key
 	try:
 		del request.session['auth_access']
