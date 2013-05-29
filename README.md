@@ -12,9 +12,9 @@ Install Pref yourself to contribute to the site and use it for your own organiza
 
 2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), and [Oauth](http://code.daaku.org/python-oauth/) python modules in this order. Let me know if you need any of the packages as I think some of them have lost support.
 
-3. Install Apache Stack for [Linux](http://www.unixmen.com/install-lamp-with-1-command-in-ubuntu-1010-maverick-meerkat/), [Windows](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
+3. Install Apache Stack for Linux (type "sudo apt-get  install lamp-server^ phpmyadmin" into a terminal), [Windows](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
 
-4. Install [Django](https://www.djangoproject.com/download/) 1.4.3
+4. Install [Django](https://www.djangoproject.com/download/)
 
 ### Configuration
 
@@ -27,6 +27,8 @@ Install Pref yourself to contribute to the site and use it for your own organiza
     * Get your own API keys from [Rotten Tomatoes](http://developer.rottentomatoes.com/) and [Netflix](http://developer.netflix.com/) (Key and Secret).
     * Create DB using [phpmyadmin](http://127.0.0.1/phpmyadmin) with whatever name you want, just be sure to put the name of it here. (Set the collation to utf8_bin)
     * Set your own username and password for said database. Leave password blank ('') if no password.
+    * Enter your own email information to be able to send and recieve emails directly from Pref.
+    * Be sure to replace the * in ALLOWED_HOSTS to the domain name of your site for security reasons (example: "pref.andyhampton.com")
     * Set the time zone correctly for you or leave alone.
     * Change the PREFIX_URL as you see fit (This means to get to the site you will have to go to http://localhost/PREFIX_URL)
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
