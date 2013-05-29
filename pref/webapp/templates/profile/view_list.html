@@ -16,9 +16,9 @@
 	{% url "webapp.views.profile.view_list" as profiles_url %}
 	<div class="pagination">
 		<ul>
-			<li {% if not profiles.has_previous %} class="disabled" {% endif %}><a href="{{profiles_url}}?page={{profiles.previous_page_number}}&length={{profiles.paginator.per_page}}">&lt;&lt;</a></li>
+			<li {% if not profiles.has_previous %} class="disabled" {% endif %}><a href="{% if profiles.has_previous %}{{profiles_url}}?page={{profiles.previous_page_number}}&length={{profiles.paginator.per_page}}{% endif %}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{profiles_url}}?page={{profiles.number}}&length={{profiles.paginator.per_page}}">{{profiles.number}}</a></li>
-			<li {% if not profiles.has_next %} class="disabled" {% endif %}><a href="{{profiles_url}}?page={{profiles.next_page_number}}&length={{profiles.paginator.per_page}}">&gt;&gt;</a></li>
+			<li {% if not profiles.has_next %} class="disabled" {% endif %}><a href="{% if profiles.has_next %}{{profiles_url}}?page={{profiles.next_page_number}}&length={{profiles.paginator.per_page}}{% endif %}">&gt;&gt;</a></li>
 		</ul>
 	</div>
 	{% include 'includes/footer.html' %}

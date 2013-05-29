@@ -29,9 +29,9 @@
 	{% url "movies.movie.movies" as movies_url %}
 	<div class="pagination">
 		<ul>
-			<li {% if not page.has_previous %} class="disabled" {% endif %}><a href="{{movies_url}}?page={{page.previous_page_number}}&length={{page.paginator.per_page}}">&lt;&lt;</a></li>
+			<li {% if not page.has_previous %} class="disabled" {% endif %}><a href="{% if page.has_previous %}{{movies_url}}?page={{page.previous_page_number}}&length={{page.paginator.per_page}}{% endif %}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{movies_url}}?page={{page.number}}&length={{page.paginator.per_page}}">{{page.number}}</a></li>
-			<li {% if not page.has_next %} class="disabled" {% endif %}><a href="{{movies_url}}?page={{page.next_page_number}}&length={{page.paginator.per_page}}">&gt;&gt;</a></li>
+			<li {% if not page.has_next %} class="disabled" {% endif %}><a href="{% if page.has_next %}{{movies_url}}?page={{page.next_page_number}}&length={{page.paginator.per_page}}{% endif %}">&gt;&gt;</a></li>
 		</ul>
 	</div>
 	{% include 'includes/footer.html' %}

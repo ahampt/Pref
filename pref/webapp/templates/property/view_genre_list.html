@@ -16,9 +16,9 @@
 	{% url "webapp.views.property.genres" as genres_url %}
 	<div class="pagination">
 		<ul>
-			<li {% if not genres.has_previous %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}">&lt;&lt;</a></li>
+			<li {% if not genres.has_previous %} class="disabled" {% endif %}><a href="{% if genres.has_previous %}{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}{% endif %}">&lt;&lt;</a></li>
 			<li class="active"><a href="{{genres_url}}?page={{genres.number}}&length={{genres.paginator.per_page}}">{{genres.number}}</a></li>
-			<li {% if not genres.has_next %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.next_page_number}}&length={{genres.paginator.per_page}}">&gt;&gt;</a></li>
+			<li {% if not genres.has_next %} class="disabled" {% endif %}><a href="{% if genres.has_next %}{{genres_url}}?page={{genres.next_page_number}}&length={{genres.paginator.per_page}}{% endif %}">&gt;&gt;</a></li>
 		</ul>
 	</div>
 	{% include 'includes/footer.html' %}
