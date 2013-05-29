@@ -10,7 +10,7 @@
 
 	<p>Please also be aware that when you leave Pref, other sites may have different privacy policies and terms which are beyond Pref's control.</p>
 
-	{% url webapp.views.site.about as about_url %}
+	{% url "webapp.views.site.about" as about_url %}
 	<p>Use of the term Pref on this page refers to the owners and operators of Pref found <a href="{{about_url}}">here</a>.</p>
 	{% include 'includes/footer.html' %}
 </body>

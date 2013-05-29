@@ -6,7 +6,7 @@
 	{% include 'includes/header.html' %}
 	{% if success %}
 		<table class="table table-striped table-hover">
-		{% url webapp.views.movie.view_list as movies_url %}
+		{% url "webapp.views.movie.view_list" as movies_url %}
 		{% for movie, associated, new in movies %}
 			{% if forloop.first %}
 				<tr>
@@ -20,7 +20,7 @@
 				{% if new %}
 					<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}}</a></td>
 				{% else %}
-					{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+					{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 					<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 				{% endif %}
 				<td style="text-align: center">{{movie.Year}}</td>
@@ -60,7 +60,7 @@
 		{% endfor %}
 		</table>
 		{% if length < 20 %}
-			{% url webapp.views.movie.search as search_url %}
+			{% url "webapp.views.movie.search" as search_url %}
 			<a href="{{search_url}}?t={{quoted_term}}&length={{length|add:3}}">+ More Results</a>
 		{% endif %}
 	{% else %}

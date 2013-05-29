@@ -9,26 +9,26 @@
 						<span class="icon-bar"></span>
 					</a>
 				{% endif %}
-				{% url webapp.views.site.access as access_url %}
+				{% url "webapp.views.site.access" as access_url %}
 				<a class="brand" href="{{access_url}}">Pref</a>
 				<div class="nav-collapse collapse" style="height: 0px;">
 					{% if request.session.admin %}
-						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
+						{% url "webapp.views.profile.view" username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
-							{% url webapp.views.profile.view_list as profiles_url %}
+							{% url "webapp.views.profile.view_list" as profiles_url %}
 							<li><a href="{{profiles_url}}">Profiles</a></li>
-							{% url webapp.views.movie.view_list as movies_url %}
+							{% url "webapp.views.movie.view_list" as movies_url %}
 							<li><a href="{{movies_url}}">Movies</a></li>
-							{% url webapp.views.property.people as people_url %}
+							{% url "webapp.views.property.people" as people_url %}
 							<li><a href="{{people_url}}">People</a></li>
-							{% url webapp.views.property.genres as genres_url %}
+							{% url "webapp.views.property.genres" as genres_url %}
 							<li><a href="{{genres_url}}">Genres</a></li>
 							<li><a href="{{movies_url}}?add=1">Add</a></li>
 						</ul>
 					{% elif request.session.auth_profile_username %}
-						{% url webapp.views.profile.view username=request.session.auth_profile_username as profile_url %}
+						{% url "webapp.views.profile.view" username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
-							{% url webapp.views.site.discovery as discovery_url %}
+							{% url "webapp.views.site.discovery" as discovery_url %}
 							<li class="dropdown">
 								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 									Find Movies
@@ -37,13 +37,13 @@
 								<ul class="dropdown-menu">
 									<li><a href="{{discovery_url}}">Discovery</a></li>
 									<li class="nav-header">By ...</li>
-									{% url webapp.views.profile.view_list as profiles_url %}
+									{% url "webapp.views.profile.view_list" as profiles_url %}
 									<li><a href="{{profiles_url}}">Profile</a></li>
-									{% url webapp.views.movie.view_list as movies_url %}
+									{% url "webapp.views.movie.view_list" as movies_url %}
 									<li><a href="{{movies_url}}">Movie</a></li>
-									{% url webapp.views.property.people as people_url %}
+									{% url "webapp.views.property.people" as people_url %}
 									<li><a href="{{people_url}}">Person</a></li>
-									{% url webapp.views.property.genres as genres_url %}
+									{% url "webapp.views.property.genres" as genres_url %}
 									<li><a href="{{genres_url}}">Genre</a></li>
 								</ul>
 							</li>
@@ -51,7 +51,7 @@
 						</ul>
 					{% endif %}
 					{% if request.session.auth_profile_id %}
-						{% url webapp.views.movie.search as search_url %}
+						{% url "webapp.views.movie.search" as search_url %}
 						<form class="navbar-search form-search pull-left" action="{{search_url}}" method="get">
 							<div class="input-append">
 								{% if term %}
@@ -70,7 +70,7 @@
 									<i class="icon-user"></i> {{request.session.auth_profile_username}}
 								</a>
 							{% else %}
-								{% url webapp.views.profile.login as login_url %}
+								{% url "webapp.views.profile.login" as login_url %}
 								<a class="btn" href="{{login_url}}">
 									<i class="icon-user"></i> Sign In
 								</a>
@@ -83,13 +83,13 @@
 									<li><a href="{{profile_url}}">Profile</a></li>
 									<li><a href="{{profile_url}}?edit=1">Settings</a></li>
 									<li class="divider"></li>
-									{% url webapp.views.profile.logout as logout_url %}
+									{% url "webapp.views.profile.logout" as logout_url %}
 									<li><a href="{{logout_url}}">Sign Out</a></li>
 								{% else %}
-									{% url webapp.views.profile.login as login_url %}
+									{% url "webapp.views.profile.login" as login_url %}
 									<li><a href="{{login_url}}">Sign In</a></li>
 									<li class="divider"></li>
-									{% url webapp.views.profile.register as register_url %}
+									{% url "webapp.views.profile.register" as register_url %}
 									<li><a href="{{register_url}}">Register</a></li>
 							</ul>
 							{% endif %}

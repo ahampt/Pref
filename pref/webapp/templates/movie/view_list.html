@@ -8,7 +8,7 @@
 		<tr><th class="span5">#{{page.start_index}}{% if not page.start_index == page.end_index %}-{{page.end_index}}{%endif%} (of {{page.paginator.count}}) titles</th><th class="span1"></th><th class="span1"></th><th class="span1"></th></tr>
 		{% for movie, bool in movies %}
 			<tr>
-				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 				<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 				<td style="text-align: center">{{movie.Year}}</td>
 				<td style="text-align: center">
@@ -26,7 +26,7 @@
 			</tr>
 		{% endfor %}
 	</table>
-	{% url movies.movie.movies as movies_url %}
+	{% url "movies.movie.movies" as movies_url %}
 	<div class="pagination">
 		<ul>
 			<li {% if not page.has_previous %} class="disabled" {% endif %}><a href="{{movies_url}}?page={{page.previous_page_number}}&length={{page.paginator.per_page}}">&lt;&lt;</a></li>

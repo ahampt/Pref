@@ -5,7 +5,7 @@
 	{% include 'includes/navbar.html' %}
 	{% if genre %}
 		{% include 'includes/header.html' %}
-		{% url webapp.views.property.genre description=genre.Description as genre_url %}
+		{% url "webapp.views.property.genre" description=genre.Description as genre_url %}
 		{% if request.session.admin %}
 			<ul class="nav nav-tabs">
 				<li class="active">
@@ -18,7 +18,7 @@
 		<tr><th class="span5">#{{page.start_index}}{% if not page.start_index == page.end_index %}-{{page.end_index}}{%endif%} (of {{page.paginator.count}}) titles</th><th class="span1"></th><th class="span2"></th></tr>
 			{% for movie, bool in movies %}
 				<tr>
-					{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+					{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 					<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 					<td style="text-align: center">{{movie.Year}}</td>
 					<td style="text-align: center">

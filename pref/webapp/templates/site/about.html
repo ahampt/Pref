@@ -4,8 +4,8 @@
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
-	{% url webapp.views.site.disclaimers as disclaimers_url %}
-	{% url webapp.views.site.privacy as privacy_url %}
+	{% url "webapp.views.site.disclaimers" as disclaimers_url %}
+	{% url "webapp.views.site.privacy" as privacy_url %}
 	<p>Version {{VERSION}}</p>
 	<p>This website was created (and currently operated) by <a href="http://www.andyhampton.com" target="_blank">me</a> as a way to supplement countless spreadsheets and individual programs to keep track of the things I love across many mediums. You can find more information about the site and contribute by going to <a href="https://github.com/ahampt/Pref" target="_blank">github</a>.</p>
 	<p>Please make comments and suggestions as you use the site by clicking the appropriate buttons on pages when you see them as I am building this site purely to suffice my own needs until people speak up. Thanks</p>

@@ -5,15 +5,15 @@
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
 	{% if movie %}
-		{% url webapp.views.movie.view urltitle=movie.UrlTitle as form_url %}
+		{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as form_url %}
 	{% elif person %}
-		{% url webapp.views.property.person name=person.UrlName as form_url %}
+		{% url "webapp.views.property.person" name=person.UrlName as form_url %}
 	{% elif genre %}
-		{% url webapp.views.property.genre description=genre.Description as form_url %}
+		{% url "webapp.views.property.genre" description=genre.Description as form_url %}
 	{% elif profile %}
-		{% url webapp.views.profile.view username=profile.Username as form_url %}
+		{% url "webapp.views.profile.view" username=profile.Username as form_url %}
 	{% else %}
-		{% url webapp.views.site.about as form_url %}
+		{% url "webapp.views.site.about" as form_url %}
 	{% endif %}
 	<form class="well" action="{{form_url}}?suggestion=1" method="post"> {% csrf_token %}
 		<div class="row">

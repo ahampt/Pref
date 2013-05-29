@@ -12,7 +12,7 @@
 		{% endfor %}
 	{% endif %}
 	<div class="well">
-		{% url webapp.views.movie.view_list as movies_url %}
+		{% url "webapp.views.movie.view_list" as movies_url %}
 		<form action="{{movies_url}}?add=1" method="post"> {% csrf_token %}
 			<div class="row">
 				<div class="span4 offset2">

@@ -5,7 +5,7 @@
 	{% include 'includes/navbar.html' %}
 	{% if person %}
 		{% include 'includes/header.html' %}
-		{% url webapp.views.property.person urlname=person.UrlName as person_url %}
+		{% url "webapp.views.property.person" urlname=person.UrlName as person_url %}
 		<ul class="nav nav-tabs">
 			<li><a href="{{person_url}}">View</a></li>
 			<li class="active">
@@ -42,7 +42,7 @@
 		<ul id="directed_list">
 		{% if directed_movies|length > 0 %}
 			{% for movie in directed_movies %}
-				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=DIRECTOR" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}
@@ -57,7 +57,7 @@
 		<ul id="written_list">
 		{% if written_movies|length > 0 %}
 			{% for movie in written_movies %}
-				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=WRITER" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}
@@ -72,7 +72,7 @@
 		<ul id="acted_list">
 		{% if acted_movies|length > 0 %}
 			{% for movie in acted_movies %}
-				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{person_url}}?remove=1&i={{movie.UrlTitle}}&t=ACTOR" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 			{% endfor %}
 		{% endif %}

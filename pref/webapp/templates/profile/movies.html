@@ -23,7 +23,7 @@
 				{% for movie in movies %}
 					<tr>
 						<td>{{forloop.counter}}</td>
-						{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td><a href="{{movie_url}}">{{movie.Title}} ({{movie.Year}})</a></td>
 					</tr>
 				{% endfor %}
@@ -34,7 +34,7 @@
 				</tr>
 				{% for movie in unranked_movies %}
 					<tr>
-						{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td colspan="2"><a href="{{movie_url}}">{{movie.Title}} ({{movie.Year}})</a></td>
 					</tr>
 				{% endfor %}
@@ -45,7 +45,7 @@
 				</tr>
 				{% for movie in unseen_movies %}
 					<tr>
-						{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td colspan="2"><a href="{{movie_url}}">{{movie.Title}} ({{movie.Year}})</a></td>
 					</tr>
 				{% endfor %}
@@ -54,7 +54,7 @@
 	
 	{% else %}
 		{% if profile.id == request.session.auth_profile_id %}
-			{% url webapp.views.site.discovery as discovery_url %}
+			{% url "webapp.views.site.discovery" as discovery_url %}
 			<big>No movies ranked. You should <a href="{{discovery_url}}">Find Movies</a> to populate this page.</big>
 		{% else %}
 			<big>No movies ranked.</big>

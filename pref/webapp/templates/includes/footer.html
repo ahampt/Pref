@@ -7,10 +7,10 @@
 			&copy; 2013 <a href="http://www.andyhampton.com" target="_blank">Andy Hampton</a>
 		</p>
 		<p class="pull-right">
-			{% url webapp.views.site.about as about_url %}
-			{% url webapp.views.site.disclaimers as disclaimers_url %}
-			{% url webapp.views.site.legal as legal_url %}
-			{% url webapp.views.site.privacy as privacy_url %}
+			{% url "webapp.views.site.about" as about_url %}
+			{% url "webapp.views.site.disclaimers" as disclaimers_url %}
+			{% url "webapp.views.site.legal" as legal_url %}
+			{% url "webapp.views.site.privacy" as privacy_url %}
 			<a href="{{about_url}}">About</a> | <a href="{{disclaimers_url}}">Disclaimers</a> | <a href="{{privacy_url}}">Privacy Policy</a>
 		</p>
 	</footer>

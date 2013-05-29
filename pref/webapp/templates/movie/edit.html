@@ -6,9 +6,9 @@
 	{% if movie %}
 		{% include 'includes/header.html' %}
 		{% if old_urltitle %}
-			{% url webapp.views.movie.view urltitle=old_urltitle as movie_url %}
+			{% url "webapp.views.movie.view" urltitle=old_urltitle as movie_url %}
 		{% else %}
-			{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+			{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 		{% endif %}
 		<ul class="nav nav-tabs">
 			<li><a href="{{movie_url}}">View</a></li>
@@ -81,7 +81,7 @@
 		<ul id="directors-list">
 			{% if directors %}
 				{% for director in directors %}
-					{% url webapp.views.property.person urlname=director.UrlName as director_url %}
+					{% url "webapp.views.property.person" urlname=director.UrlName as director_url %}
 					<li><a href="{{director_url}}">{{director.Name}}</a> - <a href="{{director_url}}?remove=1&i={{movie.UrlTitle}}&t=DIRECTOR&movie=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{director_url}}?edit=1">Edit</a> <a href="{{director_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 				{% endfor %}
 			{% endif %}
@@ -96,7 +96,7 @@
 		<ul id="writers-list">
 			{% if writers %}
 				{% for writer in writers %}
-					{% url webapp.views.property.person urlname=writer.UrlName as writer_url %}
+					{% url "webapp.views.property.person" urlname=writer.UrlName as writer_url %}
 					<li><a href="{{writer_url}}">{{writer.Name}}</a> - <a href="{{writer_url}}?remove=1&i={{movie.UrlTitle}}&t=WRITER&movie=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{writer_url}}?edit=1">Edit</a> <a href="{{writer_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 				{% endfor %}
 			{% endif %}
@@ -111,7 +111,7 @@
 		<ul id="actors-list">
 			{% if actors %}
 				{% for actor in actors %}
-					{% url webapp.views.property.person urlname=actor.UrlName as actor_url %}
+					{% url "webapp.views.property.person" urlname=actor.UrlName as actor_url %}
 					<li><a href="{{actor_url}}">{{actor.Name}}</a> - <a href="{{actor_url}}?remove=1&i={{movie.UrlTitle}}&t=ACTOR&movie=1" onclick="return confirmAction('Remove Person?')">Remove</a> <a href="{{actor_url}}?edit=1">Edit</a> <a href="{{actor_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a></li>
 				{% endfor %}
 			{% endif %}
@@ -126,7 +126,7 @@
 		<ul id="genres-list">
 			{% if genres %}
 				{% for genre in genres %}
-					{% url webapp.views.property.genre description=genre.Description as genre_url %}
+					{% url "webapp.views.property.genre" description=genre.Description as genre_url %}
 					<li><a href="{{genre_url}}">{{genre.Description}}</a> - <a href="{{genre_url}}?remove=1&i={{movie.UrlTitle}}&movie=1" onclick="return confirmAction('Remove Genre?')">Remove</a> <a href="{{genre_url}}?edit=1">Edit</a> <a href="{{genre_url}}?delete=1" onclick="return confirmAction('Delete Genre?')">Delete</a></li>
 				{% endfor %}
 			{% endif %}

@@ -9,11 +9,11 @@
 	<br />
 	<ol>
 		<li>Searching for movies using the search bar at the top of this page.</li><br />
-		{% url webapp.views.movie.view_list as movies_url %}
+		{% url "webapp.views.movie.view_list" as movies_url %}
 		<li>Looking through all of the movies currently in the system <a href="{{movies_url}}">here</a>.</li><br />
-		{% url webapp.views.property.people as people_url %}
+		{% url "webapp.views.property.people" as people_url %}
 		<li>Looking through movies with your favorite actors, directors, and writers <a href="{{people_url}}">here</a>.</li><br />
-		{% url webapp.views.property.genres as genres_url %}
+		{% url "webapp.views.property.genres" as genres_url %}
 		<li>Looking through movies in your favorite genres <a href="{{genres_url}}">here</a>.</li>
 	</ol>
 	

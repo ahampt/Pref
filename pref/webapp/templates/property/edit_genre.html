@@ -5,7 +5,7 @@
 	{% include 'includes/navbar.html' %}
 	{% if genre %}
 		{% include 'includes/header.html' %}
-		{% url webapp.views.property.genre description=genre.Description as genre_url %}
+		{% url "webapp.views.property.genre" description=genre.Description as genre_url %}
 		<ul class="nav nav-tabs">
 			<li><a href="{{genre_url}}">View</a></li>
 			<li class="active">
@@ -41,7 +41,7 @@
 		<h2>{{movies|length}} {{genre.Description}} Movies</h2>
 		<ul id="list">
 			{% for movie in movies %}
-				{% url webapp.views.movie.view urltitle=movie.UrlTitle as movie_url %}
+				{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 				<li><a href="{{movie_url}}">{{movie.Title}}</a> - <a href="{{genre_url}}?remove=1&i={{movie.UrlTitle}}" onclick="return confirmAction('Remove Movie?')">Remove</a> <a href="{{movie_url}}?edit=1">Edit</a> <a href="{{movie_url}}?delete=1" onclick="return confirmAction('Delete Movie?')">Delete</a></li>
 			{% endfor %}
 			<form action="{{genre_url}}?add=1" method="POST"> {% csrf_token %}

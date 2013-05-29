@@ -11,7 +11,7 @@
 			</div>
 		{% endfor %}
 	{% endif %}
-	{% url webapp.views.site.register as register_url %}
+	{% url "webapp.views.site.register" as register_url %}
 	<form class="well" action="{{register_url}}" method="post"> {% csrf_token %}
 		<div class="row">
 			<div class="span4 offset2">
@@ -62,7 +62,7 @@
 		<br />
 		<div class="row">
 			<div class="span4 offset2">
-				{% url webapp.views.profile.login as login_url %}
+				{% url "webapp.views.profile.login" as login_url %}
 				<p>Already have a profile? <a href="{{login_url}}">Sign In</a></p>
 			</div>
 		</div>

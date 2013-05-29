@@ -8,12 +8,12 @@
 		<tr><th class="span8">#{{genres.start_index}}{% if not genres.start_index == genres.end_index %}-{{genres.end_index}}{%endif%} (of {{genres.paginator.count}}) genres</th></tr>
 		{% for genre in genres %}
 			<tr>
-				{% url webapp.views.property.genre description=genre.Description as genre_url %}
+				{% url "webapp.views.property.genre" description=genre.Description as genre_url %}
 				<td><a href="{{ genre_url }}">{{genre.Description}}</a></td>
 			</tr>
 		{% endfor %}
 	</table>
-	{% url webapp.views.property.genres as genres_url %}
+	{% url "webapp.views.property.genres" as genres_url %}
 	<div class="pagination">
 		<ul>
 			<li {% if not genres.has_previous %} class="disabled" {% endif %}><a href="{{genres_url}}?page={{genres.previous_page_number}}&length={{genres.paginator.per_page}}">&lt;&lt;</a></li>

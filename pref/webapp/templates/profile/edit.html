@@ -12,7 +12,7 @@
 			</div>
 		{% endfor %}
 	{% endif %}
-	{% url webapp.views.profile.view username=profile.Username as profile_url %}
+	{% url "webapp.views.profile.view" username=profile.Username as profile_url %}
 	<form class="well" action="{{profile_url}}?edit=1" method="post"> {% csrf_token %}
 		<div class="row">
 			<div class="span2">

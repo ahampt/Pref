@@ -4,7 +4,7 @@
 <body>
 	{% include 'includes/navbar.html' %}
 	{% include 'includes/header.html' %}
-	{% url webapp.views.site.home as home_url %}
+	{% url "webapp.views.site.home" as home_url %}
 	<form class="well" action="{{home_url}}?error=1" method="post">
 		<div class="row">
 			<div class="offset1">

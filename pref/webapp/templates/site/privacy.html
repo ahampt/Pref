@@ -20,7 +20,7 @@
 
 	<p>You may also opt out from receiving information from Pref at any time and remove your contact information from Pref databases by deleting your profile or changing your email.</p>
 
-	{% url webapp.views.site.about as about_url %}
+	{% url "webapp.views.site.about" as about_url %}
 	<p>Use of the term Pref on this page refers to the owners and operators of Pref found <a href="{{about_url}}">here</a>.</p>
 	{% include 'includes/footer.html' %}
 </body>
