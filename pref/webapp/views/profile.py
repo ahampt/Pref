@@ -307,7 +307,8 @@ def view(request, username):
 			Display all movies associated with a profile
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
-			movies, unranked_movies, unseen_movies = [], [], []
+			movies, unranked_movies, unseen_movies, own_watched, own_unseen = [], [], [], [], []
+			own_movies = profile.id == logged_in_profile_info['id']
 			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 			for assoc in associations:
 				if assoc.Rank:
@@ -316,7 +317,16 @@ def view(request, username):
 					unranked_movies.append(assoc.ConsumeableId)
 				else:
 					unseen_movies.append(assoc.ConsumeableId)
-			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies}, RequestContext(request))
+				if not own_movies:
+					try:
+						own_association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = assoc.ConsumeableId, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
+						if own_association.Consumed:
+							own_watched.append(assoc.ConsumeableId.id)
+						else:
+							own_unseen.append(assoc.ConsumeableId.id)
+					except ObjectDoesNotExist:
+						continue
+			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies, 'own_watched' : own_watched, 'own_unseen' : own_unseen}, RequestContext(request))
 		elif request.GET.get('export'):
 			'''*****************************************************************************
 			Generate CSV file of movie list for letterboxd import

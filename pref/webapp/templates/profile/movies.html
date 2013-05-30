@@ -18,13 +18,23 @@
 			{% if movies %}
 				<tr>
 					<th class="span1">Rank</th>
-					<th class="span6">Movie</th>
+					{% if own_watched or own_unseen %}
+						<th class="span5">Movie</th>
+						<th class="span1">Me</th>
+					{% else %}
+						<th class="span6">Movie</th>
+					{% endif %}
 				</tr>
 				{% for movie in movies %}
 					<tr>
 						<td>{{forloop.counter}}</td>
 						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td><a href="{{movie_url}}">{{movie.Title}} ({{movie.Year}})</a></td>
+						{% if movie.id in own_watched %}
+							<td>Watched</td>
+						{% elif movie.id in own_unseen %}
+							<td>Want to See</td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			{% endif %}
@@ -36,6 +46,11 @@
 					<tr>
 						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td colspan="2"><a href="{{movie_url}}">{{movie.Title}} ({{movie.Year}})</a></td>
+						{% if movie.id in own_watched %}
+							<td>Watched</td>
+						{% elif movie.id in own_unseen %}
+							<td>Want to See</td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			{% endif %}
