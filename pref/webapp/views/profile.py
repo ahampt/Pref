@@ -1,4 +1,5 @@
-import logging, random, sys, urllib
+import logging, random, sys, unicodecsv, urllib
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -316,6 +317,33 @@ def view(request, username):
 				else:
 					unseen_movies.append(assoc.ConsumeableId)
 			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies}, RequestContext(request))
+		elif request.GET.get('export'):
+			'''*****************************************************************************
+			Generate CSV file of movie list for letterboxd import
+			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - export; MISC: none;
+			*****************************************************************************'''
+			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
+			response = HttpResponse(content_type='text/csv')
+			response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+			writer = unicodecsv.writer(response, encoding='utf-8')
+			writer.writerow(['imdbID', 'Title', 'Year', 'WatchedDate', 'CreatedDate', 'Rating10', 'Review'])
+			for assoc in associations:
+				imdbid, title, year, watched_date, created_date, rating, review = '', '', '', '', '', '', ''
+				movie = assoc.ConsumeableId
+				imdbid = movie.ImdbId
+				title = movie.Title
+				year = str(movie.Year)
+				if assoc.Consumed:
+					watched_date = str(assoc.UpdatedAt.year) + '-' + str(assoc.UpdatedAt.month) + '-' + str(assoc.UpdatedAt.day)
+					created_date = str(assoc.CreatedAt.year) + '-' + str(assoc.CreatedAt.month) + '-' + str(assoc.CreatedAt.day)
+					if assoc.Rating:
+						rating = assoc.Rating / 10
+					if assoc.Review:
+						review = assoc.Review
+				else:
+					watched_date = str(datetime.today.year) + '-' + str(datetime.today.month) + '-' + str(datetime.today.day)
+				writer.writerow([imdbid, title, year, watched_date, created_date, rating, review])
+			return response
 		elif request.GET.get('suggestion'):
 			if request.method == 'POST':
 				'''*****************************************************************************

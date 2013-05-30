@@ -51,7 +51,14 @@
 				{% endfor %}
 			{% endif %}
 		</table>
-	
+		<div class="row">
+			<div class="span8">
+				<a id="export-btn" class="btn btn-large btn-block btn-success" href="{{profile_url}}?export=1">Export List for Letterboxd</a>
+				<script type="text/javascript">
+					jQuery("#export-btn").popover({placement: 'top', trigger: 'hover', title: 'EXPORT', content: 'Generate and download a csv file to use for importing into letterboxd. All films will be marked as watched due to the implementation by letterboxd. All unseen movies will have a watched date of today so that it is easy to find and fix.'});
+				</script>
+			</div>
+		</div>
 	{% else %}
 		{% if profile.id == request.session.auth_profile_id %}
 			{% url "webapp.views.site.discovery" as discovery_url %}
