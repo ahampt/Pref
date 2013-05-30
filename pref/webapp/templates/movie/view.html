@@ -200,17 +200,17 @@
 		{% if movie.NetflixId %}
 			<div class="row" style="margin: 0; border-bottom: 1px solid #DDDDDD;">
 				{% if availability.DVD %}
-					<a id="disc_add" class="btn btn-danger" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'disc', 'disc_add');" style="float: right; margin-right: 60px;">Add to Queue</a>
+					<a id="disc_add" class="bt-popover btn btn-danger" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'disc', 'disc_add');" style="float: right; margin-right: 60px;">Add to Queue</a>
 					<script type="text/javascript">
 						jQuery("#disc_add").popover({placement: 'top', trigger: 'hover', title: 'Add to Queue', content: 'Add DVD of this movie to your Netflix queue.'});
 					</script>
 				{% endif %}
 				{% if availability.INSTANT %}
-					<a id="instant_add" class="btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'instant', 'instant_add');" style="float: right; margin-right: 20px;">Add</a>
+					<a id="instant_add" class="bt-popover btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.addToQueue('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null, 'instant', 'instant_add');" style="float: right; margin-right: 20px;">Add</a>
 					<script type="text/javascript">
 						jQuery("#instant_add").popover({placement: 'top', trigger: 'hover', title: 'Add Movie', content: 'Watch this movie later on Netflix.'});
 					</script>
-					<a id="instant_play" class="btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.openPlayer('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null);" style="float: right; margin-right: 20px;">Play</a>
+					<a id="instant_play" class="bt-popover btn btn-primary" href="javascript:void(0)" onclick="javascript:nflx.openPlayer('http://api.netflix.com/catalog/movie/{{movie.NetflixId}}', 0, 0, null);" style="float: right; margin-right: 20px;">Play</a>
 					<script type="text/javascript">
 						jQuery("#instant_play").popover({placement: 'top', trigger: 'hover', title: 'Play Movie', content: 'Watch this movie now on Netflix.'});
 					</script>
@@ -235,12 +235,12 @@
 					</div>
 					<div class="span1 offset1">
 						{% if association.Consumed and association.Rank %}
-							<a id="rerank_btn" class="btn btn-large btn-block btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')">{{association.Rank}}</a>
+							<a id="rerank_btn" class="bt-popover btn btn-large btn-block btn-primary" href="{{movie_url}}?rerank=1" onclick="return confirmAction('Movie unranked before reranking! Do not stop before completing ranking or movie will no longer appear ranked. Continue?')">{{association.Rank}}</a>
 							<script type="text/javascript">
 								jQuery("#rerank_btn").popover({placement: 'top', trigger: 'hover', title: 'RERANK', content: 'Rethink movie\'s position in your rankings.'});
 							</script>
 						{% elif association.Consumed %}
-							<a id="rank_btn" class="btn btn-large btn-block btn-primary" href="{{movie_url}}?rank=1">-</a>
+							<a id="rank_btn" class="bt-popover btn btn-large btn-block btn-primary" href="{{movie_url}}?rank=1">-</a>
 							<script type="text/javascript">
 								jQuery("#rank_btn").popover({placement: 'top', trigger: 'hover', title: 'RANK', content: 'View movie in the context of others that you have watched.'});
 							</script>

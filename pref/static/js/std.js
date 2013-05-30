@@ -4,6 +4,10 @@ function confirmAction(str) {
 
 var timeout;
 
+jQuery('.bt-popover').hover(function() { }, function() {
+	this.show();
+});
+
 jQuery('div.navbar div.btn-group.pull-right button.dropdown-toggle').hover(
 	function() {
 		jQuery('div.navbar div.btn-group.pull-right').addClass('open');
