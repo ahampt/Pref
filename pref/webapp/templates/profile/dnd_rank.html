@@ -14,21 +14,20 @@
 				setPieconProgress();
 			});
 		</script>
-		<div class="row">
-			<div id="dhtmlgoodies_dragDropContainer">
-				<div id="dhtmlgoodies_listOfItems">	
-					<ul id="allItems">
-						{% for movie in movies %}
-							<li id="{{movie.id}}">{{forloop.counter}}. {{movie.Title}} ({{movie.Year}})</li>
-						{% endfor %}
-						{% for movie in unranked_movies %}
-							<li id="u{{movie.id}}">Unranked: {{movie.Title}} ({{movie.Year}})</li>
-						{% endfor %}
-					</ul>
-				</div>
-			</div>
-			<ul id="dragContent"></ul>
-			<div id="dragDropIndicator"><img src="{{STATIC_URL}}img/insert.gif"></div>
+		<div class="row">	
+			<ul id="sortable" class="connected sortable">
+				{% for movie in movies %}
+					<li draggable="true" id="{{movie.id}}">{{forloop.counter}}. {{movie.Title}} ({{movie.Year}})</li>
+				{% endfor %}
+				{% if not movies %}
+					<li draggable="true" id="placeholder">Placeholder (Drag First Ranked Item Above This Item From List Below)</li>
+				{% endif %}
+			</ul>
+			<ul id="unranked_sortable" class="connected sortable">
+				{% for movie in unranked_movies %}
+					<li draggable="true" id="u{{movie.id}}">Unranked: {{movie.Title}} ({{movie.Year}})</li>
+				{% endfor %}
+			</ul>
 		</div>
 		<div class="row">
 			<div class="span1 offset1">

@@ -10,3 +10,27 @@ body {
 form.navbar-search .btn {
 	margin-top: 0;
 }
+
+.sortable {
+	-moz-user-select: none;
+	width: 600px;
+}
+
+.sortable li {
+	background: none repeat scroll 0 0 #F6F6F6;
+	border: 1px solid #CCCCCC;
+	color: #1C94C4;
+	height: 22px;
+	list-style: none outside none;
+	margin: 5px;
+	padding: 5px;
+}
+
+#unranked_sortable li {
+	background: none repeat scroll 0 0 #FEE25F;
+}
+
+li.sortable-placeholder {
+    background: none repeat scroll 0 0 transparent;
+    border: 1px dashed #CCCCCC;
+}

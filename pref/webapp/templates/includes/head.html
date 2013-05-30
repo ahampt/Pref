@@ -14,16 +14,8 @@
 	<!-- styles -->
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/std.css" />
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
-	{% if dnd %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dragndrop.css" />{% endif %}
 	{% if starbox %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />{% endif %}
 	{% if datepicker %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/pikaday.css" />{% endif %}
-	{% if dnd %}
-		<style>
-			#dhtmlgoodies_listOfItems ul{	/* Left column <ul> */	
-				height: {{size|multiply:25}}px;
-			}
-		</style>
-	{% endif %}
 
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>

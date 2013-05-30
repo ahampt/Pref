@@ -16,7 +16,34 @@
 	</footer>
 	</div> <!-- /container -->
 	<!-- javascript -->
-	{% if dnd %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/dragndrop.js"></script>{% endif %}
+	{% if dnd %}
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/jquery.sortable.min.js"></script>
+		<script language="javascript" type="text/javascript" >
+			$('.sortable').sortable();
+			$('#sortable, #unranked_sortable').sortable({
+				connectWith: '.connected'
+			});
+			$('.sortable').sortable().bind('sortupdate', function() {
+				var rankedNodes = jQuery('#sortable li').not('#placeholder');
+				var unrankedNodes = jQuery('#unranked_sortable li');
+				if(rankedNodes.length > 0) jQuery('#placeholder').hide();
+				else jQuery('#placeholder').show();
+				for(var i = 0; i < rankedNodes.length; i++) {
+					var oldHTML = rankedNodes[i].innerHTML
+					rankedNodes[i].innerHTML = i+1 + "." + oldHTML.substring(oldHTML.indexOf(" "));
+					if (oldHTML.length > 9 && oldHTML.substring(0, 9) == 'Unranked:'){
+						rankedNodes[i].id = rankedNodes[i].id.substring(1);
+					};
+				}
+				for(var i = 0; i < unrankedNodes.length; i++) {
+					var oldHTML = unrankedNodes[i].innerHTML
+					if (!(oldHTML.length > 9 && oldHTML.substring(0, 9) == 'Unranked:')){
+						unrankedNodes[i].innerHTML = "WARNING (place back in ranked list): " + oldHTML.substring(oldHTML.indexOf(" "));
+					};
+				}
+			});
+		</script>
+	{% endif %}
 	{% if piecon %}
 		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/piecon.min.js"></script>
 		<script language="javascript" type="text/javascript">
