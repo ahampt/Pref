@@ -35,48 +35,56 @@ def wikipedia_movies_from_term(search_term, how_many):
 	else:
 		return {'error_msg' : 'Could not be parsed from input.'}
 
-# Return movie from imdb given title and year
-def imdb_movie_from_data(search_term, year):
-	try:
-		movie = Movies()
-		# Query omdbapi (not affiliated with imdb)
-		search_term = urllib.quote(search_term.encode('ascii', 'ignore'))
-		req = urllib2.Request('http://www.omdbapi.com/?t='+search_term+'&y='+str(year))
-		res = urllib2.urlopen(req)
-		if res.getcode() == 200:
-			# Parse json response
-			imdb_dict = json.loads(res.read())
-			if imdb_dict.get('Response') == 'True':
-				if imdb_dict.get('imdbID'):
-					movie.ImdbId = imdb_dict.get('imdbID')
-				if imdb_dict.get('Title'):
-					movie.Title = imdb_dict.get('Title')
-				if imdb_dict.get('Year'):
-					movie.Year = int(imdb_dict.get('Year'))
-				if imdb_dict.get('Runtime'):
-					runtime_str = imdb_dict.get('Runtime')
-					runtime = 0
-					# Convert [/d+] h [/d+] m to minutes
-					runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-					if runtimes[0]:
-						runtime += runtimes[0]*60
-					if runtimes[1]:
-						runtime += runtimes[1]
-					movie.Runtime = str(runtime)
-			else:
-				return {'error' : 'No IMDb results found, please try again.'}
-		else:
-			return {'error_msg' : 'IMDb API failed, please try again.'}
-		return {'movie' : movie}
-	except Exception:
-		return {'error_msg' : 'IMDb API failed, please try again.'}
-
 # Return list of movies from imdb given search term
 def imdb_movies_from_term(search_term, page_limit):
-	return None
+	movies = []
+	if search_term and len(search_term) > 0:
+		#try:
+			# Query omdbapi (not affiliated with imdb)
+			search_term = urllib.quote(search_term.encode('ascii', 'ignore'))
+			req = urllib2.Request('http://www.omdbapi.com/?s='+search_term+'&r=JSON')
+			res = urllib2.urlopen(req)
+			if res.getcode() == 200:
+				# Parse json response
+				res_dict = json.loads(res.read())
+				if res_dict.get('Search'):
+					min_length = page_limit if page_limit < len(res_dict.get('Search')) else len(res_dict.get('Search'))
+					for i in range(min_length):
+						movie = Movies()
+						imdb_dict = res_dict.get('Search')[i]
+						if imdb_dict.get('imdbID'):
+							movie.ImdbId = imdb_dict.get('imdbID')
+						if imdb_dict.get('Title'):
+							movie.Title = imdb_dict.get('Title')
+						if imdb_dict.get('Year'):
+							movie.Year = int(imdb_dict.get('Year'))
+						if imdb_dict.get('Runtime'):
+							runtime_str = imdb_dict.get('Runtime')
+							runtime = 0
+							# Convert [/d+] h [/d+] m to minutes
+							runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+							if runtimes[0]:
+								runtime += runtimes[0]*60
+							if runtimes[1]:
+								runtime += runtimes[1]
+							movie.Runtime = str(runtime)
+						if movie.ImdbId != '' and movie.Title != '' and movie.Year != 0 and movie.Runtime != '':
+							movies.append(movie)
+				else:
+					return {'error' : 'No IMDb results found, please try again.'}
+			else:
+				return {'error_msg' : 'IMDb API failed, please try again.'}
+		#except Exception:
+		#	return {'error_msg' : 'IMDb API failed, please try again.'}
+	else:
+		return {'error_msg' : 'No term to search from.'}
+	if len(movies) > 0:
+		return {'movies' : movies}
+	else:
+		return {'error_msg' : 'No results found.'}
 
 # Return list of movies from netflix given search term
-def netflix_movies_from_term(search_term, page_limit, include_imdb = True):
+def netflix_movies_from_term(search_term, page_limit):
 	movies = []
 	if search_term and len(search_term) > 0:
 		try:
@@ -101,27 +109,8 @@ def netflix_movies_from_term(search_term, page_limit, include_imdb = True):
 					if node.getElementsByTagName('release_year') and node.getElementsByTagName('release_year')[0]:
 						year = int(node.getElementsByTagName('release_year')[0].childNodes[0].data)
 					if id != '' and title != '' and year != 0:
-						# Get movie from imdb to return if desired
-						if include_imdb:
-							res_dict = imdb_movie_from_data(title, year)
-							if res_dict.get('movie'):
-								movie = res_dict.get('movie')
-								duplicate = False
-								for j in range(len(movies)):
-									if movies[j].ImdbId == movie.ImdbId:
-										duplicate = True
-										break
-								if not duplicate:
-									movie.NetflixId = id
-									movies.append(movie)
-							elif res_dict.get('error'):
-								continue
-							else:
-								return {'error_msg' : res_dict.get('error_msg')}
-						# Else just add every movie in minimal form
-						else:
-							movie = Movies(Title = title, Year = year, NetflixId = id)
-							movies.append(movie)
+						movie = Movies(Title = title, Year = year, NetflixId = id)
+						movies.append(movie)
 					else:
 						return {'error_msg' : 'Invalid Netflix Search'}
 			else:
@@ -136,7 +125,7 @@ def netflix_movies_from_term(search_term, page_limit, include_imdb = True):
 		return {'error_msg' : 'No results found.'}
 
 # Return list of movies from rotten tomatoes given search term
-def rottentomatoes_movies_from_term(search_term, page_limit, include_imdb = True):
+def rottentomatoes_movies_from_term(search_term, page_limit):
 	movies = []
 	if search_term and len(search_term) > 0:
 		try:
@@ -150,27 +139,8 @@ def rottentomatoes_movies_from_term(search_term, page_limit, include_imdb = True
 					min_length = page_limit if page_limit < rottentomatoes_dict.get('total') else rottentomatoes_dict.get('total')
 					for i in range(min_length):
 						movie_dict = rottentomatoes_dict.get('movies')[i]
-						# Get movie from imdb to return if desired
-						if include_imdb:
-							res_dict = imdb_movie_from_data(movie_dict.get('title'), movie_dict.get('year'))
-							if res_dict.get('movie'):
-								movie = res_dict.get('movie')
-								duplicate = False
-								for j in range(len(movies)):
-									if movies[j].ImdbId == movie.ImdbId:
-										duplicate = True
-										break
-								if not duplicate:
-									movie.RottenTomatoesId = movie_dict.get('id')
-									movies.append(movie)
-							elif res_dict.get('error'):
-								continue
-							else:
-								return {'error_msg' : res_dict.get('error_msg')}
-						# Else just add every movie in minimal form
-						else:
-							movie = Movies(Title = movie_dict.get('title'), Year = movie_dict.get('year'), RottenTomatoesId = movie_dict.get('id'))
-							movies.append(movie)
+						movie = Movies(Title = movie_dict.get('title'), Year = movie_dict.get('year'), RottenTomatoesId = movie_dict.get('id'))
+						movies.append(movie)
 				else:
 					return {'error_msg' : 'Invalid Rotten Tomatoes Search'}
 			else:
@@ -190,10 +160,15 @@ def movies_from_apis_term(search_term, how_many):
 	movies = []
 	success = True
 	imdb_movies, rottentomatoes_movies, netflix_movies, wikipedia_movies = [], [], [], []
-	# Search rotten tomatoes and netflix (IMDb data returned)
-	rt_dict = rottentomatoes_movies_from_term(search_term, how_many, False)
-	net_dict = netflix_movies_from_term(search_term, how_many, False)
+	# Search imdb, rotten tomatoes and netflix
+	imdb_dict = imdb_movies_from_term(search_term, how_many)
+	rt_dict = rottentomatoes_movies_from_term(search_term, how_many)
+	net_dict = netflix_movies_from_term(search_term, how_many)
 	wiki_dict = wikipedia_movies_from_term(search_term, how_many)
+	if imdb_dict.get('movies'):
+		imdb_movies = imdb_dict.get('movies')
+	else:
+		error_list['ImdbSearch'] = imdb_dict.get('error_msg')
 	if rt_dict.get('movies'):
 		rottentomatoes_movies = rt_dict.get('movies')
 	else:
@@ -206,27 +181,6 @@ def movies_from_apis_term(search_term, how_many):
 		wikipedia_movies = wiki_dict.get('movies')
 	else:
 		error_list['WikipediaSearch'] = wiki_dict.get('error_msg')
-	# Get imdb movies
-	for movie in rottentomatoes_movies:
-		imdb_dict = imdb_movie_from_data(movie.Title, movie.Year)
-		if imdb_dict.get('movie'):
-			imdb_movies.append(imdb_dict.get('movie'))
-		elif imdb_dict.get('error_msg'):
-			error_list['ImdbSearch'] = imdb_dict.get('error_msg')
-	for movie in netflix_movies:
-		imdb_dict = imdb_movie_from_data(movie.Title, movie.Year)
-		if imdb_dict.get('movie'):
-			imdb_movies.append(imdb_dict.get('movie'))
-		elif imdb_dict.get('error_msg'):
-			error_list['ImdbSearch'] = imdb_dict.get('error_msg')
-	# Remove duplicates from imdb movies
-	for i in range(len(imdb_movies)):
-		j = i + 1
-		while j < len(imdb_movies):
-			if imdb_movies[i].ImdbId == imdb_movies[j].ImdbId:
-				del imdb_movies[j]
-			else:
-				j += 1
 	return {'imdb_movies' : imdb_movies, 'netflix_movies' : netflix_movies, 'rottentomatoes_movies' : rottentomatoes_movies, 'wikipedia_movies' : wikipedia_movies}
 
 # Return list of movies given search term and length
@@ -234,35 +188,51 @@ def movies_from_term(search_term, how_many):
 	error_list = {}
 	movies = []
 	success = True
-	rottentomatoes_movies, netflix_movies = [], []
+	imdb_movies, rottentomatoes_movies, netflix_movies = [], [], []
 	if search_term and len(search_term) > 0:
-		# Search rotten tomatoes and netflix (IMDb data returned)
+		# Search imdb, rotten tomatoes and netflix
+		imdb_dict = imdb_movies_from_term(search_term, how_many)
 		rt_dict = rottentomatoes_movies_from_term(search_term, how_many)
 		net_dict = netflix_movies_from_term(search_term, how_many)
+		if imdb_dict.get('movies'):
+			imdb_movies = imdb_dict.get('movies')
+		else:
+			error_list['ImdbSearch'] = imdb_dict.get('error_msg')
 		if rt_dict.get('movies'):
 			rottentomatoes_movies = rt_dict.get('movies')
-			movies = rottentomatoes_movies
 		else:
 			error_list['RottenTomatoesSearch'] = rt_dict.get('error_msg')
 		if net_dict.get('movies'):
 			netflix_movies = net_dict.get('movies')
 		else:
 			error_list['NetflixSearch'] = net_dict.get('error_msg')
-		if not rt_dict.get('movies') and not net_dict.get('movies'):
+		if not imdb_dict.get('movies') and not rt_dict.get('movies') and not net_dict.get('movies'):
 			success = False
-		# If duplicate imdb id, delete the netflix value
-		for movie in movies:
-			i = 0
-			while i < len(netflix_movies):
-				net_movie = netflix_movies[i]
-				if movie.ImdbId == net_movie.ImdbId:
-					movie.NetflixId = net_movie.NetflixId
-					del netflix_movies[i]
+		# Connect all of the results
+		for movie in imdb_movies:
+			for rt_movie in rottentomatoes_movies:
+				if movie.Title.lower() in rt_movie.Title.lower() and abs(movie.Year - rt_movie.Year) < 2:
+					movie.RottenTomatoesId = rt_movie.RottenTomatoesId
+					rottentomatoes_movies.remove(rt_movie)
 					break
-				else:
-					i += 1
-		for movie in netflix_movies:
-			movies.append(movie)
+			for net_movie in netflix_movies:
+				if movie.Title.lower() in net_movie.Title.lower() and abs(movie.Year - net_movie.Year) < 2:
+					movie.NetflixId = net_movie.NetflixId
+					netflix_movies.remove(net_movie)
+					break
+			if movie.RottenTomatoesId == '':
+				for rt_movie in rottentomatoes_movies:
+					if abs(movie.Year - rt_movie.Year) < 2:
+						movie.RottenTomatoesId = rt_movie.RottenTomatoesId
+						rt_movies.remove(rt_movie)
+						break
+			if movie.NetflixId == '':
+				if abs(movie.Year - net_movie.Year) < 2:
+					movie.NetflixId = net_movie.NetflixId
+					netflix_movies.remove(net_movie)
+					break
+			if movie.RottenTomatoesId != '' and movie.NetflixId != '':
+				movies.append(movie)
 	else:
 		success = False
 	return {'success': success, 'movies' : movies, 'error_list' : error_list}

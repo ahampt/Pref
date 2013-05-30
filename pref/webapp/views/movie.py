@@ -633,7 +633,7 @@ def view(request, urltitle):
 
 # Display search results
 def search(request):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -723,9 +723,9 @@ def search(request):
 			PATH: webapp.views.movie.search; METHOD: none; PARAMS: none; MISC: none;
 			*****************************************************************************'''
 			return render_to_response('movie/search.html', {'header' : generate_header_dict(request, 'Search Results'), 'success' : False, 'results' : {'Error' : 'No results, did not search for anything.'}}, RequestContext(request))
-	except Exception:
-		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	#except Exception:
+	#	site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
 # Show a random movie
 def random(request):
