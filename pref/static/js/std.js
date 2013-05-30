@@ -28,7 +28,10 @@ jQuery('div.navbar div.btn-group.pull-right ul.dropdown-menu').hover(
 );
 
 jQuery(document).ready(function() {
-	if(jQuery("input[name='imdb_possibilities']").length > 0) {
+	if(jQuery('input')
+	    .filter(function() {
+		return this.name.match(/possibilities/);
+	    }).length > 0) {
 		jQuery("input[name='imdb_possibilities']").click(function() {
 			jQuery('#imdb_url').val(jQuery(this).attr('value'));
 			jQuery('#imdb_url').keypress(function() {
