@@ -8,7 +8,7 @@
 	{% if movies or unranked_movies %}
 		<script language="javascript" type="text/javascript">
 			var setPieconProgress = function() {
-				Piecon.setProgress((($("li[id]").length - $("li[id^=u]").length) / $("li[id]").length) * 100);
+				Piecon.setProgress(($("#sortable li").length / ($("#sortable li").length + $('#unranked_sortable li').length)) * 100);
 			};
 			$(document).ready(function() {
 				setPieconProgress();
