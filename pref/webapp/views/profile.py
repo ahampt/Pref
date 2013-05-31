@@ -326,7 +326,7 @@ def view(request, username):
 							own_unseen.append(assoc.ConsumeableId.id)
 					except ObjectDoesNotExist:
 						continue
-			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies, 'own_watched' : own_watched, 'own_unseen' : own_unseen}, RequestContext(request))
+			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies, 'own_watched' : own_watched, 'own_unseen' : own_unseen, 'own_movies' : own_movies}, RequestContext(request))
 		elif request.GET.get('export'):
 			'''*****************************************************************************
 			Generate CSV file of movie list for letterboxd import

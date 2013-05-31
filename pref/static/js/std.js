@@ -2,6 +2,29 @@ function confirmAction(str) {
 	return confirm(str)
 }
 
+function ajaxGetSeenWant(movieId, movieUrl) {
+	jQuery('#seen-' + movieId).parent().html(jQuery('#seen-' + movieId).parent().html().replace(/&nbsp;/g, ''));
+	jQuery('#seen-' + movieId).after('<a class="btn btn-small btn-block btn-success" href="' + movieUrl + '">Options</a>');
+	jQuery('#seen-' + movieId).remove();
+	jQuery('#want-' + movieId).remove();
+	jQuery('#loading-' + movieId).remove();
+}
+
+function ajaxSeenWant(movieId, movieUrl, staticUrl, str) {
+	jQuery('#seen-' + movieId).hide();
+	jQuery('#want-' + movieId).hide();
+	jQuery('#seen-' + movieId).after('<img id="loading-' + movieId + '" src="' + staticUrl + 'img/loading.gif"/>');
+	if(str == 'seen') {
+		jQuery.get(movieUrl, { assoc : 1, add : 1, seen : 1 }, ajaxGetSeenWant(movieId, movieUrl));
+	}
+	else if(str == 'want') {
+		jQuery.get(movieUrl, { assoc : 1, add : 1 }, ajaxGetSeenWant(movieId, movieUrl));
+	}
+	else {
+		alert('Wrong invokation of ajaxSeenWant() in std.js');
+	}
+}
+
 var timeout;
 
 jQuery('.bt-popover').hover(function() { }, function() {

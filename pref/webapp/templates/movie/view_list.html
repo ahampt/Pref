@@ -15,12 +15,22 @@
 					{% if bool %}
 						<a class="btn btn-small btn-block btn-success" href="{{movie_url}}">Options</a>
 					{% else %}
-						<a class="btn btn-small btn-block btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
+						<a id="seen-{{movie.id}}" class="btn btn-small btn-block btn-success" href="javascript:void(0)">Seen</a>
+						<script language="javascript" type="text/javascript">
+							jQuery('#seen-{{movie.id}}').click(function() {
+								ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'seen');
+							});
+						</script>
 					{% endif %}
 				</td>
 				<td style="text-align: center">
 					{% if not bool %}
-						<a class="btn btn-small btn-block btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
+						<a id="want-{{movie.id}}" class="btn btn-small btn-block btn-success" href="javascript:void(0)">Want</a>
+						<script language="javascript" type="text/javascript">
+							jQuery('#want-{{movie.id}}').click(function() {
+								ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'want');
+							});
+						</script>
 					{% endif %}
 				</td>
 			</tr>

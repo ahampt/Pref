@@ -16,59 +16,102 @@
 		{% endif %}
 		<table class="table table-striped table-hover table-bordered">
 			{% if directed_movies|length > 0 %}
-				<tr><th class="span5">Director ({{directed_movies|length}} titles)</th><th class="span1"></th><th class="span2"></th></tr>
+				<tr><th class="span5">Director ({{directed_movies|length}} titles)</th><th class="span1"></th><th class="span1"></th><th class="span1"></th></tr>
 				{% for movie, bool in directed_movies %}
 					<tr>
 						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 						<td style="text-align: center">{{movie.Year}}</td>
-						<td style="text-align: center">
-							{% if bool %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}">Options</a>
-							{% else %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
-								&nbsp&nbsp&nbsp
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
-							{% endif %}
+						{% if bool %}
+							<td style="text-align: center">
+								<a class="btn btn-small btn-block btn-success" href="{{movie_url}}">Options</a>
+							</td>
+							<td></td>
+						{% else %}
+							<td style="text-align: center">
+								<a id="seen-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Seen</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#seen-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'seen');
+									});
+								</script>
+							</td>
+							<td style="text-align: center">
+								<a id="want-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Want</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#want-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'want');
+									});
+								</script>
+							</td>
+						{% endif %}
 						</td>
 					</tr>
 				{% endfor %}
 			{% endif %}
 			{% if written_movies|length > 0 %}
-				<tr><th class="span5">Writer ({{written_movies|length}} titles)</th><th class="span1"></th><th class="span2"></th></tr>
+				<tr><th class="span5">Writer ({{written_movies|length}} titles)</th><th class="span1"></th><th class="span1"></th><th class="span1"></th></tr>
 				{% for movie, bool in written_movies %}
 					<tr>
 						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 						<td style="text-align: center">{{movie.Year}}</td>
-						<td style="text-align: center">
-							{% if bool %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}">Options</a>
-							{% else %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
-								&nbsp&nbsp&nbsp
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
-							{% endif %}
-						</td>
+						{% if bool %}
+							<td style="text-align: center">
+								<a class="btn btn-small btn-block btn-success" href="{{movie_url}}">Options</a>
+							</td>
+							<td></td>
+						{% else %}
+							<td style="text-align: center">
+								<a id="seen-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Seen</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#seen-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'seen');
+									});
+								</script>
+							</td>
+							<td style="text-align: center">
+								<a id="want-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Want</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#want-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'want');
+									});
+								</script>
+							</td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			{% endif %}
 			{% if acted_movies|length > 0 %}
-				<tr><th class="span5">Actor ({{acted_movies|length}} titles)</th><th class="span1"></th><th class="span2"></th></tr>
+				<tr><th class="span5">Actor ({{acted_movies|length}} titles)</th><th class="span1"></th><th class="span1"></th><th class="span1"></th></tr>
 				{% for movie, bool in acted_movies %}
 					<tr>
 						{% url "webapp.views.movie.view" urltitle=movie.UrlTitle as movie_url %}
 						<td><a href="{{movie_url}}">{{movie.Title}}</a></td>
 						<td style="text-align: center">{{movie.Year}}</td>
-						<td style="text-align: center">
-							{% if bool %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}">Options</a>
-							{% else %}
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
-								&nbsp&nbsp&nbsp
-								<a class="btn btn-small btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
-							{% endif %}
-						</td>
+						{% if bool %}
+							<td style="text-align: center">
+								<a class="btn btn-small btn-block btn-success" href="{{movie_url}}">Options</a>
+							</td>
+							<td></td>
+						{% else %}
+							<td style="text-align: center">
+								<a id="seen-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Seen</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#seen-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'seen');
+									});
+								</script>
+							</td>
+							<td style="text-align: center">
+								<a id="want-{{movie.id}}" class="btn btn-small btn-success" href="javascript:void(0)">Want</a>
+								<script language="javascript" type="text/javascript">
+									jQuery('#want-{{movie.id}}').click(function() {
+										ajaxSeenWant('{{movie.id}}', '{{movie_url}}', '{{STATIC_URL}}', 'want');
+									});
+								</script>
+							</td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			{% endif %}
