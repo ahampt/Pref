@@ -532,8 +532,9 @@ def view(request, username):
 			Display profile page
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: none; MISC: none;
 			*****************************************************************************'''
+			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = True)
 			indicators = profile.StarIndicators.split(',')
-			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators}, RequestContext(request))
+			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators, 'associations' : associations}, RequestContext(request))
 	except ObjectDoesNotExist:
 		raise Http404
 	except Exception:

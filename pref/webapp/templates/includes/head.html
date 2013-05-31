@@ -16,6 +16,9 @@
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
 	{% if starbox %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/starbox.css" />{% endif %}
 	{% if datepicker %}<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/pikaday.css" />{% endif %}
+	{% if calendar %}
+			<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/fullcalendar.css" />
+	{% endif %}
 
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
@@ -30,11 +33,14 @@
 	<link rel="apple-touch-icon-precomposed" href="{{STATIC_URL}}ico/apple-touch-icon-57-precomposed.png" />
 
 	<!-- javascript -->
-	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
 	{% if starbox %}
 		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1/prototype.js"></script>
 		<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/scriptaculous/1/scriptaculous.js"></script>
 		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/starbox.js"></script>
+	{% endif %}
+	{% if calendar %}
+		<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/fullcalendar.min.js"></script>
 	{% endif %}
 	<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
 	{% if header.tracking_code %}

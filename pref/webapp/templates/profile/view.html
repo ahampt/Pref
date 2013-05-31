@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load webapp_extras %}
-{% include 'includes/head.html' with starbox='True' %}
+{% include 'includes/head.html' with starbox='True' calendar='True' %}
 <body>
 	{% include 'includes/navbar.html' %}
 	{% if profile %}
@@ -37,6 +37,35 @@
 				</div>
 			</div>
 		{% endif %}
+		<div class="row">
+			<div id="calendar"></div>
+				<script language="javascript" type="text/javascript">
+				jQuery(document).ready(function() {
+					if(jQuery('#calendar').length > 0) {
+						jQuery('#calendar').fullCalendar({
+							events : [
+								{% for assoc in associations %}
+									{
+										{% url "webapp.views.movie.view" urltitle=assoc.ConsumeableId.UrlTitle as movie_url %}
+										title: '{{assoc.ConsumeableId.Title}}',
+										start: new Date({{assoc.CreatedAt.year}}, {{assoc.CreatedAt.month|add:"-1"}}, {{assoc.CreatedAt.day}}),
+										url: '{{movie_url}}',
+										{% if assoc.CreatedAt != assoc.UpdatedAt %}
+											},
+											{
+											title: '{{assoc.ConsumeableId.Title}}',
+											start: new Date({{assoc.UpdatedAt.year}}, {{assoc.UpdatedAt.month|add:"-1"}}, {{assoc.UpdatedAt.day}}),
+											url: '{{movie_url}}',
+										{% endif %}
+									},
+								{% endfor %}
+							],
+						})
+					}
+				});
+				</script>
+		</div>
+		<br />
 		<div class="row">
 			{% url "webapp.views.property.profile" username=profile.Username as profile_url %}
 			{% if admin_rights %}
