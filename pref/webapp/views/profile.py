@@ -161,9 +161,9 @@ def login(request):
 							set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 'danger')
 						return permission_response
 				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL}, RequestContext(request))
 				else:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display login page if logged in or have access otherwise back to access
@@ -174,7 +174,7 @@ def login(request):
 				permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
 				if permission_response != True:
 					return permission_response
-			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login')}, RequestContext(request))
+			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL}, RequestContext(request))
 	except ObjectDoesNotExist:
 		if settings.ENVIRONMENT == 'DEVELOPMENT':
 			logged_in_profile_info = { }
@@ -182,7 +182,7 @@ def login(request):
 			if permission_response != True:
 				set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
 				return permission_response
-		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
+		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL}, RequestContext(request))
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))

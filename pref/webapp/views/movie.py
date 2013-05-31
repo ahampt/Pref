@@ -624,7 +624,7 @@ def view(request, urltitle):
 				sources = Sources.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).values_list('Description', flat=True).order_by('Description')
 			except Exception:
 				pass
-			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'availability' : get_netflix_availability_dict(movie), 'supplements' : get_rottentomatoes_supplemental_dict(movie)}, RequestContext(request))
+			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'availability' : get_netflix_availability_dict(movie), 'supplements' : get_rottentomatoes_supplemental_dict(movie), 'DISQUS_SHORTNAME' : settings.DISQUS_SHORTNAME}, RequestContext(request))
 	except ObjectDoesNotExist:
 		raise Http404
 	except Exception:

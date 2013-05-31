@@ -42,7 +42,7 @@
 		<div class="row">
 			<div class="span4 offset2">
 				{% url "webapp.views.profile.register" as register_url %}
-				<p>Forgot Password? <a href="mailto:support@pref.andyhampton.com?subject=Forgot%20Password&body=Username%3A%20<replace%20this%20text%20with%20your%20username%20and%20send%20the%20email%2C%20someone%20will%20get%20back%20to%20you%20soon>">Contact Support</a></p>
+				<p>Forgot Password? <a href="mailto:{{DEFAULT_TO_EMAIL}}?subject=Forgot%20Password&body=Username%3A%20<replace%20this%20text%20with%20your%20username%20and%20send%20the%20email%2C%20someone%20will%20get%20back%20to%20you%20soon>">Contact Support</a></p>
 			</div>
 		</div>
 	</form>

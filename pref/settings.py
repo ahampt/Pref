@@ -15,6 +15,8 @@ MAX_LOGIN_ATTEMPTS = 25
 
 TRACKING_CODE = ''
 
+DISQUS_SHORTNAME = ''
+
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',

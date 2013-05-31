@@ -46,7 +46,10 @@ ALLOWED_HOSTS = (
 # 
 # Google analytics code to track usage of the site
 # TRACKING_CODE = ''
-# 
+#
+# Shortname that uniquely identifies your site to enable comments through Disqus. Register your site on www.disqus.com to get this feature.
+# DISQUS_SHORTNAME = ''
+#
 # DATABASES = {
 # 	'default': {
 # 		'ENGINE': 'django.db.backends.sqlite3',	# Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
