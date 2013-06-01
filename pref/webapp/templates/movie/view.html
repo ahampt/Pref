@@ -203,7 +203,7 @@
 					</div>
 				</div>
 				<br />
-				<form action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
+				<form id="association-form" action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
 					{% if association.Consumed %}
 						<div class="row">
 							<div class="span3">
@@ -240,6 +240,19 @@
 						{% endif %}
 					</div>
 					<br />
+					<script language="javascript" type="text/javascript">
+						var formTimeout;
+						function startFormTimeout(form) {
+							formTimeout = setTimeout(function() {
+								form.submit();
+						}, 3000);
+						}
+						function formChange(form) {
+							if (formTimeout)
+								clearTimeout(formTimeout);
+							startFormTimeout(form);
+						}
+					</script>
 					{% if association.Consumed %}
 						<div class="row">
 							<div class="span2">
@@ -250,7 +263,11 @@
 								{% endif %}
 								<div id='rating'><img src='{{STATIC_URL}}img/loading.gif' alt='' /></div>
 								<script language="javascript" type='text/javascript'>
-									new Starbox('rating', {{association.Rating|default:"0"}}, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, color: '#FFD700', duration: 0.3, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, rated: {{association.Rating|default:"false"}}, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}, total: {% if association.Rating %} 1 {% else %} 0 {% endif %}});
+									function starboxChange() {
+										jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
+										formChange(jQuery('#association-form'));
+									}
+									new Starbox('rating', {{association.Rating|default:"0"}}, {buttons: {{profile.NumberOfStars|multiply:profile.SubStars}}, onRate: starboxChange, color: '#FFD700', duration: 0.3, hoverColor: '#00BFFF', ghostColor: '#FFD700', ghosting: true, indicator: 'Rating: #{average}/#{max}', max: {{profile.NumberOfStars}}, rerate: true, rated: {{association.Rating|default:"false"}}, overlay: {% if profile.StarImage == 0 %} 'big.png' {% else %} 'default.png' {% endif %}, stars: {{profile.NumberOfStars}}, total: {% if association.Rating %} 1 {% else %} 0 {% endif %}});
 								</script>
 							</div>
 							<div class="span5">
@@ -264,11 +281,37 @@
 						<br />
 					{% endif %}
 					<div class="row">
-						<div class="span1 offset6">
-							<input type="submit" class="btn btn-large btn-block btn-success" name="save" id="save" value="Save" />
-						</div>
+						<div id="save-msg" class="span6"></div>
 					</div>
 				</form>
+				<script language="javascript" type="text/javascript">
+					jQuery("#association-form input").change(function() {
+						jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
+						formChange(jQuery('#association-form'));
+					});
+					jQuery('#association-form textarea, #association-form [type=text]').on('input', function() {
+						jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
+						formChange(jQuery('#association-form'));
+					});
+					var datepickerIgnore = 2;
+					function datepickerChange() {
+						if (!datepickerIgnore) {
+							jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
+							formChange(jQuery('#association-form'));
+						}
+						else {
+							datepickerIgnore--;
+						}
+					};
+					jQuery("#association-form").submit(function(e) {
+						var form = jQuery(this);
+						e.preventDefault();
+						jQuery.post(form.attr('action'), form.serialize(), function() {
+							jQuery('#save-msg').removeClass('alert-warning').addClass('alert-success').html('changes saved');
+							location.reload();
+						});
+					});
+				</script>
 			</div>
 		{% endif %}
 		<br />

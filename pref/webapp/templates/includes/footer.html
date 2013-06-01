@@ -95,7 +95,8 @@
 				jQuery('.datepicker').each(function(index) {
 					var picker = new Pikaday({ 
 						field: jQuery('.datepicker')[index],
-						format: 'MM/DD/YYYY'
+						format: 'MM/DD/YYYY',
+						onSelect: datepickerChange,
 					});
 				});
 			});
