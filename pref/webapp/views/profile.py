@@ -247,7 +247,7 @@ def view_list(request):
 
 # Profile tools including view, edit, delete, drag and drop rankings, view associated movies, and suggestions
 def view(request, username):
-	try:
+	#try:
 		logged_in_profile_info = { }
 		permission_response = check_and_get_session_info(request, logged_in_profile_info)
 		if permission_response != True:
@@ -308,6 +308,7 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - movies; MISC: none;
 			*****************************************************************************'''
 			movies, unranked_movies, unseen_movies, own_watched, own_unseen = [], [], [], [], []
+			watch_data, rewatch_data = {}, {}
 			own_movies = profile.id == logged_in_profile_info['id']
 			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 			for assoc in associations:
@@ -315,6 +316,15 @@ def view(request, username):
 					movies.append(assoc.ConsumeableId)
 				elif assoc.Consumed:
 					unranked_movies.append(assoc.ConsumeableId)
+					if assoc.CreatedAt.year in watch_data:
+						watch_data[assoc.CreatedAt.year] = watch_data[assoc.CreatedAt.year] + 1
+					else:
+						watch_data[assoc.CreatedAt.year] = 1
+					if assoc.CreatedAt != assoc.UpdatedAt:
+						if assoc.UpdatedAt.year in rewatch_data:
+							rewatch_data[assoc.UpdatedAt.year] = rewatch_data[assoc.UpdatedAt.year] + 1
+						else:
+							rewatch_data[assoc.UpdatedAt.year] = 1
 				else:
 					unseen_movies.append(assoc.ConsumeableId)
 				if not own_movies:
@@ -326,7 +336,7 @@ def view(request, username):
 							own_unseen.append(assoc.ConsumeableId.id)
 					except ObjectDoesNotExist:
 						continue
-			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies, 'own_watched' : own_watched, 'own_unseen' : own_unseen, 'own_movies' : own_movies}, RequestContext(request))
+			return render_to_response('profile/movies.html', {'header' : generate_header_dict(request, profile.Username + '\'s Movies'), 'profile' : profile, 'watch_data' : watch_data, 'rewatch_data' : rewatch_data, 'movies' : movies, 'unranked_movies' : unranked_movies, 'unseen_movies' : unseen_movies, 'own_watched' : own_watched, 'own_unseen' : own_unseen, 'own_movies' : own_movies}, RequestContext(request))
 		elif request.GET.get('export'):
 			'''*****************************************************************************
 			Generate CSV file of movie list for letterboxd import
@@ -535,9 +545,9 @@ def view(request, username):
 			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = True)
 			indicators = profile.StarIndicators.split(',')
 			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators, 'associations' : associations}, RequestContext(request))
-	except ObjectDoesNotExist:
-		raise Http404
-	except Exception:
-		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+	#except ObjectDoesNotExist:
+	#	raise Http404
+	#except Exception:
+	#	profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+	#	return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
