@@ -55,15 +55,25 @@
 		</div>
 		<br />
 		<div class="row">
+			<label class="checkbox span2 offset2">
+				<input type="checkbox" name="remember_me" id="remember_me" value="remember_me"/> Remember Me
+			</label>
+		</div>
+		<br />
+		<div class="row">
 			<div class="span2 offset2">
 				<input class="btn btn-large btn-block btn-success" type="submit" value="Register" />
 			</div>
 		</div>
 		<br />
 		<div class="row">
-			<label class="checkbox span2 offset2">
-				<input type="checkbox" name="remember_me" id="remember_me" value="remember_me"/> Remember Me
-			</label>
+			<div class="span2 offset2">OR</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="span2 offset2">
+				<fb:login-button show-faces="true" width="200" max-rows="1" scope="email"></fb:login-button>
+			</div>
 		</div>
 		<br />
 		<div class="row">
@@ -73,6 +83,13 @@
 			</div>
 		</div>
 	</form>
-	{% include 'includes/footer.html' %}
+	<script languauge="javascript" type="text/javascript">
+		function handleFB() {
+			FB.getLoginStatus(function(response) {
+				jQuery.postGo('{{register_url}}?fb=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
+			});
+		}
+	</script>
+	{% include 'includes/footer.html' with fb=FB_APP_ID %}
 </body>
 </html>

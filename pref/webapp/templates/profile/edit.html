@@ -65,7 +65,14 @@
 					</label>
 					<br />
 				</div>
-		</div>
+			</div>
+		{% endif %}
+		{% if not profile.FacebookUserId %}
+			<div class="row">
+				<div class="span2 offset2">
+					<fb:login-button show-faces="true" width="200" max-rows="1" scope="email"></fb:login-button>
+				</div>
+			</div>
 		{% endif %}
 		<div class="row">
 			<div class="span2">
@@ -131,6 +138,13 @@
 			</div>
 		</div>
 	</form>
-	{% include 'includes/footer.html' with starbox='True' %}
+	<script languauge="javascript" type="text/javascript">
+		function handleFB() {
+			FB.getLoginStatus(function(response) {
+				jQuery.postGo('{{profile_url}}?edit=1&fb=1', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
+			});
+		}
+	</script>
+	{% include 'includes/footer.html' with starbox='True' fb=FB_APP_ID %}
 </body>
 </html>

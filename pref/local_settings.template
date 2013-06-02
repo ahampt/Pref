@@ -6,7 +6,10 @@ relpath = lambda *x: os.path.join(os.path.abspath(os.path.dirname(__file__)), *x
 API_KEYS = {
 	'ROTTEN_TOMATOES': '',
 	'NETFLIX': '',
-	'NETFLIX_SECRET': ''
+	'NETFLIX_SECRET': '',
+	'DISQUS_SHORTNAME': '',
+	'FACEBOOK': '',
+	'FACEBOOK_SECRET': ''
 }
 
 EMAIL_HOST = '<smtp.*>'
@@ -41,14 +44,17 @@ ALLOWED_HOSTS = (
 # 
 # Make sure that this is strong enough that brute force will not work
 # ACCESS_PASSWORD = ''
+#
+# Must comply to the application password requirements (one lowercase, one uppercase, one number, 8 characters minimum)
+# DEFAULT_PROFILE_PASSWORD = ''
+#
+# Make this unique, and don't share it with anybody. Can be generated online if don't want to use default
+# SECRET_KEY = ''
 # 
 # MAX_LOGIN_ATTEMPTS = 25
 # 
 # Google analytics code to track usage of the site
 # TRACKING_CODE = ''
-#
-# Shortname that uniquely identifies your site to enable comments through Disqus. Register your site on www.disqus.com to get this feature.
-# DISQUS_SHORTNAME = ''
 #
 # DATABASES = {
 # 	'default': {
@@ -79,9 +85,6 @@ ALLOWED_HOSTS = (
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 # STATIC_URL = '/' + PREFIX_URL + 'static/'
-# 
-# Make this unique, and don't share it with anybody. Can be generated online if don't want to use default
-# SECRET_KEY = ''
 # 
 # Uncomment LOGGING and below if changed LOGGING_DIR and uncommented it
 # LOGGING_DIR = '/var/log/pref/'

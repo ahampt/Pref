@@ -25,4 +25,5 @@ urlpatterns = patterns('',
 	('^' + settings.PREFIX_URL + r'about/$', 'webapp.views.site.about'),
 	('^' + settings.PREFIX_URL + r'disclaimers/$', 'webapp.views.site.disclaimers'),
 	('^' + settings.PREFIX_URL + r'privacy_policy/$', 'webapp.views.site.privacy'),
+	('^' + settings.PREFIX_URL + r'channel/$', 'webapp.views.site.channel'),
 )

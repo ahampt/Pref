@@ -103,3 +103,34 @@
 		</script>
 	{% endif %}
 	{% if canvas %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/canvasjs.min.js"></script>{% endif %}
+	{% if fb %}
+		<div id="fb-root"></div>
+		<script>
+			// Additional JS functions here
+			window.fbAsyncInit = function() {
+			FB.init({
+				appId      : '{{fb}}', // App ID
+				channelUrl : '//{{request.META.HTTP_HOST}}/channel', // Channel File
+				status     : true, // check login status
+				cookie     : true, // enable cookies to allow the server to access the session
+				xfbml      : true  // parse XFBML
+			});
+
+				FB.Event.subscribe('auth.authResponseChange', function(response) {
+					if (response.status === 'connected') {
+						handleFB();
+					}
+	  			});
+
+			};
+
+			// Load the SDK asynchronously
+			(function(d){
+				var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+				if (d.getElementById(id)) {return;}
+				js = d.createElement('script'); js.id = id; js.async = true;
+				js.src = "//connect.facebook.net/en_US/all.js";
+				ref.parentNode.insertBefore(js, ref);
+			}(document));
+		</script>
+	{% endif %}

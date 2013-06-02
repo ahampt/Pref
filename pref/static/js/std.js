@@ -85,3 +85,25 @@ jQuery(document).ready(function() {
 		});
 	}
 });
+
+(function($) {
+	$.extend({
+		getGo: function(url, params) {
+			document.location = url + '?' + $.param(params);
+		},
+		postGo: function(url, html, params) {
+			var $form = $("<form>")
+			.attr("method", "post")
+			.attr("action", url);
+			$(html).appendTo($form);
+		    	$.each(params, function(name, value) {
+				$("<input type='hidden'>")
+				.attr("name", name)
+				.attr("value", value)
+				.appendTo($form);
+			});
+			$form.appendTo("body");
+			$form.submit();
+		}
+	});
+})(jQuery);

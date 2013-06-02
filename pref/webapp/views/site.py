@@ -161,4 +161,16 @@ def privacy(request):
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
 
+# Display channel for Facebook
+def channel(request):
+	try:
+		'''*****************************************************************************
+		Display facebook channel page
+		PATH: webapp.views.site.channel; METHOD: none; PARAMS: none; MISC: none;
+		*****************************************************************************'''
+		return render_to_response('site/channel.html', {'header': generate_header_dict(request, 'Channel')}, RequestContext(request))
+	except Exception:
+		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
+
 
