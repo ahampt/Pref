@@ -10,7 +10,7 @@ Install Pref yourself to contribute to the site and use it for your own organiza
 
 1. Install [Python](http://www.python.org/) 2.7.3+.
 
-2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), [Oauth](http://code.daaku.org/python-oauth/), [unicodecsv](https://github.com/jdunck/python-unicodecsv), and [Facebook SDK](https://github.com/pythonforfacebook/facebook-sdk/) python modules in this order. Let me know if you need any of the packages as I think some of them have lost support.
+2. Install [setuptools](http://pypi.python.org/pypi/setuptools), [MySQL-Python](http://sourceforge.net/projects/mysql-python/), [URLEncoding](http://code.daaku.org/python-urlencoding/), [Oauth](http://code.daaku.org/python-oauth/), [unicodecsv](https://github.com/jdunck/python-unicodecsv), [Facebook SDK](https://github.com/pythonforfacebook/facebook-sdk/), and [Tweepy](https://github.com/tweepy/tweepy) python modules in this order. Let me know if you need any of the packages as I think some of them have lost support.
 
 3. Install Apache Stack for Linux (type "sudo apt-get  install lamp-server^ phpmyadmin" into a terminal), [Windows](http://www.wampserver.com/en/), or [Mac](http://www.mamp.info/en/index.html) if you don't have Apache and MySQL.
 
