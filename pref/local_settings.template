@@ -9,7 +9,9 @@ API_KEYS = {
 	'NETFLIX_SECRET': '',
 	'DISQUS_SHORTNAME': '',
 	'FACEBOOK': '',
-	'FACEBOOK_SECRET': ''
+	'FACEBOOK_SECRET': '',
+	'TWITTER': '',
+	'TWITTER_SECRET': '',
 }
 
 EMAIL_HOST = '<smtp.*>'

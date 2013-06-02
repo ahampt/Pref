@@ -74,6 +74,14 @@
 				</div>
 			</div>
 		{% endif %}
+		{% if not profile.TwitterId %}
+			<div class="row">
+				<div class="span2 offset2">
+					<a href="{{profile_url}}?edit=1&twitter=1"><img src="{{STATIC_URL}}img/sign-in-with-twitter.png" /></a>
+				</div>
+			</div>
+			<br />
+		{% endif %}
 		<div class="row">
 			<div class="span2">
 				<h2>Ratings</h2>
@@ -145,6 +153,10 @@
 			});
 		}
 	</script>
-	{% include 'includes/footer.html' with starbox='True' fb=FB_APP_ID %}
+	{% if profile.FacebookUserId %}
+		{% include 'includes/footer.html' with starbox='True' %}
+	{% else %}
+		{% include 'includes/footer.html' with starbox='True' fb=API_KEYS.FACEBOOK %}
+	{% endif %}
 </body>
 </html>

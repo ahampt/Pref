@@ -8,6 +8,7 @@ class Profiles(models.Model):
 	Email = models.CharField(max_length=254)
 	Password = models.CharField(max_length=81)
 	FacebookUserId = models.CharField(max_length=25,null=True,blank=True,unique=True)
+	TwitterId = models.CharField(max_length=25,null=True,blank=True,unique=True)
 	FailedLoginAttempts = models.PositiveSmallIntegerField()
 	IsAdmin = models.BooleanField()
 	NumberOfStars = models.PositiveSmallIntegerField()

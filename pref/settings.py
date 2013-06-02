@@ -73,8 +73,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	'django.core.context_processors.media',
 	'django.core.context_processors.static',
 	'django.core.context_processors.tz',
-	'pref.webapp.context_processors.environment',
-	'pref.webapp.context_processors.version',
+	'pref.webapp.context_processors.exposed_settings',
+)
+
+TEMPLATE_CONTEXT_SETTINGS = (
+	'ENVIRONMENT',
+	'VERSION',
+	'API_KEYS',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -33,16 +33,28 @@
 			<div class="span2 offset2"><input class="btn btn-large btn-block btn-success" type="submit" value="Login" /></div>
 		</div>
 		<br />
-		<div class="row">
-			<div class="span2 offset2">OR</div>
-		</div>
-		<br />
-		<div class="row">
-			<div class="span2 offset2">
-				<fb:login-button show-faces="true" width="200" max-rows="1" scope="email"></fb:login-button>
+		{% if API_KEYS.FACEBOOK or API_KEYS.TWITTER %}
+			<div class="row">
+				<div class="span2 offset2">OR</div>
 			</div>
-		</div>
-		<br />
+			<br />
+		{% endif %}
+		{% if API_KEYS.FACEBOOK %}
+			<div class="row">
+				<div class="span2 offset2">
+					<fb:login-button show-faces="true" width="200" max-rows="1" scope="email"></fb:login-button>
+				</div>
+			</div>
+			<br />
+		{% endif %}
+		{% if API_KEYS.TWITTER %}
+			<div class="row">
+				<div class="span2 offset2">
+					<a href="{{login_url}}?twitter=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}"><img src="{{STATIC_URL}}img/sign-in-with-twitter.png" /></a>
+				</div>
+			</div>
+			<br />
+		{% endif %}
 		<div class="row">
 			<div class="span4 offset2">
 				{% url "webapp.views.profile.register" as register_url %}
@@ -63,6 +75,6 @@
 			});
 		}
 	</script>
-	{% include 'includes/footer.html' with fb=FB_APP_ID %}
+	{% include 'includes/footer.html' with fb=API_KEYS.FACEBOOK %}
 </body>
 </html>

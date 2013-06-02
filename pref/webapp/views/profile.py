@@ -1,4 +1,4 @@
-import facebook, logging, random, sys, unicodecsv, urllib
+import facebook, logging, random, sys, tweepy, unicodecsv, urllib
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
@@ -37,7 +37,7 @@ def register(request):
 					if request.POST.get('userID') == account.get('id'):
 						try:
 							profile = Profiles.objects.get(FacebookUserId = account.get('id'))
-							res = redirect('webapp.views.profile.login')
+							res = redirect('webapp.views.profile.register')
 							res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
 							return res
 						except ObjectDoesNotExist:
@@ -172,7 +172,7 @@ def register(request):
 			Display registration page
 			PATH: webapp.views.profile.register; METHOD: not post; PARAMS: none; MISC: none;
 			*****************************************************************************'''
-			return render_to_response('profile/registration_form.html', {'header' : generate_header_dict(request, 'Registration'), 'FB_APP_ID' : settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+			return render_to_response('profile/registration_form.html', {'header' : generate_header_dict(request, 'Registration')}, RequestContext(request))
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
@@ -236,10 +236,71 @@ def login(request):
 							set_msg(request, 'Login Failed!', 'Account locked out. Contact system administrator to unlock account.', 'danger')
 						return permission_response
 				if profile.FailedLoginAttempts < settings.MAX_LOGIN_ATTEMPTS:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL, 'FB_APP_ID' : settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
 				else:
-					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL, 'FB_APP_ID' : settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+					return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'lockout_error' : True}, RequestContext(request))
 		else:
+			if request.GET.get('twitter'):
+				if request.GET.get('denied'):
+					'''*****************************************************************************
+					Redirect to login page due to canceled authentication of twitter
+					PATH: webapp.views.profile.login; METHOD: get; PARAMS: get - twitter,denied; MISC: none;
+					*****************************************************************************'''
+					res = redirect('webapp.views.profile.login')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
+				if request.GET.get('oauth_token') and request.GET.get('oauth_verifier'):
+					'''*****************************************************************************
+					Login to profile with twitter credentials and redirect to home (or previously attempted page) on success or back to login/access on failure
+					PATH: webapp.views.profile.login; METHOD: get; PARAMS: get - twitter,oauth_token,oauth_verifier; MISC: none;
+					*****************************************************************************'''
+					verifier = request.GET.get('oauth_verifier')
+					auth = tweepy.OAuthHandler(settings.API_KEYS['TWITTER'], settings.API_KEYS['TWITTER_SECRET'])
+					try:
+						token = request.session['request_token']
+						if token[0] != request.GET.get('oauth_token'):
+							pass
+						del request.session['request_token']
+					except KeyError:
+						pass
+					auth.set_request_token(token[0], token[1])
+					try:
+						auth.get_access_token(verifier)
+						api = tweepy.API(auth)
+						account = api.me()
+						profile = Profiles.objects.get(TwitterId = account.id)
+						login_command(request, profile)
+						profile.FailedLoginAttempts = 0
+						profile.save()
+						profile_logger.info(profile.Username + ' Login Success')
+						set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 'success')
+						return redirect(urllib.unquote(request.GET.get('redirect'))) if request.GET.get('redirect') else redirect('webapp.views.site.home')
+					except tweepy.TweepError:
+						set_msg(request, 'Login Failed!', 'Login with Twitter failed due to an internal error with authentication. Please try again.', 'error')
+						res = redirect('webapp.views.profile.register')
+					except ObjectDoesNotExist:
+						set_msg(request, 'Login Failed!', 'No profile associatied with this Twitter account.', 'error')
+						res = redirect('webapp.views.profile.register')
+					except Exception:
+						set_msg(request, 'Login Failed!', 'Login with Twitter failed due to unknown error.', 'error')
+						res = redirect('webapp.views.profile.login')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
+				'''*****************************************************************************
+				Begin login to twitter flow with authorization redirect
+				PATH: webapp.views.profile.login; METHOD: get; PARAMS: get - twitter; MISC: none;
+				*****************************************************************************'''
+				auth = tweepy.OAuthHandler(settings.API_KEYS['TWITTER'], settings.API_KEYS['TWITTER_SECRET'],
+request.build_absolute_uri())
+				try:
+					redirect_url = auth.get_authorization_url()
+					request.session['request_token'] = (auth.request_token.key, auth.request_token.secret)
+					return redirect(redirect_url)
+				except tweepy.TweepError:
+					set_msg(request, 'Login Failed!', 'Login with Twitter failed due to an internal error with authentication. Please try again.', 'error')
+				res = redirect('webapp.views.profile.login')
+				res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+				return res
 			'''*****************************************************************************
 			Display login page if logged in or have access otherwise back to access
 			PATH: webapp.views.profile.login; METHOD: not post; PARAMS: none; MISC: none;
@@ -249,7 +310,7 @@ def login(request):
 				permission_response = check_and_get_session_info(request, logged_in_profile_info, True)
 				if permission_response != True:
 					return permission_response
-			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL, 'FB_APP_ID' : settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+			return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login')}, RequestContext(request))
 	except ObjectDoesNotExist:
 		if settings.ENVIRONMENT == 'DEVELOPMENT':
 			logged_in_profile_info = { }
@@ -257,7 +318,7 @@ def login(request):
 			if permission_response != True:
 				set_msg(request, 'Login Failed!', 'Username or Password not correct', 'danger')
 				return permission_response
-		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True, 'DEFAULT_TO_EMAIL' : settings.DEFAULT_TO_EMAIL, 'FB_APP_ID' : settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+		return render_to_response('profile/login.html', {'header' : generate_header_dict(request, 'Login'), 'error' : True}, RequestContext(request))
 	except Exception:
 		profile_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
@@ -599,8 +660,68 @@ def view(request, username):
 								lookup_list.append((index_list[i+1], i / 2, 2, 3))
 								i = i + 1
 							i = i + 1
-						return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list, 'error_msg' : error_msg, 'FB_APP_ID' : False if profile.FacebookUserId else settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+						return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list, 'error_msg' : error_msg}, RequestContext(request))
 			else:
+				if request.GET.get('twitter'):
+					if request.GET.get('denied'):
+						'''*****************************************************************************
+						Redirect to edit page due to canceled authentication of twitter
+						PATH: webapp.views.profile.view username; METHOD: get; PARAMS: get - edit,twitter,denied; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
+						*****************************************************************************'''
+						set_msg(request, 'Update Failed!', 'Authorization canceled. Please try again.', 'error')
+						res = redirect('webapp.views.profile.view', username=profile.Username)
+						res['Location'] += '?edit=1'
+						return res
+					if request.GET.get('oauth_token') and request.GET.get('oauth_verifier'):
+						'''*****************************************************************************
+						Login to profile with twitter credentials and redirect to edit page no matter the outcome
+						PATH: webapp.views.profile.view username; METHOD: get; PARAMS: get - edit,twitter,oauth_token,oauth_verifier; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
+						*****************************************************************************'''
+						verifier = request.GET.get('oauth_verifier')
+						auth = tweepy.OAuthHandler(settings.API_KEYS['TWITTER'], settings.API_KEYS['TWITTER_SECRET'])
+						try:
+							token = request.session['request_token']
+							if token[0] != request.GET.get('oauth_token'):
+								pass
+							del request.session['request_token']
+						except KeyError:
+							pass
+						auth.set_request_token(token[0], token[1])
+						try:
+							auth.get_access_token(verifier)
+							api = tweepy.API(auth)
+							account = api.me()
+							profile_check = Profiles.objects.get(TwitterId = account.id)
+							set_msg(request, 'Update Failed!', 'There is already a profile associatied with this Twitter account.', 'error')
+						except tweepy.TweepError:
+							set_msg(request, 'Update Failed!', 'Login with Twitter failed due to an internal error with authentication. Please try again.', 'error')
+						except ObjectDoesNotExist:
+							profile.TwitterId = account.id
+							try:
+								profile.save()
+								set_msg(request, 'Profile Updated!', 'Your profile has successfully been connected to your Twitter account.', 'success')
+							except ValidationError:
+								set_msg(request, 'Update Failed!', 'Validation error.', 'error')
+						except Exception:
+							set_msg(request, 'Update Failed!', 'Login with Twitter failed due to unknown error.', 'error')
+						res = redirect('webapp.views.profile.view', username=profile.Username)
+						res['Location'] += '?edit=1'
+						return res
+					'''*****************************************************************************
+					Begin login to twitter flow with authorization redirect
+					PATH: webapp.views.profile.view username; METHOD: get; PARAMS: get - edit,twitter; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
+					*****************************************************************************'''
+					auth = tweepy.OAuthHandler(settings.API_KEYS['TWITTER'], settings.API_KEYS['TWITTER_SECRET'],
+	request.build_absolute_uri())
+					try:
+						redirect_url = auth.get_authorization_url()
+						request.session['request_token'] = (auth.request_token.key, auth.request_token.secret)
+						return redirect(redirect_url)
+					except tweepy.TweepError:
+						set_msg(request, 'Update Failed!', 'Login with Twitter failed due to an internal error with authentication. Please try again.', 'error')
+					res = redirect('webapp.views.profile.view', username=profile.Username)
+					res['Location'] += '?edit=1'
+					return res
 				'''*****************************************************************************
 				Display edit page
 				PATH: webapp.views.profile.view username; METHOD: not post; PARAMS: get - edit; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
@@ -621,7 +742,7 @@ def view(request, username):
 						lookup_list.append((index_list[i+1], i / 2, 2, 3))
 						i = i + 1
 					i = i + 1
-				return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list, 'FB_APP_ID' : False if profile.FacebookUserId else settings.API_KEYS['FACEBOOK']}, RequestContext(request))
+				return render_to_response('profile/edit.html', {'header' : generate_header_dict(request, 'Settings'), 'profile' : profile, 'indicators' : profile.StarIndicators.split(','), 'rate_range' : rate_range, 'lookup_list' : lookup_list}, RequestContext(request))
 		elif admin_rights and request.GET.get('delete'):
 			'''*****************************************************************************
 			Delete profile and redirect to home
