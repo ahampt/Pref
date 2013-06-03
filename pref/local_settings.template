@@ -12,6 +12,8 @@ API_KEYS = {
 	'FACEBOOK_SECRET': '',
 	'TWITTER': '',
 	'TWITTER_SECRET': '',
+	'GOOGLE': '',
+	'GOOGLE_SECRET': '',
 }
 
 EMAIL_HOST = '<smtp.*>'

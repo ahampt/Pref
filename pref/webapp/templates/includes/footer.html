@@ -103,13 +103,13 @@
 		</script>
 	{% endif %}
 	{% if canvas %}<script language="javascript" type="text/javascript" src="{{STATIC_URL}}js/canvasjs.min.js"></script>{% endif %}
-	{% if fb %}
+	{% if API_KEYS.FACEBOOK and not nofb %}
 		<div id="fb-root"></div>
 		<script>
 			// Additional JS functions here
 			window.fbAsyncInit = function() {
 			FB.init({
-				appId      : '{{fb}}', // App ID
+				appId      : '{{API_KEYS.FACEBOOK}}', // App ID
 				channelUrl : '//{{request.META.HTTP_HOST}}/channel', // Channel File
 				status     : true, // check login status
 				cookie     : true, // enable cookies to allow the server to access the session
@@ -132,5 +132,17 @@
 				js.src = "//connect.facebook.net/en_US/all.js";
 				ref.parentNode.insertBefore(js, ref);
 			}(document));
+		</script>
+	{% endif %}
+	{% if API_KEYS.GOOGLE %}
+		 <script type="text/javascript">
+			(function () {
+				var po = document.createElement('script');
+				po.type = 'text/javascript';
+				po.async = true;
+				po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(po, s);
+			})();
 		</script>
 	{% endif %}

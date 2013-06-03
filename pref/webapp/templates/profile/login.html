@@ -33,7 +33,7 @@
 			<div class="span2 offset2"><input class="btn btn-large btn-block btn-success" type="submit" value="Login" /></div>
 		</div>
 		<br />
-		{% if API_KEYS.FACEBOOK or API_KEYS.TWITTER %}
+		{% if API_KEYS.FACEBOOK or API_KEYS.TWITTER or API_KEYS.GOOGLE %}
 			<div class="row">
 				<div class="span2 offset2">OR</div>
 			</div>
@@ -55,6 +55,29 @@
 			</div>
 			<br />
 		{% endif %}
+		{% if API_KEYS.GOOGLE %}
+			<script type="text/javascript">
+				function signInCallback(authResult) {
+					if (authResult['code']) {
+						console.log(authResult);
+						jQuery.postGo('{{login_url}}?google=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}', "{% csrf_token %}", { 'authCode' : authResult['code'], 'accessToken' : authResult['access_token'] });
+					}
+				}
+			</script>
+			<div class="row">
+				<div id="signinButton" class="span2 offset2">
+					<span class="g-signin"
+					data-scope="https://www.googleapis.com/auth/plus.login"
+					data-clientid="{{API_KEYS.GOOGLE}}"
+					data-redirecturi="postmessage"
+					data-accesstype="offline"
+					data-cookiepolicy="single_host_origin"
+					data-callback="signInCallback">
+					</span>
+				</div>
+			</div>
+			<br />
+		{% endif %}
 		<div class="row">
 			<div class="span4 offset2">
 				{% url "webapp.views.profile.register" as register_url %}
@@ -68,13 +91,15 @@
 			</div>
 		</div>
 	</form>
-	<script languauge="javascript" type="text/javascript">
-		function handleFB() {
-			FB.getLoginStatus(function(response) {
-				jQuery.postGo('{{login_url}}?fb=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
-			});
-		}
-	</script>
-	{% include 'includes/footer.html' with fb=API_KEYS.FACEBOOK %}
+	{% if API_KEYS.FACEBOOK %}
+		<script languauge="javascript" type="text/javascript">
+			function handleFB() {
+				FB.getLoginStatus(function(response) {
+					jQuery.postGo('{{login_url}}?fb=1{% if request.GET.redirect %}&redirect={{request.GET.redirect}}{% endif %}', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
+				});
+			}
+		</script>
+	{% endif %}
+	{% include 'includes/footer.html' %}
 </body>
 </html>

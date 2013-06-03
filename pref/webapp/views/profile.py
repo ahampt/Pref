@@ -1,4 +1,4 @@
-import facebook, logging, random, sys, tweepy, unicodecsv, urllib
+import facebook, httplib2, json, logging, os, random, sys, tweepy, unicodecsv, urllib
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
@@ -8,6 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
+from oauth2client.client import flow_from_clientsecrets
 from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
 from webapp.models import Profiles, Sources, Movies, Associations
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -37,12 +38,13 @@ def register(request):
 					if request.POST.get('userID') == account.get('id'):
 						try:
 							profile = Profiles.objects.get(FacebookUserId = account.get('id'))
+							set_msg(request, 'Register Failed!', 'There is already a profile associated with this Google account.', 'error')
 							res = redirect('webapp.views.profile.register')
 							res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
 							return res
 						except ObjectDoesNotExist:
 							try:
-							# Defaults
+								# Defaults
 								profile = Profiles()
 								profile.FailedLoginAttempts = 0
 								profile.NumberOfStars = 4
@@ -75,6 +77,81 @@ def register(request):
 				res = redirect('webapp.views.profile.register')
 				res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
 				return res
+			if request.GET.get('google'):
+				'''*****************************************************************************
+				Create profile with google information and redirect to home on success or back to register on failure
+				PATH: webapp.views.profile.register; METHOD: post; PARAMS: get - google; MISC: none;
+				*****************************************************************************'''
+				code = request.POST.get('authCode')
+				try:
+					oauth_flow = flow_from_clientsecrets(os.path.join(os.path.dirname(__file__), 'client_secrets.json'), scope='')
+					oauth_flow.redirect_uri = "postmessage"
+					credentials = oauth_flow.step2_exchange(code)
+
+					access_token = credentials.access_token
+					url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+					h = httplib2.Http()
+					result = json.loads(h.request(url, 'GET')[1])
+					abort_msg = ''
+					if result.get('error') is not None:
+						abort_msg = 'access token'
+					if access_token != request.POST.get('accessToken'):
+						abort_msg = 'cross site access token'
+					if result['issued_to'] != settings.API_KEYS['GOOGLE']:
+						abort_msg = 'API key'
+					url = ('https://www.googleapis.com/oauth2/v3/userinfo?access_token=%s' % access_token)
+					h = httplib2.Http()
+					result.update(json.loads(h.request(url, 'GET')[1]))
+					if result.get('error') is not None:
+						abort_msg = 'access token'
+					if not abort_msg and result['user_id'] and result['email']:
+						try:
+							profile = Profiles.objects.get(GoogleId = result['user_id'])
+							set_msg(request, 'Register Failed!', 'There is already a profile associated with this Google account.', 'error')
+							res = redirect('webapp.views.profile.register')
+							res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+							return res
+						except ObjectDoesNotExist:
+							try:
+								# Defaults
+								profile = Profiles()
+								profile.FailedLoginAttempts = 0
+								profile.NumberOfStars = 4
+								profile.SubStars = 2
+								profile.StarImage = 0
+								profile.StarIndicators = 'Worst,Worser,Worse,Mild,Decent,Good,Better,Best'
+								profile.Username = result['email'].split("@")[0]
+								profile.Email = result['email']
+								# Hash and salt (randomly generated using ALPHABET defined above) password for storage using SHA-256
+								salt = ''.join(random.choice(ALPHABET) for i in range(16))
+								profile.Password = make_password(settings.DEFAULT_PROFILE_PASSWORD, salt, 'pbkdf2_sha256')
+								profile.GoogleId = result['user_id']
+								profile.full_clean()
+								profile.save()
+								profile_logger.info(profile.Username + ' Register Success')
+								# Login the new profile
+								login_command(request, profile)
+								profile_logger.info(profile.Username + ' Login Success')
+								set_msg(request, 'Welcome ' + profile.Username + '!', 'Your profile has successfully been created.', 'success')
+								return redirect(urllib.unquote(request.GET.get('redirect'))) if request.GET.get('redirect') else render_to_response('movie/discovery.html', {'header' : generate_header_dict(request, 'Now What?')}, RequestContext(request))
+							except ValidationError as e:
+								# For logging, set to anonymouse if None
+								username = profile.Username if profile.Username and profile.Username.encode('ascii', 'replace').isalnum() else 'Anonymous'
+								profile_logger.info(username + ' Register Failure')
+								error_msg = e.message_dict
+								# Make string to make pretty on display
+								for key in error_msg:
+									error_msg[key] = str(error_msg[key][0])
+								return render_to_response('profile/registration_form.html', {'header' : generate_header_dict(request, 'Registration'), 'profile' : profile, 'error_msg' : error_msg}, RequestContext(request))
+					set_msg(request, 'Register Failed!', 'Register with Google failed due to an error with the ' + abort_msg + '.', 'error')
+					res = redirect('webapp.views.profile.register')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
+				except Exception:
+					set_msg(request, 'Register Failed!', 'Register with Google failed due to an unknown error.', 'error')
+					res = redirect('webapp.views.profile.register')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
 			'''*****************************************************************************
 			Create profile and redirect to home on success or back to register on failure
 			PATH: webapp.views.profile.register; METHOD: post; PARAMS: none; MISC: none;
@@ -206,6 +283,51 @@ def login(request):
 				res = redirect('webapp.views.profile.login')
 				res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
 				return res
+			if request.GET.get('google'):
+				'''*****************************************************************************
+				Login to profile with google credentials and redirect to home (or previously attempted page) on success or back to login/access on failure
+				PATH: webapp.views.profile.login; METHOD: post; PARAMS: get - google; MISC: none;
+				*****************************************************************************'''
+				code = request.POST.get('authCode')
+				try:
+					oauth_flow = flow_from_clientsecrets(os.path.join(os.path.dirname(__file__), 'client_secrets.json'), scope='')
+					oauth_flow.redirect_uri = "postmessage"
+					credentials = oauth_flow.step2_exchange(code)
+
+					access_token = credentials.access_token
+					url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+					h = httplib2.Http()
+					result = json.loads(h.request(url, 'GET')[1])
+					abort_msg = ''
+					if result.get('error') is not None:
+						abort_msg = 'access token'
+					if access_token != request.POST.get('accessToken'):
+						abort_msg = 'cross site access token'
+					if result['issued_to'] != settings.API_KEYS['GOOGLE']:
+						abort_msg = 'API key'
+					if not abort_msg and result['user_id']:
+						try:
+							profile = Profiles.objects.get(GoogleId = result['user_id'])
+							login_command(request, profile)
+							profile.FailedLoginAttempts = 0
+							profile.save()
+							profile_logger.info(profile.Username + ' Login Success')
+							set_msg(request, 'Welcome back ' + profile.Username + '!', 'You have successfully logged in.', 'success')
+							return redirect(urllib.unquote(request.GET.get('redirect'))) if request.GET.get('redirect') else redirect('webapp.views.site.home')
+						except ObjectDoesNotExist:
+							set_msg(request, 'Login Failed!', 'No profile associatied with this Google account.', 'error')
+							res = redirect('webapp.views.profile.register')
+							res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+							return res
+					set_msg(request, 'Login Failed!', 'Login with Google failed due to an error with the ' + abort_msg + '.', 'error')
+					res = redirect('webapp.views.profile.login')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
+				except Exception:
+					set_msg(request, 'Login Failed!', 'Login with Google failed due to an unknown error.', 'error')
+					res = redirect('webapp.views.profile.login')
+					res['Location'] += '?redirect=' + request.GET.get('redirect') if request.GET.get('redirect') else ''
+					return res
 			'''*****************************************************************************
 			Login to profile and redirect to home (or previously attempted page) on success or back to login/access on failure
 			PATH: webapp.views.profile.login; METHOD: post; PARAMS: none; MISC: none;
@@ -539,16 +661,60 @@ def view(request, username):
 							if request.POST.get('userID') == account.get('id'):
 								try:
 									profile_check = Profiles.objects.get(FacebookUserId = account.get('id'))
+									set_msg(request, 'Update Failed!', 'This Facebook account is already assoicated with a profile.', 'error')
 								except ObjectDoesNotExist:
 									profile.FacebookUserId = account.get('id')
 									try:
 										profile.save()
 										set_msg(request, 'Profile Updated!', 'Your profile has successfully been connected to your Facebook account.', 'success')
 									except ValidationError:
-										pass
+										set_msg(request, 'Update Failed!', 'Login with Facebook failed due to a validation error.', 'error')
 					res = redirect('webapp.views.profile.view', username=profile.Username)
 					res['Location'] += '?edit=1'
 					return res
+				if request.GET.get('google'):
+					'''*****************************************************************************
+					Associate google account with profile
+					PATH: webapp.views.profile.view username; METHOD: post; PARAMS: get - edit,google; MISC: logged_in_profile_info['username'] = username OR logged_in_profile.IsAdmin;
+					*****************************************************************************'''
+					code = request.POST.get('authCode')
+					try:
+						oauth_flow = flow_from_clientsecrets(os.path.join(os.path.dirname(__file__), 'client_secrets.json'), scope='')
+						oauth_flow.redirect_uri = "postmessage"
+						credentials = oauth_flow.step2_exchange(code)
+
+						access_token = credentials.access_token
+						url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+						h = httplib2.Http()
+						result = json.loads(h.request(url, 'GET')[1])
+						abort_msg = ''
+						if result.get('error') is not None:
+							abort_msg = 'access token'
+						if access_token != request.POST.get('accessToken'):
+							abort_msg = 'cross site access token'
+						if result['issued_to'] != settings.API_KEYS['GOOGLE']:
+							abort_msg = 'API key'
+						if not abort_msg and result['user_id']:
+							try:
+								profile_check = Profiles.objects.get(GoogleId = result['user_id'])
+								set_msg(request, 'Update Failed!', 'This Google account is already assoicated with a profile.', 'error')
+							except ObjectDoesNotExist:
+								profile.GoogleId = result['user_id']
+								try:
+									profile.save()
+									set_msg(request, 'Profile Updated!', 'Your profile has successfully been connected to your Google account.', 'success')
+								except ValidationError:
+									set_msg(request, 'Update Failed!', 'Login with Google failed due to a validaiton error.', 'error')
+						else:
+							set_msg(request, 'Register Failed!', 'Register with Google failed due to an error with the ' + abort_msg + '.', 'error')
+						res = redirect('webapp.views.profile.view', username=profile.Username)
+						res['Location'] += '?edit=1'
+						return res
+					except Exception:
+						set_msg(request, 'Update Failed!', 'Login with Google failed due to an unknown error.', 'error')
+						res = redirect('webapp.views.profile.view', username=profile.Username)
+						res['Location'] += '?edit=1'
+						return res
 				else:
 					'''*****************************************************************************
 					Save changes made to profile and redirect to profile page

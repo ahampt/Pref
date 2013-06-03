@@ -73,11 +73,40 @@
 					<fb:login-button show-faces="true" width="200" max-rows="1" scope="email"></fb:login-button>
 				</div>
 			</div>
+			<script languauge="javascript" type="text/javascript">
+			function handleFB() {
+				FB.getLoginStatus(function(response) {
+					jQuery.postGo('{{profile_url}}?edit=1&fb=1', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
+					});
+				}
+			</script>
 		{% endif %}
 		{% if not profile.TwitterId %}
 			<div class="row">
 				<div class="span2 offset2">
 					<a href="{{profile_url}}?edit=1&twitter=1"><img src="{{STATIC_URL}}img/sign-in-with-twitter.png" /></a>
+				</div>
+			</div>
+			<br />
+		{% endif %}
+		{% if not profile.GoogleId %}
+			<script type="text/javascript">
+				function signInCallback(authResult) {
+					if (authResult['code']) {
+						jQuery.postGo('{{profile_url}}?edit=1&google=1', "{% csrf_token %}", { 'authCode' : authResult['code'], 'accessToken' : authResult['access_token'] });
+					}
+				}
+			</script>
+			<div class="row">
+				<div id="signinButton" class="span2 offset2">
+					<span class="g-signin"
+					data-scope="https://www.googleapis.com/auth/plus.login"
+					data-clientid="{{API_KEYS.GOOGLE}}"
+					data-redirecturi="postmessage"
+					data-accesstype="offline"
+					data-cookiepolicy="single_host_origin"
+					data-callback="signInCallback">
+					</span>
 				</div>
 			</div>
 			<br />
@@ -146,17 +175,6 @@
 			</div>
 		</div>
 	</form>
-	<script languauge="javascript" type="text/javascript">
-		function handleFB() {
-			FB.getLoginStatus(function(response) {
-				jQuery.postGo('{{profile_url}}?edit=1&fb=1', "{% csrf_token %}", { 'authAccessToken' : response.authResponse.accessToken, 'userID' : response.authResponse.userID});
-			});
-		}
-	</script>
-	{% if profile.FacebookUserId %}
-		{% include 'includes/footer.html' with starbox='True' %}
-	{% else %}
-		{% include 'includes/footer.html' with starbox='True' fb=API_KEYS.FACEBOOK %}
-	{% endif %}
+	{% include 'includes/footer.html' with starbox='True' %}
 </body>
 </html>
