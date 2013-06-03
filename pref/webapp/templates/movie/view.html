@@ -32,7 +32,12 @@
 					{% if not association %}
 						<a class="btn btn-success" href="{{movie_url}}?assoc=1&add=1&seen=1">Seen</a>
 						<a class="btn btn-success" href="{{movie_url}}?assoc=1&add=1">Want</a>
+						<br />
 					{% endif %}
+				</div>
+				<div>
+					<fb:like send="false" layout="button_count" width="200" show_faces="true"></fb:like>
+					<div class="g-plusone" data-size="medium"></div>
 				</div>
 				<div>
 					{% if movie.Runtime %}
