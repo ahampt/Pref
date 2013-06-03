@@ -619,7 +619,7 @@ def view(request, username):
 					if assoc.Review:
 						review = assoc.Review
 				else:
-					watched_date = str(datetime.today.year) + '-' + str(datetime.today.month) + '-' + str(datetime.today.day)
+					watched_date = str(datetime.today().year) + '-' + str(datetime.today().month) + '-' + str(datetime.today().day)
 				writer.writerow([imdbid, title, year, watched_date, created_date, rating, review])
 			return response
 		elif request.GET.get('suggestion'):
