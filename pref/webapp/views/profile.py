@@ -602,7 +602,7 @@ def view(request, username):
 			*****************************************************************************'''
 			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
 			response = HttpResponse(content_type='text/csv')
-			response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+			response['Content-Disposition'] = 'attachment; filename="letterboxd-import.csv"'
 			writer = unicodecsv.writer(response, encoding='utf-8')
 			writer.writerow(['imdbID', 'Title', 'Year', 'WatchedDate', 'CreatedDate', 'Rating10', 'Review'])
 			for assoc in associations:
@@ -612,14 +612,14 @@ def view(request, username):
 				title = movie.Title
 				year = str(movie.Year)
 				if assoc.Consumed:
-					watched_date = str(assoc.UpdatedAt.year) + '-' + str(assoc.UpdatedAt.month) + '-' + str(assoc.UpdatedAt.day)
-					created_date = str(assoc.CreatedAt.year) + '-' + str(assoc.CreatedAt.month) + '-' + str(assoc.CreatedAt.day)
+					watched_date = str(assoc.UpdatedAt.year) + '-' + str(assoc.UpdatedAt.strftime('%m')) + '-' + str(assoc.UpdatedAt.strftime('%d'))
+					created_date = str(assoc.CreatedAt.year) + '-' + str(assoc.CreatedAt.strftime('%m')) + '-' + str(assoc.CreatedAt.strftime('%d'))
 					if assoc.Rating:
 						rating = assoc.Rating / 10
 					if assoc.Review:
 						review = assoc.Review
 				else:
-					watched_date = str(datetime.today().year) + '-' + str(datetime.today().month) + '-' + str(datetime.today().day)
+					watched_date = str(datetime.today().year) + '-' + str(datetime.today().strftime('%m')) + '-' + str(datetime.today().strftime('%d'))
 				writer.writerow([imdbid, title, year, watched_date, created_date, rating, review])
 			return response
 		elif request.GET.get('suggestion'):

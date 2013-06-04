@@ -16,9 +16,9 @@
 							text: "Watched Movies by Year"              
 						},
 						axisX:{
+							valueFormatString: "YYYY",
 							interval: 1,
-							labelFontSize: 15,
-							lineThickness: 0,
+							intervalType: "year",
 						},
 						toolTip: {
 							shared: true
@@ -34,7 +34,7 @@
 							showInLegend: "true",
 							dataPoints: [
 								{% for year, count in watch_data.items %}
-									{label: "{{year}}", y: {{count}}},
+									{x: new Date({{year}}, 1, 1), y: {{count}}},
 								{% endfor %}
 							]
 						},
@@ -44,7 +44,7 @@
 							showInLegend: "true",
 							dataPoints: [
 								{% for year, count in rewatch_data.items %}
-									{label: "{{year}}", y: {{count}}},
+									{x: new Date({{year}}, 1, 1), y: {{count}}},
 								{% endfor %}
 							]
 						}
