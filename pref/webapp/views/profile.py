@@ -604,23 +604,22 @@ def view(request, username):
 			response = HttpResponse(content_type='text/csv')
 			response['Content-Disposition'] = 'attachment; filename="letterboxd-import.csv"'
 			writer = unicodecsv.writer(response, encoding='utf-8')
-			writer.writerow(['imdbID', 'Title', 'Year', 'WatchedDate', 'CreatedDate', 'Rating10', 'Review'])
+			writer.writerow(['imdbID', 'Title', 'Year', 'WatchedDate', 'Rating10', 'Review'])
 			for assoc in associations:
-				imdbid, title, year, watched_date, created_date, rating, review = '', '', '', '', '', '', ''
+				imdbid, title, year, watched_date, rating, review = '', '', '', '', '', ''
 				movie = assoc.ConsumeableId
 				imdbid = movie.ImdbId
 				title = movie.Title
 				year = str(movie.Year)
 				if assoc.Consumed:
 					watched_date = str(assoc.UpdatedAt.year) + '-' + str(assoc.UpdatedAt.strftime('%m')) + '-' + str(assoc.UpdatedAt.strftime('%d'))
-					created_date = str(assoc.CreatedAt.year) + '-' + str(assoc.CreatedAt.strftime('%m')) + '-' + str(assoc.CreatedAt.strftime('%d'))
 					if assoc.Rating:
 						rating = assoc.Rating / 10
 					if assoc.Review:
 						review = assoc.Review
 				else:
 					watched_date = str(datetime.today().year) + '-' + str(datetime.today().strftime('%m')) + '-' + str(datetime.today().strftime('%d'))
-				writer.writerow([imdbid, title, year, watched_date, created_date, rating, review])
+				writer.writerow([imdbid, title, year, watched_date, rating, review])
 			return response
 		elif request.GET.get('suggestion'):
 			if request.method == 'POST':
