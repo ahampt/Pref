@@ -38,6 +38,7 @@ def view_list(request):
 			try:
 				has_error = False
 				error_text = None
+				movie = Movies ()
 				# Start movie from imdb id
 				res_dict = movie_from_imdb_input(request.GET.get('i'))
 				if res_dict.get('movie'):
