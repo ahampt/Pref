@@ -138,42 +138,42 @@ def movie_from_imdb_input(imdb_input):
 	imdb_id = imdb_id_from_input(imdb_input)
 	if imdb_id:
 		try:
-		imdb_dict = get_imdb_dict(imdb_id)
-		if imdb_dict.get('Response') == 'True':
-			movie.ImdbId = imdb_id
-			if imdb_dict.get('Title'):
-				movie.Title = imdb_dict.get('Title')
-			if imdb_dict.get('Year'):
-				movie.Year = int(imdb_dict.get('Year'))
-			if imdb_dict.get('Runtime') and imdb_dict.get('Runtime') != "N/A":
-				runtime_str = imdb_dict.get('Runtime')
-				runtime = 0
-				# Convert [/d+] h [/d+] m to minutes
-				runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-				if runtimes[0]:
-					runtime += runtimes[0]*60
-				if runtimes[1]:
-					runtime += runtimes[1]
-				movie.Runtime = str(runtime)
-			directors, writers, actors, genres = [], [], [], []
-			if imdb_dict.get('Director'):
-				directors = imdb_dict.get('Director').split(', ')
-				for i in range(len(directors)):
-					directors[i] = directors[i]
-			if imdb_dict.get('Writer'):
-				writers = imdb_dict.get('Writer').split(', ')
-				for i in range(len(writers)):
-					writers[i] = writers[i]
-			if imdb_dict.get('Actors'):
-				actors = imdb_dict.get('Actors').split(', ')
-				for i in range(len(actors)):
-					actors[i] = actors[i]
-			if imdb_dict.get('Genre'):
-				genres = imdb_dict.get('Genre').split(', ')
-				for i in range(len(genres)):
-					genres[i] = genres[i]
-		else:
-			return {'error_msg' : 'Invalid'}
+			imdb_dict = get_imdb_dict(imdb_id)
+			if imdb_dict.get('Response') == 'True':
+				movie.ImdbId = imdb_id
+				if imdb_dict.get('Title'):
+					movie.Title = imdb_dict.get('Title')
+				if imdb_dict.get('Year'):
+					movie.Year = int(imdb_dict.get('Year'))
+				if imdb_dict.get('Runtime') and imdb_dict.get('Runtime') != "N/A":
+					runtime_str = imdb_dict.get('Runtime')
+					runtime = 0
+					# Convert [/d+] h [/d+] m to minutes
+					runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+					if runtimes[0]:
+						runtime += runtimes[0]*60
+					if runtimes[1]:
+						runtime += runtimes[1]
+					movie.Runtime = str(runtime)
+				directors, writers, actors, genres = [], [], [], []
+				if imdb_dict.get('Director'):
+					directors = imdb_dict.get('Director').split(', ')
+					for i in range(len(directors)):
+						directors[i] = directors[i]
+				if imdb_dict.get('Writer'):
+					writers = imdb_dict.get('Writer').split(', ')
+					for i in range(len(writers)):
+						writers[i] = writers[i]
+				if imdb_dict.get('Actors'):
+					actors = imdb_dict.get('Actors').split(', ')
+					for i in range(len(actors)):
+						actors[i] = actors[i]
+				if imdb_dict.get('Genre'):
+					genres = imdb_dict.get('Genre').split(', ')
+					for i in range(len(genres)):
+						genres[i] = genres[i]
+			else:
+				return {'error_msg' : 'Invalid'}
 		except Exception:
 			return {'error_msg' : 'IMDb API failed, please try again.'}
 	else:

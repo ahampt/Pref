@@ -654,8 +654,8 @@ def search(request):
 				return redirect('webapp.views.movie.view', urltitle = movie.UrlTitle)
 			except Exception:
 				pass
-			length = int(request.GET.get('length')) if request.GET.get('length') and request.GET.get('length').isdigit() else 2
-			length = length if length <= 20 else 20
+			length = int(request.GET.get('length')) if request.GET.get('length') and request.GET.get('length').isdigit() else 10
+			length = length if length <= 50 else 50
 			res_dict = movies_from_term(term, length)
 			if res_dict.get('error_list'):
 				site_logger.debug('Search Failed - Text: '+term+' Errors: ' + str(res_dict.get('error_list')))
