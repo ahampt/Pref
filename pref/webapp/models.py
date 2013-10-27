@@ -98,6 +98,8 @@ class Genres(models.Model):
 	
 	def clean(self):
 		data = self.Description
+		if data == 'N/A':
+			raise ValidationError("Name cannot be \"N/A\".")
 		if data and len(data) > 0 and not data.encode('ascii', 'replace').isalnum():
 			raise ValidationError("Description can only contain alphanumeric characters.")
 
