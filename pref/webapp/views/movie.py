@@ -582,13 +582,13 @@ def view(request, urltitle):
 			dirs, writs, acts, gens = [], [], [], []
 			type = str(request.GET.get('t')) if request.GET.get('t') else None
 			value = request.POST.get('add')
-			if type and type ==  'DIRECTOR':
-				dirs.append(value)
-			elif type and type ==  'WRITER':
-				writs.append(value)
-			elif type and type ==  'ACTOR':
-				acts.append(value)
-			elif type and type ==  'GENRE':
+			if type and type == 'DIRECTOR':
+				dirs.append({'name' : value})
+			elif type and type == 'WRITER':
+				writs.append({'name' : value})
+			elif type and type == 'ACTOR':
+				acts.append({'name' : value})
+			elif type and type == 'GENRE':
 				gens.append(value)
 			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
 			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 'success')

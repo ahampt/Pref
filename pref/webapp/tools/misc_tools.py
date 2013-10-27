@@ -25,7 +25,7 @@ def create_movie_property(movie, property_id, property_name, property_type, logg
 # Send email to admin that person may be incorrect (to varying degree)
 def person_notification(concern_level, person):
 	email_from = settings.DEFAULT_FROM_EMAIL
-	email_subject = 'Priority ' + str(concern_level) + ' Person Notification for ' + person.Name + '[' + str(person.id) + ']'
+	email_subject = 'Priority ' + str(concern_level) + ' Person Notification for ' + person.Name + ' [' + str(person.id) + ']'
 	email_message = ''
 	if concern_level == 3:
 		email_message = 'This person was probably added incorrectly. Please check if this person is already in the database.'

@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import create_properties, create_movie_property, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
+from webapp.tools.misc_tools import create_movie_property, person_is_relevant, genre_is_relevant, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
 from webapp.models import Profiles, People, Genres, Movies, Properties, Associations
 
 property_logger = logging.getLogger('log.property')
