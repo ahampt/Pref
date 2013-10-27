@@ -39,7 +39,7 @@
 				<div class="span4 offset2">
 					<label for="imdb_url">IMDb URL or ID*: </label>
 					{% if movie and movie.ImdbId %}
-						<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" value="{{links.imdb}}" />
+						<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" value="{{movie.ImdbId}}" />
 					{% else %}
 						<input class="input-block-level" type="text" name="imdb_url" id="imdb_url" />
 					{% endif %}
@@ -60,8 +60,8 @@
 			<div class="row">
 				<div class="span4 offset2">
 					<label for="rottentomatoes_id">Rotten Tomatoes ID*: </label>
-					{% if movie and movie.RottentomatoesId %}
-						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
+					{% if movie and movie.RottenTomatoesId %}
+						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{movie.RottenTomatoesId}}" />
 					{% else %}
 						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
 					{% endif %}
@@ -83,7 +83,7 @@
 				<div class="span4 offset2">
 					<label for="netflix_url">Netflix URL or ID: </label>
 					{% if movie and movie.NetflixId %}
-						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" value="{{links.netflix}}" />
+						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" value="{{movie.NetflixId}}" />
 					{% else %}
 						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" />
 					{% endif %}
@@ -105,7 +105,7 @@
 				<div class="span4 offset2">
 					<label for="wikipedia_id">Wikipedia URL or ID: </label>
 					{% if movie and movie.WikipediaId %}
-						<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" value="{{links.wikipedia}}" />
+						<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" value="{{movie.WikipediaId}}" />
 					{% else %}
 						<input class="input-block-level" type="text" name="wikipedia_id" id="wikipedia_id" />
 					{% endif %}

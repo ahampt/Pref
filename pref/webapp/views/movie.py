@@ -129,13 +129,24 @@ def view_list(request):
 						except ValidationError as e:
 							urltitle = movie.UrlTitle if movie.UrlTitle else 'Unknown'
 							movie_logger.info(urltitle + ' Create Failure by ' + logged_in_profile_info['username'])
+							# Restore values for add page
+							movie.ImdbId = request.POST.get('imdb_url')
+							movies.RottenTomatoesId = request.POST.get('rottentomatoes_id')
+							movies.NetflixId = request.POST.get('netflix_url')
+							movies.WikipediaId = request.POST.get('wikipedia_id')
 							error_msg = e.message_dict
 							for key in error_msg:
 								error_msg[key] = str(error_msg[key][0])
 							return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'error_msg' : error_msg, 'movie' : movie, 'links' : generate_links_dict(movie)}, RequestContext(request))
 					else:
 						movie_logger.info('Movie Create Failure by ' + logged_in_profile_info['username'])
-						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : res_dict.get('movie'), 'error_msg' : res_dict.get('error_list'), 'links' : generate_links_dict(res_dict.get('movie'))}, RequestContext(request))
+						# Restore values for add page
+						movie = res_dict.get('movie')
+						movie.ImdbId = request.POST.get('imdb_url')
+						movie.RottenTomatoesId = request.POST.get('rottentomatoes_id')
+						movie.NetflixId = request.POST.get('netflix_url')
+						movie.WikipediaId = request.POST.get('wikipedia_id')
+						return render_to_response('movie/add.html', {'header' : generate_header_dict(request, 'Add Movie'), 'movie' : movie, 'error_msg' : res_dict.get('error_list'), 'links' : generate_links_dict(movie)}, RequestContext(request))
 			else:
 				'''*****************************************************************************
 				Display admin add movie page
