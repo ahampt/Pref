@@ -59,6 +59,28 @@
 			{% endif %}
 			<div class="row">
 				<div class="span4 offset2">
+					<label for="rottentomatoes_id">Rotten Tomatoes ID*: </label>
+					{% if movie and movie.RottentomatoesId %}
+						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
+					{% else %}
+						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
+					{% endif %}
+				</div>
+			</div>
+			{% if rottentomatoes_possibilities %}
+				<div class="row">
+					<table class="table table-striped span4 offset2">
+						{% for movie in rottentomatoes_possibilities %}
+							<tr>
+								<td style="text-align: center"><input type="radio" name="rottentomatoes_possibilities" value="{{movie.RottenTomatoesId}}" /></td>
+								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+			<div class="row">
+				<div class="span4 offset2">
 					<label for="netflix_url">Netflix URL or ID: </label>
 					{% if movie and movie.NetflixId %}
 						<input class="input-block-level" type="text" name="netflix_url" id="netflix_url" value="{{links.netflix}}" />
@@ -73,28 +95,6 @@
 						{% for movie in netflix_possibilities %}
 							<tr>
 								<td style="text-align: center"><input type="radio" name="netflix_possibilities" value="{{movie.NetflixId}}" /></td>
-								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
-							</tr>
-						{% endfor %}
-					</table>
-				</div>
-			{% endif %}
-			<div class="row">
-				<div class="span4 offset2">
-					<label for="rottentomatoes_id">Rotten Tomatoes ID: </label>
-					{% if movie and movie.RottentomatoesId %}
-						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" value="{{links.rt}}" />
-					{% else %}
-						<input class="input-block-level" type="text" name="rottentomatoes_id" id="rottentomatoes_id" />
-					{% endif %}
-				</div>
-			</div>
-			{% if rottentomatoes_possibilities %}
-				<div class="row">
-					<table class="table table-striped span4 offset2">
-						{% for movie in rottentomatoes_possibilities %}
-							<tr>
-								<td style="text-align: center"><input type="radio" name="rottentomatoes_possibilities" value="{{movie.RottenTomatoesId}}" /></td>
 								<td><a href="{{movie.UrlTitle}}" target="_blank">{{movie.Title}} ({{movie.Year}})</a></td>
 							</tr>
 						{% endfor %}

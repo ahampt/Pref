@@ -115,39 +115,33 @@ LOGGING = {
 	'handlers': {
 		'site': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'site.log',
 		},
 		'profile': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'profile.log'
 		},
 		'movie': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'movie.log'
 		},
 		'property': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'property.log'
 		},
 		'associate': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'associate.log'
 		},
 		'source': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
+			'class': 'logging.FileHandler' if not DEBUG else 'logging.StreamHandler',
 			'formatter': 'verbose',
-			'filename': LOGGING_DIR + 'source.log'
 		}
 	},
 	'loggers': {

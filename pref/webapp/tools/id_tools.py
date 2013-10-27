@@ -105,7 +105,7 @@ def imdb_id_from_input(imdb_input):
 	id_end = len(imdb_input)
 	# If url input, extract imdb id
 	if imdb_input.find(imdb_str) != 0 or len(imdb_input) < len(imdb_str)+1:
-		return None;
+		return None
 	# Start with tt
 	id_start = len(imdb_str) - 2
 	# Continue until no more numbers
@@ -134,6 +134,7 @@ def get_imdb_dict(imdb_id):
 
 # Return movie given imdb url or id
 def movie_from_imdb_input(imdb_input):
+	directors, writers, actors, genres = [], [], [], []
 	movie = Movies()
 	imdb_id = imdb_id_from_input(imdb_input)
 	if imdb_id:
@@ -149,29 +150,31 @@ def movie_from_imdb_input(imdb_input):
 					runtime_str = imdb_dict.get('Runtime')
 					runtime = 0
 					# Convert [/d+] h [/d+] m to minutes
-					runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-					if runtimes[0]:
-						runtime += runtimes[0]*60
-					if runtimes[1]:
-						runtime += runtimes[1]
+					try:
+						runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+						if runtimes[0]:
+							runtime += runtimes[0]*60
+						if runtimes[1]:
+							runtime += runtimes[1]
+					except Exception:
+						pass
 					movie.Runtime = str(runtime)
-				directors, writers, actors, genres = [], [], [], []
 				if imdb_dict.get('Director'):
-					directors = imdb_dict.get('Director').split(', ')
-					for i in range(len(directors)):
-						directors[i] = directors[i]
+					cur_directors = imdb_dict.get('Director').split(', ')
+					for i in range(len(cur_directors)):
+						directors.append({'name' : cur_directors[i]})
 				if imdb_dict.get('Writer'):
-					writers = imdb_dict.get('Writer').split(', ')
-					for i in range(len(writers)):
-						writers[i] = writers[i]
+					cur_writers = imdb_dict.get('Writer').split(', ')
+					for i in range(len(cur_writers)):
+						writers.append({'name' : cur_writers[i]})
 				if imdb_dict.get('Actors'):
-					actors = imdb_dict.get('Actors').split(', ')
-					for i in range(len(actors)):
-						actors[i] = actors[i]
+					cur_actors = imdb_dict.get('Actors').split(', ')
+					for i in range(len(cur_actors)):
+						actors.append({'name' : cur_actors[i]})
 				if imdb_dict.get('Genre'):
-					genres = imdb_dict.get('Genre').split(', ')
-					for i in range(len(genres)):
-						genres[i] = genres[i]
+					cur_genres = imdb_dict.get('Genre').split(', ')
+					for i in range(len(cur_genres)):
+						genres.append(cur_genres[i])
 			else:
 				return {'error_msg' : 'Invalid'}
 		except Exception:
@@ -289,9 +292,9 @@ def movie_from_netflix_input(netflix_input):
 					person_dom = get_netflix_dom(None, href)
 					for person in person_dom.getElementsByTagName('person'):
 						if not is_cast:
-							directors.append(person.getElementsByTagName('name')[0].childNodes[0].data)
+							directors.append({'name' : person.getElementsByTagName('name')[0].childNodes[0].data})
 						else:
-							actors.append(person.getElementsByTagName('name')[0].childNodes[0].data)
+							actors.append({'name' : person.getElementsByTagName('name')[0].childNodes[0].data})
 			for node in dom.getElementsByTagName('category'):
 				if node.getAttribute('scheme') == 'http://api.netflix.com/categories/genres':
 					genre = node.getAttribute('label')
@@ -416,10 +419,10 @@ def movie_from_rottentomatoes_input(rottentomatoes_input):
 				runtime_str = str(movie_dict.get('runtime'))
 			if movie_dict.get('abridged_directors'):
 				for j in range(len(movie_dict.get('abridged_directors'))):
-					directors.append(movie_dict.get('abridged_directors')[j].get('name'))
+					directors.append({'name' : movie_dict.get('abridged_directors')[j].get('name')})
 			if movie_dict.get('abridged_cast'):
 				for j in range(len(movie_dict.get('abridged_cast'))):
-					actors.append(movie_dict.get('abridged_cast')[j].get('name'))
+					actors.append({'name' : movie_dict.get('abridged_cast')[j].get('name'), 'id' : movie_dict.get('abridged_cast')[j].get('id')})
 			if movie_dict.get('genres'):
 				for j in range(len(movie_dict.get('genres'))):
 					genres.append(movie_dict.get('genres')[j])
@@ -481,10 +484,10 @@ def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input, wikipedia
 			writers = imdb_res.get('writers')
 			actors = imdb_res.get('actors')
 			genres = imdb_res.get('genres')
-		# Imdb success required for now
 		else:
 			error_list['ImdbId'] = imdb_res.get('error_msg')
 			success = False
+	# Imdb success required for now
 	else:
 		error_list['ImdbId'] = 'This field cannot be blank.'
 		success = False
@@ -520,6 +523,10 @@ def movie_from_inputs(imdb_input, netflix_input, rottentomatoes_input, wikipedia
 			movie.RottenTomatoesId = rottentomatoes_movie.RottenTomatoesId
 			# Use better cast list from rotten tomatoes
 			actors = rottentomatoes_res.get('actors')
+	# Rotten Tomatoes success required for now
+	else:
+		error_list['RottenTomatoesId'] = 'This field cannot be blank.'
+		success = False
 	# Use given wikipedia input with no validation, maybe include in future
 	if wikipedia_input and len(wikipedia_input) > 0:
 		wikipedia_res = movie_from_wikipedia_input(wikipedia_input)

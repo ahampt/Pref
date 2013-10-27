@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.db import models
 
@@ -51,8 +51,9 @@ class PropertyTypes(models.Model):
 		unique_together = ('Description', 'TableName')
 
 class People(models.Model):
-	Name = models.CharField(max_length=100,unique=True)
+	Name = models.CharField(max_length=100)
 	UrlName = models.CharField(max_length=100,null=True,blank=True,unique=True)
+	RottenTomatoesId = models.CharField(max_length=25,null=True,blank=True,unique=True)
 	CreatedAt= models.DateTimeField(auto_now_add=True)
 	UpdatedAt = models.DateTimeField(auto_now=True)
 	
@@ -75,7 +76,18 @@ class People(models.Model):
 				elif char.isspace():
 					urlname += '_'
 		if hasAlNum and len(urlname) > 0:
-			self.UrlName = urlname
+			try:
+				person = People.objects.get(UrlName=urlname)
+				if self.RottenTomatoesId:
+					urlname = urlname + '_' + str(self.RottenTomatoesId)
+					test = People.objects.get(UrlName=urlname)
+				i = 2
+				while True:
+					urlname = person.UrlName + '_' + str(i)
+					i += 1
+					test = People.objects.get(UrlName=urlname)
+			except ObjectDoesNotExist:
+				self.UrlName = urlname
 		else:
 			raise ValidationError("Name must contain at least one alphanumeric character.")
 	

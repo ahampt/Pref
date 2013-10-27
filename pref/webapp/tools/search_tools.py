@@ -52,6 +52,9 @@ def imdb_movies_from_term(search_term, page_limit):
 					for i in range(min_length):
 						movie = Movies()
 						imdb_dict = res_dict.get('Search')[i]
+						if imdb_dict.get('Type'):
+							if imdb_dict.get('Type') == 'episode' or imdb_dict.get('Type') == 'series' or imdb_dict.get('Type') == 'game':
+								continue
 						if imdb_dict.get('imdbID'):
 							movie.ImdbId = imdb_dict.get('imdbID')
 						if imdb_dict.get('Title'):
@@ -62,11 +65,14 @@ def imdb_movies_from_term(search_term, page_limit):
 							runtime_str = imdb_dict.get('Runtime')
 							runtime = 0
 							# Convert [/d+] h [/d+] m to minutes
-							runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-							if runtimes[0]:
-								runtime += runtimes[0]*60
-							if runtimes[1]:
-								runtime += runtimes[1]
+							try:
+								runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
+								if runtimes[0]:
+									runtime += runtimes[0]*60
+								if runtimes[1]:
+									runtime += runtimes[1]
+							except Exception:
+								pass
 							movie.Runtime = str(runtime)
 						if movie.ImdbId != '' and movie.Title != '' and movie.Year != 0 and movie.Runtime != '':
 							movies.append(movie)

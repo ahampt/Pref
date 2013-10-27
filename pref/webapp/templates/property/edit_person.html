@@ -22,11 +22,17 @@
 		<form class="well" action="{{person_url}}?edit=1" method="post"> {% csrf_token %}
 			<div class="row">
 				<div class="span3 offset2">
-					<label for="name">Title: </label>
+					<label for="name">Name: </label>
 					<input class="input-block-level" type="text" name="name" id="name" value="{{person.Name}}" />
 				</div>
 				<div class="span1 offset1">
 					<a class="btn btn-medium btn-block btn-danger" href="{{person_url}}?delete=1" onclick="return confirmAction('Delete Person?')">Delete</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span3 offset2">
+					<label for="name">Rotten Tomatoes: </label>
+					<input class="input-block-level" type="text" name="rottentomatoes" id="rottentomatoes" value="{{person.RottenTomatoesId}}" />
 				</div>
 			</div>
 			<div class="row">

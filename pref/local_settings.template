@@ -90,7 +90,7 @@ ALLOWED_HOSTS = (
 # Example: "http://media.lawrence.com/static/"
 # STATIC_URL = '/' + PREFIX_URL + 'static/'
 # 
-# Uncomment LOGGING and below if changed LOGGING_DIR and uncommented it
+# Uncomment LOGGING and below if changed LOGGING_DIR and uncommented it (always use in production)
 # LOGGING_DIR = '/var/log/pref/'
 # 
 # LOGGING = {

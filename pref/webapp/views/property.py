@@ -109,6 +109,7 @@ def person(request, urlname):
 				PATH: webapp.views.property.person urlname; METHOD: post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
 				person.Name = request.POST.get('name')
+				person.RottenTomatoesId = None if (not request.POST.get('rottentomatoes') or (request.POST.get('rottentomatoes') and request.POST.get('rottentomatoes') == 'None')) else request.POST.get('rottentomatoes')
 				try:
 					person.full_clean()
 					person.save()

@@ -3,6 +3,8 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.db.models import Q
 from django.shortcuts import redirect
 from webapp.models import Profiles, Movies, ConsumeableTypes, People, Genres, Properties, PropertyTypes, Associations
 
@@ -20,53 +22,74 @@ def create_movie_property(movie, property_id, property_name, property_type, logg
 	except Exception:
 		pass
 
+# Send email to admin that person may be incorrect (to varying degree)
+def person_notification(concern_level, person):
+	email_from = settings.DEFAULT_FROM_EMAIL
+	email_subject = 'Priority ' + str(concern_level) + ' Person Notification for ' + person.Name + '[' + str(person.id) + ']'
+	email_message = ''
+	if concern_level == 3:
+		email_message = 'This person was probably added incorrectly. Please check if this person is already in the database.'
+	elif concern_level == 2:
+		email_message = 'This person was probably updated correctly but use caution because a new rotten tomatoes id was added to this record. Please verify this action.'
+	else:
+		email_message = 'This person was probably matched correctly. Please verify this action.'
+	# send email
+	send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
+
+# Create or find the correct existing person handling duplicates carefully
+def create_or_find_person(person_dict, logged_in_profile_username):
+	people_with_same_name = People.objects.filter(Name=person_dict.get('name'))
+	# First, try to match RT id
+	if person_dict.get('id'):
+		try:
+			person = People.objects.get(RottenTomatoesId=person_dict.get('id'))
+			return person
+		except People.DoesNotExist:
+			pass
+	# or try to match name with or without an RT id
+	elif people_with_same_name.count() == 1:
+		person = people_with_same_name[0]
+		if person.RottenTomatoesId:
+			person_notification(1, person)
+		return person
+	people_with_same_name_null = people_with_same_name.filter(Q(RottenTomatoesId=None) | Q(RottenTomatoesId=''))
+	# Next, try to find one entry with null RT id
+	if people_with_same_name_null.count() == 1:
+		person = people_with_same_name_null[0]
+		if person_dict.get('id'):
+			person.RottenTomatoesId = person_dict.get('id')
+			person.save()
+			person_notification(2, person)
+		else:
+			person_notification(1, person)
+		return person
+	# Lastly, add new person
+	try:
+		person = People(Name=person_dict.get('name'),RottenTomatoesId=person_dict.get('id'))
+		if people_with_same_name.count() > 1:
+			person_notification(3, person)
+		person.full_clean()
+		person.save()
+		property_logger.info(person_dict.get('name').encode('ascii', 'replace') + ' Create Success by ' + logged_in_profile_username)
+		return person
+	except ValidationError:
+		property_logger.info(person_dict.get('name').encode('ascii', 'replace') + ' Create Failure by ' + logged_in_profile_username)
+		return None
+
 # Create and save properties given movie and properties
 def create_properties(movie, directors, writers, actors, genres, logged_in_profile_username):
 	for director in directors:
-		# Associate old property
-		try:
-			person = People.objects.get(Name=director)
+		person = create_or_find_person(director, logged_in_profile_username)
+		if person:
 			create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
-		# Create and associate new property
-		except Exception:
-			try:
-				person = People(Name=director)
-				person.full_clean()
-				person.save()
-				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-				create_movie_property(movie, person.id, person.UrlName, 'DIRECTOR', logged_in_profile_username)
-			except ValidationError:
-				property_logger.info(director + ' Create Failure by ' + logged_in_profile_username)
 	for writer in writers:
-		# Associate old property
-		try:
-			person = People.objects.get(Name=writer)
+		person = create_or_find_person(writer, logged_in_profile_username)
+		if person:
 			create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
-		# Create and associate new property
-		except Exception:
-			try:
-				person = People(Name=writer)
-				person.full_clean()
-				person.save()
-				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-				create_movie_property(movie, person.id, person.UrlName, 'WRITER', logged_in_profile_username)
-			except ValidationError:
-				property_logger.info(writer + ' Create Failure by ' + logged_in_profile_username)
 	for actor in actors:
-		# Associate old property
-		try:
-			person = People.objects.get(Name=actor)
+		person = create_or_find_person(actor, logged_in_profile_username)
+		if person:
 			create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
-		# Create and associate new property
-		except Exception:
-			try:
-				person = People(Name=actor)
-				person.full_clean()
-				person.save()
-				property_logger.info(person.UrlName + ' Create Success by ' + logged_in_profile_username)
-				create_movie_property(movie, person.id, person.UrlName, 'ACTOR', logged_in_profile_username)
-			except ValidationError:
-				property_logger.info(actor + ' Create Failure by ' + logged_in_profile_username)
 	for genre in genres:
 		# Associate old property
 		try:
