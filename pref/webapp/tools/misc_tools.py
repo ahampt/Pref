@@ -1,4 +1,4 @@
-import logging, urllib
+import cgi, logging, urllib
 from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
@@ -175,6 +175,7 @@ def generate_header_dict(request, header_text):
 			search_list.append(title + ' (' + str(year) + ')')
 	except Exception:
 		pass
+	search_list.extend([cgi.escape(name, True) for name in People.objects.values_list('Name', flat=True).order_by('Name').distinct()])
 	return {'msg_dict' : get_msg_dict(request), 'header_text' : header_text, 'tracking_code' : settings.TRACKING_CODE, 'search_list' : search_list}
 
 # Logout and return profile of user

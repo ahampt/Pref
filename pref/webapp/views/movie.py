@@ -642,7 +642,7 @@ def search(request):
 		type_dict = get_type_dict()
 		if request.GET.get('t'):
 			'''*****************************************************************************
-			Search for movie and display movie page or search results page appropriately
+			Search for movie (or person) and display movie page (or person page) or search results page appropriately
 			PATH: webapp.views.movie.search; METHOD: none; PARAMS: get - t; MISC: none;
 			*****************************************************************************'''
 			term = request.GET.get('t')
@@ -652,6 +652,16 @@ def search(request):
 				movie = None
 				movie = Movies.objects.get(Title=title, Year=year)
 				return redirect('webapp.views.movie.view', urltitle = movie.UrlTitle)
+			except Exception:
+				pass
+			try:
+				max_num = 0
+				for cur_person in People.objects.filter(Name=term):
+					num = Properties.objects.filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyId=cur_person.id).count()
+					if num > max_num:
+						person = cur_person
+						max_num = num
+				return redirect('webapp.views.property.person', urlname = person.UrlName)
 			except Exception:
 				pass
 			length = int(request.GET.get('length')) if request.GET.get('length') and request.GET.get('length').isdigit() else 10
