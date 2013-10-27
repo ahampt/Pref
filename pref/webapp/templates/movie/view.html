@@ -107,6 +107,17 @@
 					{% endif %}
 					<a href="{{links.netflix}}" target="_blank" title="Netflix"><img src="{{STATIC_URL}}img/ico/netflix.jpg" /></a>
 				{% endif %}
+				<div>
+					<a href="#" id="open-all">Open All Links</a>
+					<script language="javascript" type="text/javascript">
+						jQuery('#open-all').click(function(e) {
+							e.preventDefault();
+							{% for key, value in links.items %}
+								window.open('{{value}}');
+							{% endfor %}
+						});
+					</script>
+				</div>
 			</div>
 		</div>
 		<br />
