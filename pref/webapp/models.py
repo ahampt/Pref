@@ -178,6 +178,7 @@ class Associations(models.Model):
 	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
 	Consumed = models.BooleanField()
 	Accessible = models.BooleanField()
+	CountConsumed = models.PositiveSmallIntegerField()
 	SourceId =  models.ForeignKey(Sources,related_name='+',null=True,blank=True)
 	Rank = models.PositiveIntegerField(null=True,blank=True)
 	Rating = models.PositiveSmallIntegerField(null=True,blank=True)
@@ -186,6 +187,9 @@ class Associations(models.Model):
 	UpdatedAt = models.DateTimeField(null=True)
 	
 	def clean(self):
+		data = self.CountConsumed
+		if data and not (data >= 0):
+			raise ValidationError("Rating must be a positive integer.")
 		data = self.Rating
 		if data and not (data >= 0 or data <= 100):
 			raise ValidationError("Rating must be an integer between 1 and 100 (inclusive).")

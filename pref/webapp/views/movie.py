@@ -214,8 +214,9 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,add; MISC: none;
 					*****************************************************************************'''
 					watched = True if request.GET.get('seen') else False
+					viewcount = 1 if watched else 0
 					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-					association = Associations(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = watched, Accessible = False, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
+					association = Associations(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = watched, Accessible = False, CountConsumed = viewcount, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
 					association.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
 					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies. Please check that the information on this page is accurate as Pref relies on user feedback to correct errors. If you notice an error, such as an actor with a similar (same) name to a different actor being shown here, click on the offending piece of information and click on the correction link to let Pref know about it. Thanks.', 'success')
@@ -229,6 +230,7 @@ def view(request, urltitle):
 					if not association.Consumed:
 						association.Consumed = True
 						association.CreatedAt = datetime.now()
+					association.CountConsumed = association.CountConsumed + 1
 					association.UpdatedAt = datetime.now()
 					association.save()
 					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
@@ -249,6 +251,7 @@ def view(request, urltitle):
 					elif association.Consumed and not request.POST.get('watched') == 'Watched':
 						association.CreatedAt = None
 						association.UpdatedAt = None
+						association.CountConsumed = 0
 						association.Rank = None
 						association.Rating = None
 						association.Review = None
@@ -288,6 +291,7 @@ def view(request, urltitle):
 							except Exception:
 								pass
 						association.Review = request.POST.get('review')
+						association.CountConsumed = int(request.POST.get('view_count')) if request.POST.get('view_count') and request.POST.get('view_count').isdigit() else association.CountConsumed
 					# Clear source information if no longer accessible or update it with new source object
 					old_source = None
 					if association.SourceId:

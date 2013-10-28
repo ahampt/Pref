@@ -232,18 +232,18 @@
 						<br />
 					{% endif %}
 					<div class="row">
-						<div class="span2">
+						<div class="span1">
 							{% if association.Consumed %}
-								<input type="checkbox" name="watched" id="watched" value="Watched" checked /> Watched
+								<input type="checkbox" name="watched" id="watched" value="Watched" checked /> Seen
 							{% else %}
-								<input type="checkbox" name="watched" id="watched" value="Watched" /> Watched
+								<input type="checkbox" name="watched" id="watched" value="Watched" /> Seen
 							{% endif %}
 						</div>
-						<div class="span2">
+						<div class="span1">
 							{% if association.Accessible %}
-								<input type="checkbox" name="accessible" id="accessible" value="Accessible" checked /> Accessible
+								<input type="checkbox" name="accessible" id="accessible" value="Accessible" checked /> Access
 							{% else %}
-								<input type="checkbox" name="accessible" id="accessible" value="Accessible" /> Accessible
+								<input type="checkbox" name="accessible" id="accessible" value="Accessible" /> Access
 							{% endif %}
 						</div>
 						{% if association.Accessible %}
@@ -253,6 +253,11 @@
 							{% else %}
 								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" placeholder="Source" />
 							{% endif %}
+						{% endif %}
+						{% if association.Consumed %}
+							<div class="span2">
+								Viewed: <input type="text" class="input-mini" name="view_count" id="view_count" value="{{association.CountConsumed}}" /> {% if association.ViewCount == 1 %}time{% else %}times{% endif %}
+							</div>
 						{% endif %}
 					</div>
 					<br />
