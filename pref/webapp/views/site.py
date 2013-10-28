@@ -1,14 +1,11 @@
-import logging, sys, time, urllib2, json
+import logging, sys
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.db.models import Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.id_tools import get_rottentomatoes_dict
-from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info, create_movie_property, get_type_dict
-from webapp.models import Profiles, People, Properties
+from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info
+from webapp.models import Profiles
 
 site_logger = logging.getLogger('log.site')
 
@@ -172,103 +169,6 @@ def channel(request):
 		PATH: webapp.views.site.channel; METHOD: none; PARAMS: none; MISC: none;
 		*****************************************************************************'''
 		return render_to_response('site/channel.html', {'header': generate_header_dict(request, 'Channel')}, RequestContext(request))
-	except Exception:
-		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-
-# Add RT ids to existing people
-def rt_conversion(request):
-	try:
-		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info)
-		if permission_response != True:
-			return permission_response
-		if not logged_in_profile_info['id']:
-			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
-			return redirect('webapp.views.profile.login')
-		'''*****************************************************************************
-		Add RottenTomatoes IDs to current people in the database
-		PATH: webapp.views.site.rt_conversion; METHOD: none; PARAMS: none; MISC: none;
-		*****************************************************************************'''
-		cast_cache = {}
-		type_dict = get_type_dict()
-		for person in People.objects.filter(Q(RottenTomatoesId=None) | Q(RottenTomatoesId='')):
-			acted_properties = Properties.objects.select_related().filter(ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'], PropertyTypeId=type_dict['PROPERTY_ACTOR'], PropertyId=person.id).order_by('-ConsumeableId__Year', 'ConsumeableId__Title')
-			for prop in acted_properties:
-				movie = prop.ConsumeableId
-				cast_list = cast_cache.get(movie.id)
-				if not cast_list:
-					try:	
-						# Query rotten tomatoes API
-						req = urllib2.Request('http://api.rottentomatoes.com/api/public/v1.0/movies/'+movie.RottenTomatoesId+'/cast.json?apikey='+settings.API_KEYS['ROTTEN_TOMATOES'])
-						res = urllib2.urlopen(req)
-						if res.getcode() == 200:
-							# Parse json response
-							rt_dict = json.loads(res.read())
-						else:
-							rt_dict = {'Response' : False}
-					except Exception:
-						rt_dict = {'Response' : False}
-					time.sleep(0.1)
-					if rt_dict.get('Respone') and rt_dict.get('Response') == False:
-						# flag
-						email_from = settings.DEFAULT_FROM_EMAIL
-						email_subject = 'Failed RT Request - ACTOR: ' + person.Name + ' [' + str(person.id) + '] MOVIE: ' + movie.Title + ' [' + str(movie.id) + ']'
-						email_message = 'RT dict was not retrieved for this movie at the time this actor was being examined. Please verify this property is correct.'
-						# send email
-						send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
-						continue
-					else:
-						cast_cache[movie.id] = rt_dict.get('cast')
-						cast_list = rt_dict.get('cast')
-				if cast_list:
-					found = False
-					for person_dict in cast_list:
-						if person_dict.get('name') == person.Name:
-							found = True
-							if not person.RottenTomatoesId:
-								person.RottenTomatoesId = person_dict.get('id')
-								person.save()
-							elif person.RottenTomatoesId != person_dict.get('id'):
-								try:
-									cur_person = People.objects.get(RottenTomatoesId=person_dict.get('id'))
-									prop.PropertyId = cur_person
-									prop.save()
-								except People.DoesNotExist:
-									try:
-										new_person = People(Name = person_dict.get('name'), RottenTomatoesId=person_dict.get('id'))
-										new_person.full_clean()
-										new_person.save()
-										create_movie_property(movie, new_person.id, new_person.UrlName, 'ACTOR', logged_in_profile_info['username'])
-										# flag to review directing and writing properties
-										email_from = settings.DEFAULT_FROM_EMAIL
-										email_subject = 'New Person - PERSON: ' + new_person.Name + ' [' + str(new_person.id) + ']'
-										email_message = 'It was determined that a new person was needed. Please check all people with this name have the correct directing and writing credits as this was not checked.'
-										# send email
-										send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
-									except ValidationError:
-										# flag (with full info)
-										email_from = settings.DEFAULT_FROM_EMAIL
-										email_subject = 'Failed to Add Person - PERSON: ' + new_person.Name + ' [RT: ' + str(new_person.RottenTomatoesId) + '] MOVIE: ' + movie.Title + ' [' + str(movie.id) + ']'
-										email_message = 'Validation failed when creating this person given their name and RT id. Please create manually or check if they already exist and associate this movie with them.'
-										# send email
-										send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
-							break
-					if not found:
-						# flag
-						email_from = settings.DEFAULT_FROM_EMAIL
-						email_subject = 'Failed to find Person in RT Dict - ACTOR: ' + person.Name + ' [' + str(person.id) + '] MOVIE: ' + movie.Title + ' [' + str(movie.id) + ']'
-						email_message = 'Searching the rt dict of this movie resulted in a failure to find this actor. Please verify that this is correct or correct manually. Think about what will happen in the future with this person.'
-						# send email
-						send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
-				else:
-					# flag
-					email_from = settings.DEFAULT_FROM_EMAIL
-					email_subject = 'Failed to get Cast List - ACTOR: ' + person.Name + ' [' + str(person.id) + '] MOVIE: ' + movie.Title + ' [' + str(movie.id) + ']'
-					email_message = 'You should not be seeing this. This means that the cache and the rt request failed to find a cast for the movie specified.'
-					# send email
-					send_mail(email_subject, email_message, email_from, [settings.DEFAULT_TO_EMAIL], fail_silently=False)
-		return HttpResponse('Success')
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
