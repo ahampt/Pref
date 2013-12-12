@@ -4,8 +4,8 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
-from webapp.models import Profiles, Associations, Consumptions
+from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info
+from webapp.models import Profiles
 
 site_logger = logging.getLogger('log.site')
 
@@ -169,31 +169,6 @@ def channel(request):
 		PATH: webapp.views.site.channel; METHOD: none; PARAMS: none; MISC: none;
 		*****************************************************************************'''
 		return render_to_response('site/channel.html', {'header': generate_header_dict(request, 'Channel')}, RequestContext(request))
-	except Exception:
-		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
-
-# Display privacy policy page
-def count_conversion(request):
-	try:
-		logged_in_profile_info = { }
-		permission_response = check_and_get_session_info(request, logged_in_profile_info)
-		if permission_response != True:
-			return permission_response
-		'''*****************************************************************************
-		Run count conversion
-		PATH: webapp.views.site.count_conversion; METHOD: none; PARAMS: none; MISC: none;
-		*****************************************************************************'''
-		type_dict = get_type_dict()
-		for profile in Profiles.objects.all():
-			associations = Associations.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
-			for assoc in associations:
-				consumption = Consumptions(ProfileId = profile, ConsumeableId = assoc.ConsumeableId, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = assoc.CreatedAt)
-				consumption.save()
-				if assoc.CreatedAt != assoc.UpdatedAt:
-					consumption = Consumptions(ProfileId = profile, ConsumeableId = assoc.ConsumeableId, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = assoc.UpdatedAt)
-					consumption.save()
-		return HttpResponse("Done")
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))
