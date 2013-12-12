@@ -10,7 +10,7 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from oauth2client.client import flow_from_clientsecrets
 from webapp.tools.misc_tools import logout_command, login_command, generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
-from webapp.models import Profiles, Sources, Movies, Associations
+from webapp.models import Profiles, Sources, Movies, Associations, Consumptions
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 profile_logger = logging.getLogger('log.profile')
@@ -574,17 +574,22 @@ def view(request, username):
 					movies.append(assoc.ConsumeableId)
 				elif assoc.Consumed:
 					unranked_movies.append(assoc.ConsumeableId)
-					if assoc.CreatedAt.year in watch_data:
-						watch_data[assoc.CreatedAt.year] = watch_data[assoc.CreatedAt.year] + 1
-					else:
-						watch_data[assoc.CreatedAt.year] = 1
-					if assoc.CreatedAt != assoc.UpdatedAt:
-						if assoc.UpdatedAt.year in rewatch_data:
-							rewatch_data[assoc.UpdatedAt.year] = rewatch_data[assoc.UpdatedAt.year] + 1
-						else:
-							rewatch_data[assoc.UpdatedAt.year] = 1
 				else:
 					unseen_movies.append(assoc.ConsumeableId)
+				if assoc.Consumed:
+					consumptions = Consumptions.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumeableId = assoc.ConsumeableId).order_by('ConsumedAt')
+					if consumptions.count() > 0:
+						consumption = consumptions[0]
+						if consumption.ConsumedAt.year in watch_data:
+							watch_data[consumption.ConsumedAt.year] = watch_data[consumption.ConsumedAt.year] + 1
+						else:
+							watch_data[consumption.ConsumedAt.year] = 1
+						if consumptions.count() > 1:
+							for consumption in consumptions[1:]:
+								if consumption.ConsumedAt.year in rewatch_data:
+									rewatch_data[consumption.ConsumedAt.year] = rewatch_data[consumption.ConsumedAt.year] + 1
+								else:
+									rewatch_data[consumption.ConsumedAt.year] = 1
 				if not own_movies:
 					try:
 						own_association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = assoc.ConsumeableId, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
@@ -601,6 +606,7 @@ def view(request, username):
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: get - export; MISC: none;
 			*****************************************************************************'''
 			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('Rank', '-ConsumeableId__Year', 'ConsumeableId__Title')
+			consumptions = Consumptions.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 			response = HttpResponse(content_type='text/csv')
 			response['Content-Disposition'] = 'attachment; filename="letterboxd-import.csv"'
 			writer = unicodecsv.writer(response, encoding='utf-8')
@@ -612,14 +618,20 @@ def view(request, username):
 				title = movie.Title
 				year = str(movie.Year)
 				if assoc.Consumed:
-					watched_date = str(assoc.UpdatedAt.year) + '-' + str(assoc.UpdatedAt.strftime('%m')) + '-' + str(assoc.UpdatedAt.strftime('%d'))
 					if assoc.Rating:
 						rating = assoc.Rating / 10
 					if assoc.Review:
 						review = assoc.Review
+					for consumption in consumptions.filter(ConsumeableId = movie).order_by('ConsumedAt'):
+						watched_date = str(consumption.ConsumedAt.year) + '-' + str(consumption.ConsumedAt.strftime('%m')) + '-' + str(consumption.ConsumedAt.strftime('%d'))
+						writer.writerow([imdbid, title, year, watched_date, rating, review])
+						if rating:
+							rating = ""
+						if review:
+							review = ""
 				else:
 					watched_date = str(datetime.today().year) + '-' + str(datetime.today().strftime('%m')) + '-' + str(datetime.today().strftime('%d'))
-				writer.writerow([imdbid, title, year, watched_date, rating, review])
+					writer.writerow([imdbid, title, year, watched_date, rating, review])
 			return response
 		elif request.GET.get('suggestion'):
 			if request.method == 'POST':
@@ -918,6 +930,8 @@ def view(request, username):
 				profile_logger.info(prof.Username + ' Logout Success')
 			# Delete all associations
 			Associations.objects.filter(ProfileId=profile).delete()
+			# Delete all consumptions
+			Consumptions.objects.filter(ProfileId=profile).delete()
 			# Delete all sources
 			Sources.objects.filter(ProfileId=profile).delete()
 			profile.delete()
@@ -929,9 +943,9 @@ def view(request, username):
 			Display profile page
 			PATH: webapp.views.profile.view username; METHOD: none; PARAMS: none; MISC: none;
 			*****************************************************************************'''
-			associations = Associations.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = True)
+			consumptions = Consumptions.objects.select_related().filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 			indicators = profile.StarIndicators.split(',')
-			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators, 'associations' : associations}, RequestContext(request))
+			return render_to_response('profile/view.html', {'header' : generate_header_dict(request, profile.Username), 'profile' : profile, 'admin_rights' : admin_rights, 'indicators' : indicators, 'consumptions' : consumptions}, RequestContext(request))
 	except ObjectDoesNotExist:
 		raise Http404
 	except Exception:

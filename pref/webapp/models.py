@@ -178,25 +178,23 @@ class Associations(models.Model):
 	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
 	Consumed = models.BooleanField()
 	Accessible = models.BooleanField()
-	CountConsumed = models.PositiveSmallIntegerField()
 	SourceId =  models.ForeignKey(Sources,related_name='+',null=True,blank=True)
 	Rank = models.PositiveIntegerField(null=True,blank=True)
 	Rating = models.PositiveSmallIntegerField(null=True,blank=True)
 	Review = models.TextField(null=True,blank=True)
-	CreatedAt= models.DateTimeField(null=True)
-	UpdatedAt = models.DateTimeField(null=True)
+	CreatedAt= models.DateTimeField(auto_now_add=True)
+	UpdatedAt = models.DateTimeField(auto_now=True)
 	
 	def clean(self):
-		data = self.CountConsumed
-		if data and not (data >= 0):
-			raise ValidationError("Rating must be a positive integer.")
 		data = self.Rating
 		if data and not (data >= 0 or data <= 100):
 			raise ValidationError("Rating must be an integer between 1 and 100 (inclusive).")
-		create_date = self.CreatedAt
-		update_date = self.UpdatedAt
-		if create_date and update_date and not (create_date <= update_date):
-			raise ValidationError("First viewed date must be before or same as last viewed date.")
 	
 	class Meta:
 		unique_together = ('ProfileId', 'ConsumeableId', 'ConsumeableTypeId')
+
+class Consumptions(models.Model):
+	ProfileId = models.ForeignKey(Profiles,related_name='+')
+	ConsumeableId = models.ForeignKey(Movies,related_name='+')
+	ConsumeableTypeId = models.ForeignKey(ConsumeableTypes,related_name='+')
+	ConsumedAt = models.DateTimeField()

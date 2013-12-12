@@ -1,5 +1,5 @@
 import cgi, logging, urllib
-from datetime import timedelta
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -277,3 +277,24 @@ def get_type_dict():
 	for property_type in PropertyTypes.objects.all():
 		type_dict['PROPERTY_' + property_type.Description] = property_type
 	return type_dict
+
+# Convert POST value into datetime and check bounds (inclusive)
+def date_from_input(input, upper_bound = None, lower_bound = None):
+	try:
+		if not input or (lower_bound and upper_bound and lower_bound > upper_bound):
+			return None
+		month = int(input[0:input.find('/')])
+		day = int(input[input.find('/')+1:input.find('/', input.find('/')+1)])
+		year = int(input[input.find('/', input.find('/')+1)+1:])
+		new_date = datetime(year, month, day)
+		if((not upper_bound or (upper_bound and new_date <= upper_bound)) and (not lower_bound or (lower_bound and new_date >= lower_bound))):
+			return new_date
+		else:
+			if upper_bound and new_date > upper_bound:
+				return upper_bound
+			elif lower_bound and new_date < lower_bound:
+				return lower_bound
+			else:
+				return None
+	except Exception:
+		return None

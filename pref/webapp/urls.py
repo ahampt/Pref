@@ -8,6 +8,7 @@ from django.conf import settings
 urlpatterns = patterns('',
 	('^' + settings.PREFIX_URL + r'$', 'webapp.views.site.access'),
 	('^' + settings.PREFIX_URL + r'home/$', 'webapp.views.site.home'),
+	('^' + settings.PREFIX_URL + r'fix/$', 'webapp.views.site.count_conversion'),
 	('^' + settings.PREFIX_URL + r'register/$', 'webapp.views.profile.register'),
 	('^' + settings.PREFIX_URL + r'profiles/$', 'webapp.views.profile.view_list'),
 	('^' + settings.PREFIX_URL + r'profiles/(?P<username>\w{0,30})/$', 'webapp.views.profile.view'),

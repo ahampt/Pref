@@ -220,43 +220,73 @@
 				</div>
 				<br />
 				<form id="association-form" action="{{movie_url}}?assoc=1&update=1" method="post"> {% csrf_token %}
-					{% if association.Consumed %}
-						<div class="row">
-							<div class="span3">
-								First Viewed On: <input type="text" class="input-small datepicker" name="first_viewed" id="first_viewed" value="{{association.CreatedAt.month}}/{{association.CreatedAt.day}}/{{association.CreatedAt.year}}" />
+					{% for consumption in consumptions %}
+						{% if forloop.first %}
+							<div class="row">
+								<div class="span3">
+									First Viewed On: <input type="text" class="input-small autoupdate datepicker" name="first_viewed" id="first_viewed" value="{{consumption.ConsumedAt.month}}/{{consumption.ConsumedAt.day}}/{{consumption.ConsumedAt.year}}" />
+								</div>
+						{% endif %}
+						{% if forloop.last %}
+								<div class="span3">
+									Last Viewed On: <input type="text" class="input-small autoupdate datepicker" name="last_viewed" id="last_viewed" value="{{consumption.ConsumedAt.month}}/{{consumption.ConsumedAt.day}}/{{consumption.ConsumedAt.year}}" />
+								</div>
+								<div class="span1">
+									<a href="#dates-modal" data-toggle="modal" id='all-dates'>All Dates</a>
+								</div>
+								{% if consumptions.count > 0 %}
+									<div id="dates-modal" class="modal hide" tabindex="-1" aria-labelledby="dates-modal-label" aria-hidden="true">
+										<div class="modal-header">
+											<h3 id="dates-modal-label">View Dates</h3>
+										</div>
+										<div class="modal-body">
+											{% for consumption in consumptions %}
+												<div class="row"><div class="input-append offset2"><input type="text" class="input-small" name="view-date-{{forloop.counter}}" id="view-date-{{forloop.counter}}" value="{{consumption.ConsumedAt.month}}/{{consumption.ConsumedAt.day}}/{{consumption.ConsumedAt.year}}" /><a class="add-on" href="{{movie_url}}?assoc=1&consumption={{forloop.counter}}&delete=1"><i class="icon-remove"></i></a></div></div>
+											{% endfor %}
+										</div>
+											<div class="modal-footer">
+											<a class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
+											<a id="save-consumptions" class="btn btn-primary">Save changes</a>
+										</div>
+									</div>
+									<script language="javascript" type="text/javascript">
+										jQuery('#save-consumptions').click(function(e) {
+											e.preventDefault();
+											jQuery('#association-form').attr('action', jQuery('#association-form').attr('action')+'&consumption=1')
+											jQuery('#association-form').submit();
+										});
+									</script>
+								{% endif %}
 							</div>
-							<div class="span3">
-								Last Viewed On: <input type="text" class="input-small datepicker" name="last_viewed" id="last_viewed" value="{{association.UpdatedAt.month}}/{{association.UpdatedAt.day}}/{{association.UpdatedAt.year}}" />
-							</div>
-						</div>
-						<br />
-					{% endif %}
+							<br />
+						{% endif %}
+					{% endfor %}
 					<div class="row">
 						<div class="span1">
 							{% if association.Consumed %}
-								<input type="checkbox" name="watched" id="watched" value="Watched" checked /> Seen
+								<input type="checkbox" class="autoupdate" name="watched" id="watched" value="Watched" checked /> Seen
 							{% else %}
-								<input type="checkbox" name="watched" id="watched" value="Watched" /> Seen
+								<input type="checkbox" class="autoupdate" name="watched" id="watched" value="Watched" /> Seen
 							{% endif %}
 						</div>
 						<div class="span1">
 							{% if association.Accessible %}
-								<input type="checkbox" name="accessible" id="accessible" value="Accessible" checked /> Access
+								<input type="checkbox" class="autoupdate" name="accessible" id="accessible" value="Accessible" checked /> Access
 							{% else %}
-								<input type="checkbox" name="accessible" id="accessible" value="Accessible" /> Access
+								<input type="checkbox" class="autoupdate" name="accessible" id="accessible" value="Accessible" /> Access
 							{% endif %}
 						</div>
 						{% if association.Accessible %}
 							{% if association.SourceId %}
-								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" value="{{association.SourceId.Description}}" />
+								<input type="text" class="autoupdate" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" value="{{association.SourceId.Description}}" />
 								<input type="checkbox" name="update_all_sources" id="update_all_sources" value="Update_All" /> Update All
 							{% else %}
-								<input type="text" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" placeholder="Source" />
+								<input type="text" class="autoupdate" autocomplete="off" data-provide="typeahead" data-items="2" data-source='["{{sources|join:'","'}}"]' name="source" id="source" placeholder="Source" />
 							{% endif %}
 						{% endif %}
 						{% if association.Consumed %}
 							<div class="span2">
-								Viewed: <input type="text" class="input-mini" name="view_count" id="view_count" value="{{association.CountConsumed}}" /> {% if association.ViewCount == 1 %}time{% else %}times{% endif %}
+								Viewed: <input type="text" class="input-mini uneditable-input" name="view_count" id="view_count" value="{{consumptions.count}}" readonly=/> {% if consumptions.count == 1 %}time{% else %}times{% endif %}
 							</div>
 						{% endif %}
 					</div>
@@ -306,11 +336,11 @@
 					</div>
 				</form>
 				<script language="javascript" type="text/javascript">
-					jQuery("#association-form input").change(function() {
+					jQuery("#association-form .autoupdate").change(function() {
 						jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
 						formChange(jQuery('#association-form'));
 					});
-					jQuery('#association-form textarea, #association-form [type=text]').on('input', function() {
+					jQuery('#association-form textarea, #association-form .autoupdate [type=text]').on('input', function() {
 						jQuery('#save-msg').addClass('alert alert-warning').html('changes not saved');
 						formChange(jQuery('#association-form'));
 					});
@@ -325,12 +355,14 @@
 						}
 					};
 					jQuery("#association-form").submit(function(e) {
-						var form = jQuery(this);
-						e.preventDefault();
-						jQuery.post(form.attr('action'), form.serialize(), function() {
-							jQuery('#save-msg').removeClass('alert-warning').addClass('alert-success').html('changes saved');
-							location.reload();
-						});
+						if(jQuery('#association-form').attr('action').indexOf('consumption') == 0) {
+							var form = jQuery(this);
+							e.preventDefault();
+							jQuery.post(form.attr('action'), form.serialize(), function() {
+								jQuery('#save-msg').removeClass('alert-warning').addClass('alert-success').html('changes saved');
+								location.reload();
+							});
+						}
 					});
 				</script>
 			</div>

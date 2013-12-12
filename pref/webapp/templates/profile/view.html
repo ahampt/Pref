@@ -44,19 +44,12 @@
 					if(jQuery('#calendar').length > 0) {
 						jQuery('#calendar').fullCalendar({
 							events : [
-								{% for assoc in associations %}
+								{% for consumption in consumptions %}
 									{
-										{% url "webapp.views.movie.view" urltitle=assoc.ConsumeableId.UrlTitle as movie_url %}
-										title: '{{assoc.ConsumeableId.Title}}',
-										start: new Date({{assoc.CreatedAt.year}}, {{assoc.CreatedAt.month|add:"-1"}}, {{assoc.CreatedAt.day}}),
+										{% url "webapp.views.movie.view" urltitle=consumption.ConsumeableId.UrlTitle as movie_url %}
+										title: '{{consumption.ConsumeableId.Title}}',
+										start: new Date({{consumption.ConsumedAt.year}}, {{consumption.ConsumedAt.month|add:"-1"}}, {{consumption.ConsumedAt.day}}),
 										url: '{{movie_url}}',
-										{% if assoc.CreatedAt != assoc.UpdatedAt %}
-											},
-											{
-											title: '{{assoc.ConsumeableId.Title}}',
-											start: new Date({{assoc.UpdatedAt.year}}, {{assoc.UpdatedAt.month|add:"-1"}}, {{assoc.UpdatedAt.day}}),
-											url: '{{movie_url}}',
-										{% endif %}
 									},
 								{% endfor %}
 							],

@@ -9,9 +9,9 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from random import randint
 from webapp.tools.id_tools import wikipedia_id_from_input, wikipedia_movie_from_title, movie_from_inputs, imdb_id_from_input, movie_from_imdb_input, netflix_id_from_input, netflix_movie_from_title, movie_from_netflix_input, rottentomatoes_id_from_input, rottentomatoes_movie_from_title, movie_from_rottentomatoes_input, get_netflix_availability_dict, get_rottentomatoes_supplemental_dict
-from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, netflix_link_for_movie, rottentomatoes_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict
+from webapp.tools.misc_tools import create_properties, imdb_link_for_movie, netflix_link_for_movie, rottentomatoes_link_for_movie, wikipedia_link_for_movie, person_is_relevant, genre_is_relevant, source_is_relevant, generate_header_dict, generate_links_dict, set_msg, update_rankings, check_and_get_session_info, get_type_dict, date_from_input
 from webapp.tools.search_tools import movies_from_term, movies_from_apis_term
-from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations
+from webapp.models import Profiles, Sources, People, Genres, Movies, Properties, Associations, Consumptions
 
 site_logger = logging.getLogger('log.site')
 movie_logger = logging.getLogger('log.movie')
@@ -214,10 +214,11 @@ def view(request, urltitle):
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,add; MISC: none;
 					*****************************************************************************'''
 					watched = True if request.GET.get('seen') else False
-					viewcount = 1 if watched else 0
 					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
-					association = Associations(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = watched, Accessible = False, CountConsumed = viewcount, CreatedAt = datetime.now(), UpdatedAt = datetime.now())
+					association = Associations(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], Consumed = watched, Accessible = False)
 					association.save()
+					consumption = Consumptions(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = datetime.now())
+					consumption.save()
 					associate_logger.info(profile.Username + ' Associated ' + movie.UrlTitle + ' Success')
 					set_msg(request, 'Movie Associated!', movie.Title + ' has been added to your list of movies. Please check that the information on this page is accurate as Pref relies on user feedback to correct errors. If you notice an error, such as an actor with a similar (same) name to a different actor being shown here, click on the offending piece of information and click on the correction link to let Pref know about it. Thanks.', 'success')
 				elif request.GET.get('recent'):
@@ -225,17 +226,17 @@ def view(request, urltitle):
 					Update association based on a user recently watching a movie and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,recent; MISC: none;
 					*****************************************************************************'''
-					association = Associations.objects.get(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
+					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
+					association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie,  ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
 					# First time watching the specified movie
 					if not association.Consumed:
 						association.Consumed = True
-						association.CreatedAt = datetime.now()
-					association.CountConsumed = association.CountConsumed + 1
-					association.UpdatedAt = datetime.now()
 					association.save()
+					consumption = Consumptions(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = datetime.now())
+					consumption.save()
 					associate_logger.info(logged_in_profile_info['username'] + ' Association with ' + movie.UrlTitle + ' Update Success')
 					set_msg(request, 'Association Updated!', 'Your association with ' + movie.Title + ' has successfully been updated.', 'success')
-				elif request.method == 'POST' and request.GET.get('update'):
+				elif request.method == 'POST' and request.GET.get('update') and not request.GET.get('consumption'):
 					'''*****************************************************************************
 					Update association from input on movie page and redirect to movie page
 					PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - assoc,update; MISC: none;
@@ -243,47 +244,33 @@ def view(request, urltitle):
 					rankings_changed = False
 					profile = Profiles.objects.get(id=logged_in_profile_info['id'])
 					association = Associations.objects.get(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'])
-					# If first time user watched the movie, update both times
-					if not association.Consumed and request.POST.get('watched') == 'Watched':
-						association.CreatedAt = datetime.now()
-						association.UpdatedAt = datetime.now()
-					# Else if user is unwatching movie (should not be allowed but mistakes happen), delete saved data
-					elif association.Consumed and not request.POST.get('watched') == 'Watched':
-						association.CreatedAt = None
-						association.UpdatedAt = None
-						association.CountConsumed = 0
+					consumptions = Consumptions.objects.filter(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('ConsumedAt')
+					# If user is unwatching movie (should not be allowed but mistakes happen), delete saved data
+					if association.Consumed and not request.POST.get('watched') == 'Watched':
+						for consumption in consumptions:
+							consumption.delete()
 						association.Rank = None
 						association.Rating = None
 						association.Review = None
 						rankings_changed = True
 					# Update the rest
 					else:
-						if request.POST.get('first_viewed') and request.POST.get('first_viewed') != (str(association.CreatedAt.month) + '/' + str(association.CreatedAt.day) + '/' + str(association.CreatedAt.year)):
-							try:
-								new_date_text = request.POST.get('first_viewed')
-								month = int(new_date_text[0:new_date_text.find('/')])
-								day = int(new_date_text[new_date_text.find('/')+1:new_date_text.find('/', new_date_text.find('/')+1)])
-								year = int(new_date_text[new_date_text.find('/', new_date_text.find('/')+1)+1:])
-								new_date = datetime(year, month, day)
-								if(new_date < datetime.now()):
-									association.CreatedAt = new_date
-								else:
-									association.CreatedAt = datetime.now()
-							except Exception:
-								pass
-						if request.POST.get('last_viewed') and request.POST.get('last_viewed') != (str(association.UpdatedAt.month) + '/' + str(association.UpdatedAt.day) + '/' + str(association.UpdatedAt.year)):
-							try:
-								new_date_text = request.POST.get('last_viewed')
-								month = int(new_date_text[0:new_date_text.find('/')])
-								day = int(new_date_text[new_date_text.find('/')+1:new_date_text.find('/', new_date_text.find('/')+1)])
-								year = int(new_date_text[new_date_text.find('/', new_date_text.find('/')+1)+1:])
-								new_date = datetime(year, month, day)
-								if(new_date < datetime.now()):
-									association.UpdatedAt = new_date
-								else:
-									association.UpdatedAt = datetime.now()
-							except Exception:
-								pass
+						first_viewed = date_from_input(request.POST.get('first_viewed'), datetime.now() if consumptions.count() <= 1 else consumptions[1].ConsumedAt)
+						if first_viewed:
+							if consumptions.count() > 0:
+								consumption = consumptions[0]
+								consumption.ConsumedAt = first_viewed
+							else:
+								consumption = Consumptions(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = first_viewed)
+							consumption.save()
+							last_viewed = date_from_input(request.POST.get('last_viewed'), datetime.now(), first_viewed if consumptions.count() == 1 else consumptions[consumptions.count()-1].ConsumedAt)
+							if last_viewed:
+								if consumptions.count() > 1:
+									consumption = consumptions[consumptions.count()-1]
+									consumption.ConsumedAt = last_viewed
+								elif first_viewed != last_viewed:
+									consumption = Consumptions(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE'], ConsumedAt = last_viewed)
+								consumption.save()
 						if request.POST.get('rating_rated') and request.POST.get('rating_rated') != 'false':
 							# Handle bad float coercion by ignoring the rating
 							try:
@@ -291,7 +278,6 @@ def view(request, urltitle):
 							except Exception:
 								pass
 						association.Review = request.POST.get('review')
-						association.CountConsumed = int(request.POST.get('view_count')) if request.POST.get('view_count') and request.POST.get('view_count').isdigit() else association.CountConsumed
 					# Clear source information if no longer accessible or update it with new source object
 					old_source = None
 					if association.SourceId:
@@ -351,10 +337,38 @@ def view(request, urltitle):
 					if source and not source_is_relevant(source):
 						source.delete()
 						source_logger.info(source.Description + ' Delete Success by ' + logged_in_profile_info['username'])
+					for consumption in Consumptions.objects.filter(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']):
+						consumption.delete()
 					associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 					# Fill in the gap in rankings
 					update_rankings(logged_in_profile_info['id'])
 					set_msg(request, 'Movie Disassociated!', movie.Title + ' has been removed from your list of movies.', 'danger')
+				elif request.GET.get('consumption'):
+					if request.method == 'POST' and request.GET.get('update'):
+						'''*****************************************************************************
+						Update consumptions and redirect to movie page
+						PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - assoc,consumption,update; MISC: none;
+						*****************************************************************************'''
+						try:
+							consumptions = Consumptions.objects.filter(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('ConsumedAt')
+							for index in range(consumptions.count()):
+								new_date = date_from_input(request.POST.get('view-date-'+str(index+1)), consumptions[index+1].ConsumedAt if index + 1 < consumptions.count() else None, consumptions[index-1].ConsumedAt if index > 0 else None)
+								if new_date:
+									consumption = consumptions[index]
+									consumption.ConsumedAt = new_date
+									consumption.save()
+						except Exception:
+							pass
+					elif request.GET.get('delete'):
+						'''*****************************************************************************
+						Delete consumption and redirect to movie page
+						PATH: webapp.views.movie.view urltitle; METHOD: none; PARAMS: get - assoc,consumption,delete; MISC: none;
+						*****************************************************************************'''
+						try:
+							cid = int(request.GET.get('consumption'))
+							Consumptions.objects.filter(ProfileId = logged_in_profile_info['id'], ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('ConsumedAt')[cid-1].delete()
+						except Exception:
+							pass
 			except ObjectDoesNotExist:
 				set_msg(request, 'Association Not Found!', 'You have no association with ' + movie.Title + '.', 'danger')
 			except Exception:
@@ -582,6 +596,8 @@ def view(request, urltitle):
 				if source and not source_is_relevant(source):
 					source.delete()
 					source_logger.info(source.Description + ' Delete Success by ' + logged_in_profile_info['username'])
+				for consumption in Consumptions.objects.filter(ConsumeableId=movie,ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE']):
+					consumption.delete()
 				associate_logger.info(logged_in_profile_info['username'] + ' Disassociated ' + movie.UrlTitle + ' Success')
 				update_rankings(association.ProfileId)
 			# Delete movie
@@ -626,6 +642,7 @@ def view(request, urltitle):
 			*****************************************************************************'''
 			association = None
 			profile = None
+			consumptions = None
 			indicators = []
 			sources = []
 			try:
@@ -634,13 +651,14 @@ def view(request, urltitle):
 				# Scale rating to profile preference (i.e. from percentage rating to n stars)
 				association.Rating = association.Rating / float(math.ceil(100 / profile.NumberOfStars)) if association.Rating else None
 				indicators = profile.StarIndicators.split(',')
+				consumptions = Consumptions.objects.filter(ProfileId = profile, ConsumeableId = movie, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('ConsumedAt')
 			except Exception:
 				pass
 			try:
 				sources = Sources.objects.filter(ProfileId = profile, ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).values_list('Description', flat=True).order_by('Description')
 			except Exception:
 				pass
-			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'availability' : get_netflix_availability_dict(movie), 'supplements' : get_rottentomatoes_supplemental_dict(movie), 'DISQUS_SHORTNAME' : settings.API_KEYS['DISQUS_SHORTNAME']}, RequestContext(request))
+			return render_to_response('movie/view.html', {'header' : generate_header_dict(request, movie.Title + ' (' + str(movie.Year) + ')'), 'movie' : movie, 'profile' : profile, 'sources' : sources, 'indicators' : indicators, 'association' : association, 'consumptions' : consumptions, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'availability' : get_netflix_availability_dict(movie), 'supplements' : get_rottentomatoes_supplemental_dict(movie), 'DISQUS_SHORTNAME' : settings.API_KEYS['DISQUS_SHORTNAME']}, RequestContext(request))
 	except ObjectDoesNotExist:
 		raise Http404
 	except Exception:
