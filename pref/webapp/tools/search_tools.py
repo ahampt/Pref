@@ -63,14 +63,9 @@ def imdb_movies_from_term(search_term, page_limit):
 							movie.Year = int(imdb_dict.get('Year'))
 						if imdb_dict.get('Runtime'):
 							runtime_str = imdb_dict.get('Runtime')
-							runtime = 0
-							# Convert [/d+] h [/d+] m to minutes
+							# Convert [/d+] min to minutes
 							try:
-								runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-								if runtimes[0]:
-									runtime += runtimes[0]*60
-								if runtimes[1]:
-									runtime += runtimes[1]
+								runtime = int(runtime_str[:runtime_str.find(" ")])
 							except Exception:
 								pass
 							movie.Runtime = str(runtime)

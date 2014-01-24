@@ -522,9 +522,7 @@ def view(request, urltitle):
 				Save changes made to movie and redirect to movie page
 				PATH: webapp.views.movie.view urltitle; METHOD: post; PARAMS: get - edit; MISC: logged_in_profile.IsAdmin;
 				*****************************************************************************'''
-				has_error = False
 				old_urltitle = None
-				validation_dict = None
 				try:
 					movie.Title = request.POST.get('title')
 					movie.Year = request.POST.get('year')
@@ -534,27 +532,16 @@ def view(request, urltitle):
 					movie.NetflixId = netflix_id_from_input(request.POST.get('netflix'))
 					movie.WikipediaId = wikipedia_id_from_input(request.POST.get('wikipedia'))
 					old_urltitle = movie.UrlTitle
-					validation_dict = movie_from_inputs(movie.ImdbId, movie.NetflixId, movie.RottenTomatoesId, movie.WikipediaId)
-					if validation_dict.get('success'):
-						movie.full_clean()
-						movie.save()
-						movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
-						set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 'success')
-						return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
-					else:
-						has_error = True
-						raise ValidationError('')
+					movie.full_clean()
+					movie.save()
+					movie_logger.info(movie.UrlTitle + ' Update Success by ' + logged_in_profile_info['username'])
+					set_msg(request, 'Movie Updated!', movie.Title + ' has successfully been updated.', 'success')
+					return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 				except ValidationError as e:
 					movie_logger.info(movie.UrlTitle + ' Update Failure by ' + logged_in_profile_info['username'])
-					error_msg = {}
-					if has_error:
-						if validation_dict and not validation_dict.get('success'):
-							for key, value in validation_dict.get('error_list').items():
-								error_msg[key] = value
-					else:
-						error_msg = e.message_dict
-						for key in error_msg:
-							error_msg[key] = str(error_msg[key][0])
+					error_msg = e.message_dict
+					for key in error_msg:
+						error_msg[key] = str(error_msg[key][0])
 					return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'old_urltitle' : old_urltitle, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'error_msg' : error_msg, 'people_list' : [cgi.escape(name, True) for name in People.objects.values_list('Name', flat=True).order_by('Name')], 'genres_list' : [cgi.escape(description, True) for description in Genres.objects.values_list('Description', flat=True).order_by('Description')]}, RequestContext(request))
 			else:
 				'''*****************************************************************************
@@ -624,17 +611,22 @@ def view(request, urltitle):
 			create_properties(movie, dirs, writs, acts, gens, logged_in_profile_info['username'])
 			set_msg(request, 'Property Added!', movie.Title + ' has successfully been updated with the new property specified.', 'success')
 			properties = Properties.objects.filter(ConsumeableId=movie, ConsumeableTypeId=type_dict['CONSUMEABLE_MOVIE'])
+			redirect_section = ""
 			directors, writers, actors, genres = [], [], [], []
 			for property in properties:
 				if property.PropertyTypeId.Description == 'DIRECTOR':
+					redirect_section = "directors-list"
 					directors.append(People.objects.get(id=property.PropertyId))
 				elif property.PropertyTypeId.Description == 'WRITER':
+					redirect_section = "writers-list"
 					writers.append(People.objects.get(id=property.PropertyId))
 				elif property.PropertyTypeId.Description == 'ACTOR':
+					redirect_section = "actors-list"
 					actors.append(People.objects.get(id=property.PropertyId))
 				elif property.PropertyTypeId.Description == 'GENRE':
+					redirect_section = "genres-list"
 					genres.append(Genres.objects.get(id=property.PropertyId))
-			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'people_list' : [cgi.escape(name, True) for name in People.objects.values_list('Name', flat=True).order_by('Name')], 'genres_list' : [cgi.escape(description, True) for description in Genres.objects.values_list('Description', flat=True).order_by('Description')]}, RequestContext(request))
+			return render_to_response('movie/edit.html', {'header' : generate_header_dict(request, 'Update'), 'movie' : movie, 'directors' : directors, 'writers' : writers, 'actors' : actors, 'genres' : genres, 'links' : generate_links_dict(movie), 'redirect' : redirect_section, 'people_list' : [cgi.escape(name, True) for name in People.objects.values_list('Name', flat=True).order_by('Name')], 'genres_list' : [cgi.escape(description, True) for description in Genres.objects.values_list('Description', flat=True).order_by('Description')]}, RequestContext(request))
 		else:
 			'''*****************************************************************************
 			Display movie page

@@ -1,4 +1,4 @@
-import json, urllib, urllib2
+import json, urllib, urllib2, zlib
 from django.conf import settings
 from webapp.models import Movies, People, Genres
 from oauth import OAuthRequest
@@ -148,14 +148,9 @@ def movie_from_imdb_input(imdb_input):
 					movie.Year = int(imdb_dict.get('Year'))
 				if imdb_dict.get('Runtime') and imdb_dict.get('Runtime') != "N/A":
 					runtime_str = imdb_dict.get('Runtime')
-					runtime = 0
-					# Convert [/d+] h [/d+] m to minutes
+					# Convert [/d+] min to minutes
 					try:
-						runtimes = [int(s) for s in runtime_str.split() if s.isdigit()]
-						if runtimes[0]:
-							runtime += runtimes[0]*60
-						if runtimes[1]:
-							runtime += runtimes[1]
+						runtime = int(runtime_str[:runtime_str.find(" ")])
 					except Exception:
 						pass
 					movie.Runtime = str(runtime)
@@ -166,7 +161,9 @@ def movie_from_imdb_input(imdb_input):
 				if imdb_dict.get('Writer'):
 					cur_writers = imdb_dict.get('Writer').split(', ')
 					for i in range(len(cur_writers)):
-						writers.append({'name' : cur_writers[i]})
+						cur_writer = cur_writers[i]
+						cur_writer = cur_writer[:cur_writer.find("(")] if cur_writer.find("(") >= 0 else cur_writer
+						writers.append({'name' : cur_writer})
 				if imdb_dict.get('Actors'):
 					cur_actors = imdb_dict.get('Actors').split(', ')
 					for i in range(len(cur_actors)):
@@ -354,8 +351,11 @@ def get_rottentomatoes_dict(rottentomatoes_id):
 		req = urllib2.Request('http://api.rottentomatoes.com/api/public/v1.0/movies/'+rottentomatoes_id+'.json?apikey='+settings.API_KEYS['ROTTEN_TOMATOES'])
 		res = urllib2.urlopen(req)
 		if res.getcode() == 200:
+			data = res.read()
+			if res.info().get("Content-Encoding") == 'gzip':
+				data = zlib.decompress(data, 16+zlib.MAX_WBITS)
 			# Parse json response
-			return json.loads(res.read())
+			return json.loads(data)
 		else:
 			return {'Response' : False}
 	except Exception:

@@ -142,6 +142,13 @@
 			<h1>invalid person</h1>
 		</div>
 	{% endif %}
+	{% if redirect %}
+		<script language="javascript" type="text/javascript">
+			jQuery(document).ready(function() {
+				jQuery('html,body').animate({scrollTop: jQuery('#{{redirect}}').offset().top});
+			});
+		</script>
+	{% endif %}
 	{% include 'includes/footer.html' %}
 </body>
 </html>
