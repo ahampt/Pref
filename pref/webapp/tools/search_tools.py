@@ -1,4 +1,4 @@
-import json, urllib, urllib2
+import json, urllib, urllib2, zlib
 from django.conf import settings
 from id_tools import netflix_id_from_input
 from webapp.models import Movies
@@ -135,7 +135,10 @@ def rottentomatoes_movies_from_term(search_term, page_limit):
 			req = urllib2.Request('http://api.rottentomatoes.com/api/public/v1.0/movies.json?q='+encoded_title+'&page_limit=' + str(page_limit) + '&page=1&apikey='+settings.API_KEYS['ROTTEN_TOMATOES'])
 			res = urllib2.urlopen(req)
 			if res.getcode() == 200:
-				rottentomatoes_dict = json.loads(res.read())
+				data = res.read()
+				if res.info().get("Content-Encoding") == 'gzip':
+					data = zlib.decompress(data, 16+zlib.MAX_WBITS)
+				rottentomatoes_dict = json.loads(data)
 				if rottentomatoes_dict.get('total') > 0:
 					min_length = page_limit if page_limit < rottentomatoes_dict.get('total') else rottentomatoes_dict.get('total')
 					for i in range(min_length):
