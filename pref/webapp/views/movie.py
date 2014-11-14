@@ -30,10 +30,10 @@ def view_list(request):
 			set_msg(request, 'Action Failed!', 'You must be logged in to perform that action', 'warning')
 			return redirect('webapp.views.profile.login')
 		type_dict = get_type_dict()
-		if request.GET.get('add') and request.GET.get('i') and request.GET.get('r') and request.GET.get('n'):
+		if request.GET.get('add') and request.GET.get('i') and request.GET.get('r'):
 			'''*****************************************************************************
-			Add movie given imdb identifier (rotten tomatoes and netflix ids required as well) and redirect to movie page by way of association functions if success otherwise back to search with errors
-			PATH: webapp.views.movie.view_list; METHOD: none; PARAMS: get - add,i,r,n; MISC: none;
+			Add movie given imdb identifier (rotten tomatoes id required as well) and redirect to movie page by way of association functions if success otherwise back to search with errors
+			PATH: webapp.views.movie.view_list; METHOD: none; PARAMS: get - add,i,r; MISC: none;
 			*****************************************************************************'''
 			try:
 				has_error = False
@@ -51,7 +51,7 @@ def view_list(request):
 				res = wikipedia_movie_from_title(movie)
 				if res.get('movie'):
 					movie.WikipediaId = res.get('movie').WikipediaId
-				# Set rotten tomatoes, netflix, and wikipedia id
+				# Set rotten tomatoes, and wikipedia id
 				movie.RottenTomatoesId = request.GET.get('r')
 				test = movie_from_rottentomatoes_input(movie.RottenTomatoesId)
 				if test.get('movie'):
@@ -60,12 +60,6 @@ def view_list(request):
 				else:
 					has_error = True
 					error_text = 'Rotten Tomatoes ID Validation: ' + test.get('error_msg')
-					raise ValidationError('')
-				movie.NetflixId = request.GET.get('n')
-				test = movie_from_netflix_input(movie.NetflixId)
-				if not test.get('movie'):
-					has_error = True
-					error_text = 'Netflix ID Validation: ' + test.get('error_msg')
 					raise ValidationError('')
 				movie.full_clean()
 				movie.save()
@@ -746,7 +740,7 @@ def search(request):
 							res = rottentomatoes_movie_from_title(result_movies[i], True)
 							if res.get('id'):
 								result_movies[i].RottenTomatoesId = res.get('id')
-						if result_movies[i].ImdbId and result_movies[i].RottenTomatoesId and result_movies[i].NetflixId:
+						if result_movies[i].ImdbId and result_movies[i].RottenTomatoesId:
 							result_movies[i].UrlTitle = imdb_link_for_movie(result_movies[i])
 							movies.append((result_movies[i], False, True))
 					del result_movies[i]

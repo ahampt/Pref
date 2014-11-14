@@ -113,7 +113,9 @@
 						jQuery('#open-all').click(function(e) {
 							e.preventDefault();
 							{% for key, value in links.items %}
-								window.open('{{value}}');
+								{% if value %}
+									window.open('{{value}}');
+								{% endif %}
 							{% endfor %}
 						});
 					</script>
