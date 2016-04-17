@@ -4,8 +4,8 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info
-from webapp.models import Profiles
+from webapp.tools.misc_tools import generate_header_dict, set_msg, check_and_get_session_info, get_type_dict
+from webapp.models import Profiles, Associations, Movies
 
 site_logger = logging.getLogger('log.site')
 
@@ -81,7 +81,13 @@ def home(request):
 		Display home page
 		PATH: webapp.views.site.home; METHOD: none; PARAMS: none; MISC: none;
 		*****************************************************************************'''
-		return render_to_response('site/home.html', {'header' : generate_header_dict(request, 'Welcome to Pref')}, RequestContext(request))
+		logged_in_profile_info = { }
+		movies = { }
+		check_and_get_session_info(request, logged_in_profile_info, False)
+		if logged_in_profile_info['id']:
+			type_dict = get_type_dict()
+			associations = Associations.objects.filter(ProfileId = logged_in_profile_info['id'], ConsumeableTypeId = type_dict['CONSUMEABLE_MOVIE']).order_by('-UpdatedAt')[:10].select_related('Movies')
+		return render_to_response('site/home.html', {'header' : generate_header_dict(request, 'Welcome to Pref'), 'associations' : associations}, RequestContext(request))
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
 		return render_to_response('500.html', {'header' : generate_header_dict(request, 'Error')}, RequestContext(request))

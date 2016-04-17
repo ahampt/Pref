@@ -768,7 +768,14 @@ def random(request):
 		Display random movie page
 		PATH: webapp.views.movie.random; METHOD: none; PARAMS: none; MISC: none;
 		*****************************************************************************'''
-		movie = Movies.objects.all()[randint(0, Movies.objects.count()-1)]
+		movie = { }
+		while True:
+			movie_id = randint(1, Movies.objects.count())
+			try:
+				movie = Movies.objects.get(id=movie_id)
+			except ObjectDoesNotExist:
+				continue
+			break
 		return redirect('webapp.views.movie.view', urltitle=movie.UrlTitle)
 	except Exception:
 		site_logger.error('Unexpected error: ' + str(sys.exc_info()[0]))

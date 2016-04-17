@@ -15,6 +15,8 @@
 					{% if request.session.admin %}
 						{% url "webapp.views.profile.view" username=request.session.auth_profile_username as profile_url %}
 						<ul class="nav pull-left">
+							{% url "webapp.views.movie.random" as random_url %}
+							<li><a href="{{random_url}}">Random</a></li>
 							{% url "webapp.views.profile.view_list" as profiles_url %}
 							<li><a href="{{profiles_url}}">Profiles</a></li>
 							{% url "webapp.views.movie.view_list" as movies_url %}

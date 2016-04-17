@@ -112,11 +112,13 @@
 					<script language="javascript" type="text/javascript">
 						jQuery('#open-all').click(function(e) {
 							e.preventDefault();
+							{% autoescape off %}
 							{% for key, value in links.items %}
 								{% if value %}
-									window.open('{{value}}');
+									window.open('{{value|urlencode}}');
 								{% endif %}
 							{% endfor %}
+							{% endautoescape %}
 						});
 					</script>
 				</div>

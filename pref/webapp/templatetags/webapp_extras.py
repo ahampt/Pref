@@ -1,5 +1,6 @@
 from django import template
 import math
+import urllib
 
 register = template.Library()
 
@@ -21,3 +22,7 @@ def get_item(i, arr):
 		return arr[i]
 	except:
 		return ''
+
+@register.filter
+def urlencode(value):
+	return value[:5] + urllib.quote(value[5:])
