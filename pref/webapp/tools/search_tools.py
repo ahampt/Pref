@@ -214,24 +214,26 @@ def movies_from_term(search_term, how_many):
 			success = False
 		# Connect all of the results
 		for movie in imdb_movies:
+			if not movie.Year:
+				break
 			for rt_movie in rottentomatoes_movies:
-				if movie.Title.lower() in rt_movie.Title.lower() and abs(movie.Year - rt_movie.Year) < 2:
+				if movie.Title.lower() in rt_movie.Title.lower() and rt_movie.Year and abs(movie.Year - rt_movie.Year) < 2:
 					movie.RottenTomatoesId = rt_movie.RottenTomatoesId
 					rottentomatoes_movies.remove(rt_movie)
 					break
 			for net_movie in netflix_movies:
-				if movie.Title.lower() in net_movie.Title.lower() and abs(movie.Year - net_movie.Year) < 2:
+				if movie.Title.lower() in net_movie.Title.lower() and net_movie.Year and abs(movie.Year - net_movie.Year) < 2:
 					movie.NetflixId = net_movie.NetflixId
 					netflix_movies.remove(net_movie)
 					break
 			if movie.RottenTomatoesId == '':
 				for rt_movie in rottentomatoes_movies:
-					if abs(movie.Year - rt_movie.Year) < 2:
+					if rt_movie.Year and abs(movie.Year - rt_movie.Year) < 2:
 						movie.RottenTomatoesId = rt_movie.RottenTomatoesId
 						rt_movies.remove(rt_movie)
 						break
 			if movie.NetflixId == '':
-				if abs(movie.Year - net_movie.Year) < 2:
+				if net_movie.Year and abs(movie.Year - net_movie.Year) < 2:
 					movie.NetflixId = net_movie.NetflixId
 					netflix_movies.remove(net_movie)
 					break

@@ -35,7 +35,10 @@ Install Pref yourself to contribute to the site and use it for your own organiza
     * Change LOGGING_DIR to wherever you have a folder to keep all of the log files from this project (Default is to folder in /var/log/pref). Be sure that the folder already exists or you make it beforehand.
     * Make any other changes that the template describes (very important for external API's).
 
-4. cd into the project root directory (it has manage.py in it). Run the command:
+5. cd into the project root directory (it has manage.py in it). To create the DB tables, run the command:
+     `python manage.py syncdb`
+
+5. To start the test server, run the command:
      `python manage.py runserver`
 
-5. If you have any difficulties getting setup, let me know about and I may be able to help.
+6. If you have any difficulties getting setup, let me know about and I may be able to help.
