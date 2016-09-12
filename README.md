@@ -2,6 +2,9 @@
 
 Rate, rank, and keep track of media consumed or desired to be consumed. This site will serve as the one stop spot for any and all things related to personalized preferences data. This project will use Rotten Tomatoes, IMDb, Netflix, and Wikipedia API's for data gathering including more in the future.
 
+## RIP
+As of September 11, 2016 Pref should be considered deprecated. Things may or may not continue to work but no guarantees. Rotten Tomatoes has closed up their once-public API and I don't feel like continuing with oMDB/iMDB only after putting so much work into de-duplicating people based on RT data. I highly advise you look into supporting the great people at [Letterboxd](http://letterboxd.com/) as they have built basically I could have ever dreamed of for Pref (with great reporting tools before I even got to it). Farewell.
+
 ## Installation
 
 Install Pref yourself to contribute to the site and use it for your own organizational needs. There's plenty to add and fix.
